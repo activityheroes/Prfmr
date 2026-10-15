@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101313"><title>Pole Vault | Dot Athletics</title>
+  <link rel="stylesheet" href="../sprint/sprint.css"><link rel="stylesheet" href="./vault.css">
+</head>
+<body data-sport="pole-vault">
+  <main class="game">
+    <header class="masthead"><div class="identity"><span class="brand">DOT ATHLETICS / 05</span><h1>POLE VAULT<span class="event-tag">RHYTHM &amp; RISE</span></h1></div><label class="sound-toggle"><input id="sound" type="checkbox" checked><span>Sound</span></label></header>
+    <nav class="event-nav" aria-label="Event"><a href="../sprint/">Sprint</a><a href="../cycling/">Cycling</a><a href="../swimming/">Swimming</a><a href="../javelin/">Javelin</a><a href="./" aria-current="page">Pole vault</a><a href="../long-jump/">Long jump</a></nav>
+    <section class="scoreboard" aria-label="Vault telemetry">
+      <div class="clock-block"><label class="eyebrow" for="bar-height">CROSSBAR HEIGHT</label><div class="clock"><output id="bar-value" for="bar-height">3.50</output><span>m</span></div><input id="bar-height" type="range" min="2.5" max="6" step="0.25" value="3.5" aria-label="Crossbar height"></div>
+      <div class="metric"><span class="eyebrow" id="speed-label">SPEED</span><div><output id="speed" aria-live="off">0.0</output><span id="speed-unit">m/s</span></div></div>
+      <div class="metric best"><span class="eyebrow">PERSONAL BEST</span><div><output id="best">--.--</output><span>m</span></div></div>
+    </section>
+    <section class="race-surface" aria-label="Pole vault runway and landing pit">
+      <div class="timeline-head"><span id="distance">0.0 M</span><span>45 M / PLANT BOX</span></div>
+      <div class="timeline" role="progressbar" aria-label="Runway distance" aria-valuemin="0" aria-valuemax="45" aria-valuenow="0"><div id="progress"></div><i class="plant-marker" title="Plant zone: hold at 39.5m, release at 42m"></i></div>
+      <div class="track">
+        <canvas id="track" role="img" aria-label="Dot-matrix pole vaulter approaching timing strips, a crossbar and a landing mat"></canvas>
+        <div class="track-top"><span class="lane">ATTEMPT <b id="attempt">01</b></span><span class="live-label"><i></i><span id="meet-label">RHYTHM VAULT</span></span></div>
+        <div class="race-call" id="race-call">READY</div>
+        <div id="scene-error" class="pause-panel" hidden><strong>3D VIEW UNAVAILABLE</strong><span>WebGL is unavailable in this browser.</span></div>
+        <div class="track-bottom"><span id="feedback">ON YOUR MARKS</span><span id="zone-count">ZONES 0 / 6</span></div>
+        <div id="pause-panel" class="pause-panel" hidden><strong>PAUSED</strong><button id="resume" type="button">Resume attempt</button></div>
+      </div>
+    </section>
+    <section class="interaction" aria-label="Vault control">
+      <ol class="phases" aria-label="Attempt phases"><li data-phase="run" class="active"><span>01</span><b>RUN-UP</b></li><li data-phase="zone"><span>02</span><b>BOOST ZONE</b></li><li data-phase="line"><span>03</span><b>VAULT</b></li></ol>
+      <div class="control-row">
+        <div class="control-stat"><span class="eyebrow" id="left-label">NEXT ZONE</span><strong id="left-value">6.0<span>M</span></strong></div>
+        <button id="trigger" class="trigger" type="button" aria-label="Start approach" title="Hold / release: Space"><span class="trigger-ring"></span><span class="trigger-core"><small id="trigger-top">READY</small><strong id="trigger-main">START RUN</strong><small id="trigger-bottom">6 BOOST ZONES</small></span></button>
+        <div class="control-stat right"><span class="eyebrow" id="right-label">TIMING SCORE</span><strong id="right-value">0<span>/ 100</span></strong></div>
+      </div>
+      <div class="control-footer"><span id="phase-note">45 M RUNWAY</span><button id="restart" class="text-button" type="button">Restart</button></div>
+    </section>
+    <details class="equipment"><summary><span>EQUIPMENT</span><span id="kit-label">CLUB LOADOUT</span><span class="chevron" aria-hidden="true">+</span></summary>
+      <fieldset id="gear"><legend class="sr-only">Equipped pole vault gear</legend>
+        <label>GRIP TAPE<select id="gear-band"><option value="0">Club grip</option><option value="1">Precision grip</option><option value="2">Competition grip</option></select><output id="stat-band"></output></label>
+        <label>RUN-UP INSOLES<select id="gear-blocks"><option value="0">Club insoles</option><option value="1">Spring insoles</option><option value="2">Elite insoles</option></select><output id="stat-blocks"></output></label>
+        <label>VAULT SPIKES<select id="gear-spikes"><option value="0">Club spikes</option><option value="1">Velocity spikes</option><option value="2">Elite spikes</option></select><output id="stat-spikes"></output></label>
+        <label>VAULT SUIT<select id="gear-kit"><option value="0">Club suit</option><option value="1">Aero suit</option><option value="2">Endurance suit</option></select><output id="stat-kit"></output></label>
+      </fieldset>
+    </details>
+    <footer class="page-footer"><a href="../dot-matrix-demo.html">Motion lab</a><span>SIX ZONES. RAISE THE BAR.</span></footer><div id="announcer" class="sr-only" aria-live="polite"></div>
+  </main>
+  <dialog id="result-dialog" aria-labelledby="result-title">
+    <div class="result-tag" id="result-tag">OFFICIAL RESULT</div><h2 id="result-title">Pole vault</h2><div class="result-time"><span id="result-mark">--.--</span><small id="result-unit">m</small></div><p id="result-detail"></p><dl id="result-stats"></dl>
+    <details class="zone-breakdown"><summary>Run-up breakdown</summary><ol id="zone-results"></ol></details><button id="again" class="primary-button" type="button">Vault again</button><button id="retry" class="text-button retry" type="button" hidden>Retry this height</button>
+  </dialog>
+  <script type="module" src="./game.mjs"></script>
+</body>
+</html>

@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dot-Matrix Motion Demo</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080908;
+      --panel: rgba(12, 16, 13, 0.84);
+      --ink: #e8ffe5;
+      --muted: #86a582;
+      --matrix: #79ff78;
+      --hot: #ffcf5a;
+      --red: #ff5f73;
+      --blue: #65d8ff;
+      --line: rgba(121, 255, 120, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(101, 216, 255, 0.16), transparent 24rem),
+        radial-gradient(circle at 82% 20%, rgba(255, 207, 90, 0.11), transparent 26rem),
+        linear-gradient(180deg, #050705 0%, #0c120c 46%, #050705 100%);
+      color: var(--ink);
+      font-family: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      content: "";
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.035) 50%, rgba(0, 0, 0, 0.16) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.018), rgba(0, 0, 255, 0.03));
+      background-size: 100% 4px, 6px 100%;
+      mix-blend-mode: screen;
+      opacity: 0.38;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-rows: auto minmax(360px, 1fr) auto auto;
+      min-height: 100vh;
+      padding: clamp(16px, 2vw, 26px);
+      gap: 16px;
+    }
+
+    header,
+    .controls,
+    .readout {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 0 34px rgba(121, 255, 120, 0.08), inset 0 0 28px rgba(121, 255, 120, 0.04);
+      backdrop-filter: blur(10px);
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0;
+      text-shadow: 0 0 18px rgba(121, 255, 120, 0.56);
+    }
+
+    .status {
+      min-width: 12ch;
+      padding: 7px 10px;
+      border: 1px solid rgba(101, 216, 255, 0.34);
+      color: var(--blue);
+      text-align: center;
+      text-transform: uppercase;
+      box-shadow: inset 0 0 18px rgba(101, 216, 255, 0.1);
+    }
+
+    .stage {
+      position: relative;
+      min-height: 420px;
+      height: min(62vh, 680px);
+      overflow: hidden;
+      border: 1px solid rgba(121, 255, 120, 0.26);
+      background:
+        linear-gradient(180deg, rgba(121, 255, 120, 0.08), transparent 32%),
+        repeating-linear-gradient(90deg, rgba(121, 255, 120, 0.04) 0 1px, transparent 1px 34px),
+        repeating-linear-gradient(0deg, rgba(121, 255, 120, 0.035) 0 1px, transparent 1px 34px),
+        #020402;
+      box-shadow: inset 0 0 54px rgba(0, 0, 0, 0.8), 0 18px 70px rgba(0, 0, 0, 0.42);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .control {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+
+    button,
+    select,
+    input[type="range"] {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid rgba(121, 255, 120, 0.26);
+      border-radius: 0;
+      background: #071007;
+      color: var(--ink);
+      font: inherit;
+      accent-color: var(--matrix);
+    }
+
+    button {
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: inset 0 0 22px rgba(121, 255, 120, 0.08);
+    }
+
+    button:hover,
+    select:focus-visible,
+    input:focus-visible {
+      outline: 2px solid rgba(255, 207, 90, 0.66);
+      outline-offset: 2px;
+    }
+
+    .readout {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      padding: 1px;
+      overflow: hidden;
+    }
+
+    .readout div {
+      display: grid;
+      gap: 3px;
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.28);
+      min-width: 0;
+    }
+
+    .readout span {
+      color: var(--muted);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+    }
+
+    .readout strong {
+      color: var(--hot);
+      font-size: 1.15rem;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 760px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .controls,
+      .readout {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stage {
+        min-height: 360px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .controls,
+      .readout {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .shell {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <h1>DOT-MATRIX MOTION</h1>
+      <div class="status" id="status">Swimming</div>
+    </header>
+
+    <section class="stage" aria-label="Animated dot-matrix character demo">
+      <canvas id="matrix" width="1280" height="620" role="img" aria-label="Side-view dot-matrix character swimming front crawl, cycling, running or walking"></canvas>
+    </section>
+
+    <section class="controls" aria-label="Animation controls">
+      <div class="control">
+        <label for="mode">Mode</label>
+        <select id="mode">
+          <option value="swim" selected>Swim</option>
+          <option value="cycle">Cycle</option>
+          <option value="walk">Walk</option>
+          <option value="run">Run</option>
+          <option value="idle">Idle</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="speed">Speed</label>
+        <input id="speed" type="range" min="0.45" max="2.5" step="0.05" value="1">
+      </div>
+      <div class="control">
+        <label for="scale">Dot Size</label>
+        <input id="scale" type="range" min="0.7" max="1.8" step="0.05" value="1.1">
+      </div>
+      <div class="control">
+        <label>Direction</label>
+        <button id="turn" type="button">Turn Around</button>
+      </div>
+    </section>
+
+    <section class="readout" aria-label="Animation details">
+      <div><span>Frame</span><strong id="frameOut">0</strong></div>
+      <div><span>Phase</span><strong id="phaseOut">Entry</strong></div>
+      <div><span>Dots</span><strong id="dotsOut">0</strong></div>
+      <div><span>FPS</span><strong id="fpsOut">0</strong></div>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.querySelector("#matrix");
+    const ctx = canvas.getContext("2d");
+    const modeInput = document.querySelector("#mode");
+    const speedInput = document.querySelector("#speed");
+    const scaleInput = document.querySelector("#scale");
+    const turnButton = document.querySelector("#turn");
+    const statusOut = document.querySelector("#status");
+    const frameOut = document.querySelector("#frameOut");
+    const phaseOut = document.querySelector("#phaseOut");
+    const dotsOut = document.querySelector("#dotsOut");
+    const fpsOut = document.querySelector("#fpsOut");
+
+    // Measurements are in character units. Travel and foot contact share this stride.
+    const GAITS = {
+      walk: { duration: 1.12, stance: 0.62, stride: 2.7, lift: 1.55, arm: 0.65, elbow: 0.28, lean: 0.28 },
+      run: { duration: 0.62, stance: 0.3, stride: 3.2, lift: 5, arm: 1.12, elbow: 1.6, lean: 1.6 },
+      idle: { duration: 2.8, stance: 1, stride: 0, lift: 0, arm: 0, elbow: 0.15, lean: 0.12 }
+    };
+    const BIKE = {
+      duration: 1.1, wheelRadius: 3.65, crankRadius: 1.45, gearRatio: 2.2,
+      rear: { x: -6.1, y: -3.65 }, front: { x: 6.35, y: -3.65 },
+      crank: { x: -0.65, y: -4.15 }, seatTube: { x: -2.45, y: -8.7 },
+      headTube: { x: 4.6, y: -8.9 }, fork: { x: 4.95, y: -7.45 },
+      saddle: { x: -2.8, y: -10.5 }, grip: { x: 5.55, y: -9.6 }
+    };
+    const SWIM = { duration: 1.65, distancePerCycle: 9, underwater: 0.6 };
+    const TAU = Math.PI * 2;
+    const state = { cycle: 0, wheelAngle: 0, distance: 0, direction: 1, mode: modeInput.value };
+    let lastTime = null;
+    let fpsTime = 0;
+    let fpsFrames = 0;
+    let visibleDots = 0;
+    let viewWidth = 0;
+    let viewHeight = 0;
+
+    const wrap = value => ((value % 1) + 1) % 1;
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+    const ease = value => {
+      const t = clamp(value, 0, 1);
+      return t * t * (3 - 2 * t);
+    };
+
+    function fitCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      viewWidth = rect.width;
+      viewHeight = rect.height;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = Math.round(viewWidth * dpr);
+      canvas.height = Math.round(viewHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function getFoot(cycle, gait, side = 0) {
+      const t = wrap(cycle);
+      const running = gait === GAITS.run;
+      const landingAngle = running ? 0.08 : -0.26;
+      const pushAngle = running ? 1.05 : 0.8;
+      let x, y, angle;
+      const contact = gait.stride === 0 || t < gait.stance;
+      if (gait.stride === 0) {
+        x = side === 0 ? 0.55 : -0.55;
+        y = 0;
+        angle = 0;
+      } else if (contact) {
+        const u = t / gait.stance;
+        x = gait.stride * (1 - 2 * u);
+        y = 0;
+        const pushStart = running ? 0.52 : 0.7;
+        angle = landingAngle * (1 - ease(u / 0.16)) + pushAngle * ease((u - pushStart) / (1 - pushStart));
+      } else {
+        const u = (t - gait.stance) / (1 - gait.stance);
+        // Match the stance velocity at both ends, including the forward reach before landing.
+        const tangent = -2 * gait.stride * (1 - gait.stance) / gait.stance;
+        x = -gait.stride + 2 * gait.stride * ease(u) + tangent * u * (1 - u) * (1 - 2 * u);
+        // Recover the heel early, then drive the knee forward before extending to land.
+        const liftPhase = running
+          ? u < 0.4 ? 0.5 * Math.sin(u / 0.4 * Math.PI / 2) : 0.5 + 0.5 * ease((u - 0.4) / 0.6)
+          : u;
+        y = -gait.lift * Math.pow(Math.sin(Math.PI * liftPhase), 1.25);
+        angle = pushAngle * (1 - ease(u / 0.55)) + landingAngle * ease((u - 0.55) / 0.45);
+      }
+
+      if (running) x -= 1.15;
+
+      // Pivot on the contacting heel or toe without moving it along the ground.
+      const pivot = angle > 0 ? 0.85 : -0.55;
+      const point = (px, py) => ({
+        x: x + pivot + (px - pivot) * Math.cos(angle) - py * Math.sin(angle),
+        y: y + (px - pivot) * Math.sin(angle) + py * Math.cos(angle)
+      });
+      return {
+        contact, cycle: t, anchor: { x, y },
+        heel: point(-0.55, 0), toe: point(0.85, 0), ankle: point(-0.08, -0.5)
+      };
+    }
+
+    function jointBetween(start, end, upper = 4.25, lower = 4.1, bend = 1) {
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const reach = Math.hypot(dx, dy);
+      const distance = clamp(reach, 0.001, upper + lower - 0.0001);
+      const along = (upper * upper - lower * lower + distance * distance) / (2 * distance);
+      const offset = Math.sqrt(Math.max(0, upper * upper - along * along)) * bend;
+      // Positive x is always forward in the character's own coordinate system.
+      return {
+        x: start.x + dx / reach * along + dy / reach * offset,
+        y: start.y + dy / reach * along - dx / reach * offset
+      };
+    }
+
+    function getPose(mode, cycle) {
+      const gait = GAITS[mode];
+      const step = wrap(cycle * 2) / 2;
+      let hipY;
+      if (mode === "run") {
+        const support = step / gait.stance;
+        const flight = (step - gait.stance) / (0.5 - gait.stance);
+        hipY = step < gait.stance
+          ? -8.1 + 0.5 * Math.sin(Math.PI * support) - 0.4 * ease((support - 0.45) / 0.55)
+          : -8.5 + 0.4 * ease(flight) - 0.35 * Math.sin(Math.PI * flight);
+      } else {
+        hipY = mode === "walk"
+          ? -8.5 + 0.32 * Math.cos((cycle - 0.1) * TAU * 2)
+          : -8.65 + 0.04 * Math.sin(cycle * TAU);
+      }
+      const hip = { x: 0, y: hipY };
+      const shoulder = { x: gait.lean, y: hipY - 4.35 };
+      const head = { x: gait.lean * 1.35 + 0.15, y: hipY - 7.05 };
+      const limbs = [0, 1].map(side => {
+        const phase = wrap(cycle + side * 0.5);
+        const foot = getFoot(phase, gait, side);
+        const knee = jointBetween(hip, foot.ankle);
+        const swing = -Math.cos(phase * TAU);
+        const angle = mode === "idle" ? -0.08 : swing * gait.arm - (mode === "run" ? 0.08 : 0);
+        const elbowBend = gait.elbow + (mode === "run" ? swing * 0.15 : 0);
+        const elbow = {
+          x: shoulder.x + Math.sin(angle) * 2.35,
+          y: shoulder.y + Math.cos(angle) * 2.35
+        };
+        const hand = {
+          x: elbow.x + Math.sin(angle + elbowBend) * 2.2,
+          y: elbow.y + Math.cos(angle + elbowBend) * 2.2
+        };
+        return { foot, knee, elbow, hand };
+      });
+      return { hip, shoulder, head, limbs };
+    }
+
+    function getBikePose(cycle) {
+      const hip = { x: -2.8, y: -10.95 };
+      const breath = Math.sin(cycle * TAU * 2) * 0.045;
+      const shoulder = { x: 2.8, y: -12.95 + breath };
+      const head = { x: 4.05, y: -14.9 + breath };
+      const limbs = [0, 1].map(side => {
+        const angle = (cycle + side * 0.5) * TAU;
+        const pedal = {
+          x: BIKE.crank.x + Math.sin(angle) * BIKE.crankRadius,
+          y: BIKE.crank.y - Math.cos(angle) * BIKE.crankRadius
+        };
+        const tilt = 0.08 + 0.16 * Math.sin(angle);
+        const point = (x, y) => ({
+          x: pedal.x + x * Math.cos(tilt) - y * Math.sin(tilt),
+          y: pedal.y + x * Math.sin(tilt) + y * Math.cos(tilt)
+        });
+        const foot = { ankle: point(-0.3, -0.5), heel: point(-0.85, -0.12), toe: point(0.75, -0.12) };
+        const hand = { x: BIKE.grip.x - side * 0.22, y: BIKE.grip.y - side * 0.14 };
+        const elbow = jointBetween(shoulder, hand, 2.35, 2.2, -1);
+        return { pedal, foot, hand, elbow, knee: jointBetween(hip, foot.ankle) };
+      });
+      return { hip, shoulder, head, limbs };
+    }
+
+    function getSwimPose(cycle) {
+      const bob = Math.sin(cycle * TAU * 2) * 0.06;
+      const hip = { x: -1.9, y: 0.7 + bob };
+      const shoulder = { x: 2.4, y: 0.22 + bob };
+      const breath = Math.sin(Math.PI * clamp((wrap(cycle) - 0.62) / 0.34, 0, 1)) ** 2;
+      const head = { x: 4.05, y: -0.25 + bob - breath * 0.22, angle: 0.6 - breath * 0.65 };
+      const arms = [0, 1].map(side => {
+        const phase = wrap(cycle + side * 0.5);
+        const recovering = phase >= SWIM.underwater;
+        const u = recovering ? (phase - SWIM.underwater) / (1 - SWIM.underwater) : phase / SWIM.underwater;
+        // The elbow leads a folded recovery; the underwater forearm sweeps back to the hip.
+        const angle = recovering
+          ? Math.PI + 0.075 + (Math.PI - 0.155) * ease(u)
+          : -0.08 + (Math.PI + 0.155) * ease(u);
+        const bend = recovering
+          ? -2.05 * Math.sin(Math.PI * u)
+          : 1.1 * Math.pow(Math.sin(Math.PI * u), 1.6);
+        const elbow = { x: shoulder.x + Math.cos(angle) * 2.35, y: shoulder.y + Math.sin(angle) * 2.35 };
+        const hand = { x: elbow.x + Math.cos(angle + bend) * 2.2, y: elbow.y + Math.sin(angle + bend) * 2.2 };
+        return { phase, recovering, elbow, hand };
+      });
+      const legs = [0, 1].map(side => {
+        // Three opposed kick pairs per complete arm cycle: a six-beat flutter kick.
+        const kick = cycle * TAU * 3 + side * Math.PI;
+        const thighAngle = Math.PI - 0.04 + Math.sin(kick) * 0.13;
+        const shinAngle = thighAngle + 0.08 + 0.14 * (0.5 + 0.5 * Math.sin(kick - 0.5));
+        const knee = { x: hip.x + Math.cos(thighAngle) * 4.25, y: hip.y + Math.sin(thighAngle) * 4.25 };
+        const ankle = { x: knee.x + Math.cos(shinAngle) * 4.1, y: knee.y + Math.sin(shinAngle) * 4.1 };
+        const toe = { x: ankle.x + Math.cos(shinAngle - 0.16), y: ankle.y + Math.sin(shinAngle - 0.16) };
+        return { knee, ankle, toe };
+      });
+      return { hip, shoulder, head, arms, legs };
+    }
+
+    function dot(x, y, color, radius = 0.265) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, TAU);
+      ctx.fill();
+      visibleDots += 1;
+    }
+
+    function bone(a, b, color, spacing = 0.7, radius = 0.265) {
+      const count = Math.max(1, Math.round(Math.hypot(b.x - a.x, b.y - a.y) / spacing));
+      for (let i = 0; i <= count; i += 1) {
+        const t = i / count;
+        dot(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, color, radius);
+      }
+    }
+
+    function dotArc(center, radius, start, end, color, dotRadius = 0.18, spacing = 0.52) {
+      const count = Math.ceil(Math.abs(end - start) * radius / spacing);
+      const closed = Math.abs(end - start) >= TAU;
+      for (let i = 0; i < count + (closed ? 0 : 1); i += 1) {
+        const angle = start + (end - start) * i / count;
+        dot(center.x + Math.cos(angle) * radius, center.y + Math.sin(angle) * radius, color, dotRadius);
+      }
+    }
+
+    function drawRiderBody(pose, helmet = false) {
+      const rows = helmet ? 9 : 6;
+      const dx = pose.shoulder.x - pose.hip.x;
+      const dy = pose.shoulder.y - pose.hip.y;
+      const length = Math.hypot(dx, dy);
+      const across = helmet ? { x: -dy / length, y: dx / length } : { x: 1, y: 0 };
+      for (let row = 0; row <= rows; row += 1) {
+        const t = row / rows;
+        const cx = pose.shoulder.x * (1 - t) + pose.hip.x * t;
+        const y = pose.shoulder.y + (pose.hip.y - pose.shoulder.y) * t;
+        for (let col = -1; col <= 1; col += 1) {
+          const offset = col * (0.55 - t * 0.1);
+          dot(cx + across.x * offset, y + across.y * offset, col === 1 ? "#bcffc9" : "#79ff78");
+        }
+      }
+      bone(pose.shoulder, { x: pose.head.x, y: pose.head.y + 1.1 }, "#bcffc9");
+      for (let row = -2; row <= 2; row += 1) {
+        for (let col = -2; col <= 2; col += 1) {
+          if (row * row + col * col > 6) continue;
+          dot(pose.head.x + col * 0.61, pose.head.y + row * 0.61, helmet && row < 0 ? "#65d8ff" : "#e8ffe5", 0.27);
+        }
+      }
+      dot(pose.head.x + 1.27, pose.head.y - 0.3, "#65d8ff", 0.3);
+      dot(pose.head.x + 0.66, pose.head.y - 0.3, "#65d8ff", 0.3);
+      dot(pose.head.x + 1.65, pose.head.y + 0.25, "#e8ffe5", 0.27);
+      if (helmet) {
+        dotArc(pose.head, 1.65, Math.PI, TAU, "#65d8ff", 0.25, 0.62);
+        bone({ x: pose.head.x - 0.8, y: pose.head.y }, { x: pose.head.x + 0.6, y: pose.head.y + 1.2 }, "#328879", 0.45, 0.13);
+      }
+    }
+
+    function drawCharacter(x, groundY, unit, mode, cycle) {
+      const pose = getPose(mode, cycle);
+      visibleDots = 0;
+      ctx.save();
+      ctx.translate(x, groundY);
+      ctx.scale(unit * state.direction, unit);
+      const arm = (limb, color) => {
+        bone(pose.shoulder, limb.elbow, color);
+        bone(limb.elbow, limb.hand, color);
+      };
+      const leg = (limb, color, shoeColor) => {
+        bone(pose.hip, limb.knee, color);
+        bone(limb.knee, limb.foot.ankle, color);
+        bone(limb.foot.heel, limb.foot.toe, shoeColor, 0.56, 0.29);
+      };
+
+      // Far limbs are drawn behind the body and shaded, like a side-view game sprite.
+      arm(pose.limbs[1], "#328879");
+      leg(pose.limbs[1], "#328879", "#ad8141");
+      drawRiderBody(pose);
+      leg(pose.limbs[0], "#79ff78", "#ffcf5a");
+      arm(pose.limbs[0], "#bcffc9");
+      ctx.restore();
+      return pose;
+    }
+
+    function drawCyclist(x, groundY, unit, cycle) {
+      const pose = getBikePose(cycle);
+      visibleDots = 0;
+      ctx.save();
+      ctx.translate(x, groundY);
+      ctx.scale(unit * state.direction, unit);
+      for (const center of [BIKE.rear, BIKE.front]) {
+        for (let i = 0; i < 6; i += 1) {
+          const angle = state.wheelAngle + i * TAU / 6;
+          bone(center, { x: center.x + Math.cos(angle) * 3.3, y: center.y + Math.sin(angle) * 3.3 },
+            i === 0 ? "#65d8ff" : "#356573", 0.6, 0.115);
+        }
+        dotArc(center, BIKE.wheelRadius, 0, TAU, "#65d8ff", 0.235);
+        dotArc(center, BIKE.wheelRadius - 0.42, 0, TAU, "#328879", 0.12);
+        dot(center.x, center.y, "#e8ffe5", 0.34);
+      }
+
+      const arm = (limb, color) => {
+        bone(pose.shoulder, limb.elbow, color);
+        bone(limb.elbow, limb.hand, color);
+      };
+      const leg = (limb, color, shoe) => {
+        bone(pose.hip, limb.knee, color);
+        bone(limb.knee, limb.foot.ankle, color);
+        bone(BIKE.crank, limb.pedal, "#ad8141", 0.5, 0.15);
+        bone({ x: limb.pedal.x - 0.48, y: limb.pedal.y + 0.15 },
+          { x: limb.pedal.x + 0.48, y: limb.pedal.y + 0.15 }, "#e8ffe5", 0.36, 0.15);
+        bone(limb.foot.heel, limb.foot.toe, shoe, 0.5, 0.29);
+      };
+      arm(pose.limbs[1], "#328879");
+      leg(pose.limbs[1], "#328879", "#ad8141");
+
+      for (const [from, to] of [
+        [BIKE.rear, BIKE.seatTube], [BIKE.rear, BIKE.crank], [BIKE.seatTube, BIKE.crank],
+        [BIKE.seatTube, BIKE.headTube], [BIKE.crank, BIKE.fork], [BIKE.headTube, BIKE.front],
+        [BIKE.seatTube, BIKE.saddle]
+      ]) bone(from, to, "#65d8ff", 0.55, 0.23);
+      bone({ x: -3.85, y: -10.5 }, { x: -1.65, y: -10.5 }, "#e8ffe5", 0.55, 0.28);
+      bone(BIKE.headTube, { x: 4.75, y: -9.65 }, "#65d8ff", 0.5, 0.23);
+      bone({ x: 4.75, y: -9.65 }, { x: 6.1, y: -9.65 }, "#e8ffe5", 0.5, 0.23);
+      dotArc({ x: 6.1, y: -8.9 }, 0.75, -Math.PI / 2, Math.PI / 2, "#e8ffe5", 0.23, 0.45);
+      bone({ x: 6.1, y: -8.15 }, { x: 5.45, y: -8.15 }, "#e8ffe5", 0.5, 0.23);
+
+      for (const sign of [-1, 1]) {
+        bone({ x: BIKE.rear.x, y: BIKE.rear.y + sign * 0.4 },
+          { x: BIKE.crank.x, y: BIKE.crank.y + sign * 0.82 }, "#ad8141", 0.48, 0.12);
+      }
+      dotArc(BIKE.crank, 0.82, 0, TAU, "#ffcf5a", 0.15, 0.42);
+      drawRiderBody(pose, true);
+      leg(pose.limbs[0], "#79ff78", "#ffcf5a");
+      dot(BIKE.crank.x, BIKE.crank.y, "#e8ffe5", 0.23);
+      arm(pose.limbs[0], "#bcffc9");
+      ctx.restore();
+      return pose;
+    }
+
+    function drawSwimmer(x, waterY, unit, cycle) {
+      const pose = getSwimPose(cycle);
+      visibleDots = 0;
+      ctx.save();
+      ctx.translate(x, waterY);
+      ctx.scale(unit * state.direction, unit);
+      const arm = (limb, color) => {
+        bone(pose.shoulder, limb.elbow, color, 0.62);
+        bone(limb.elbow, limb.hand, color, 0.62);
+        dot(limb.hand.x, limb.hand.y, color, 0.3);
+      };
+      const leg = (limb, color) => {
+        bone(pose.hip, limb.knee, color);
+        bone(limb.knee, limb.ankle, color);
+        bone(limb.ankle, limb.toe, color, 0.5, 0.23);
+      };
+      arm(pose.arms[1], "#397f8b");
+      leg(pose.legs[1], "#397f8b");
+      for (let row = 0; row <= 6; row += 1) {
+        const t = row / 6;
+        const cx = pose.hip.x + (pose.shoulder.x - pose.hip.x) * t;
+        const cy = pose.hip.y + (pose.shoulder.y - pose.hip.y) * t;
+        for (let col = -1; col <= 1; col += 1) {
+          dot(cx, cy + col * (0.38 + t * 0.15), t < 0.22 ? "#ff6e9c" : "#79ff78");
+        }
+      }
+      bone(pose.shoulder, { x: pose.head.x - 1.05, y: pose.head.y + 0.3 }, "#bcffc9", 0.55);
+      ctx.save();
+      ctx.translate(pose.head.x, pose.head.y);
+      ctx.rotate(pose.head.angle);
+      for (let row = -2; row <= 2; row += 1) {
+        for (let col = -2; col <= 2; col += 1) {
+          if (row * row + col * col > 6) continue;
+          dot(col * 0.56, row * 0.56, col < 0 || row < -1 ? "#65d8ff" : "#e8ffe5", 0.26);
+        }
+      }
+      dot(0.65, -0.25, "#ff6e9c", 0.28);
+      dot(1.2, -0.25, "#ff6e9c", 0.28);
+      dot(1.52, 0.28, "#e8ffe5", 0.23);
+      ctx.restore();
+      leg(pose.legs[0], "#79ff78");
+      arm(pose.arms[0], "#bcffc9");
+
+      for (const limb of pose.arms) {
+        const age = limb.phase / 0.1;
+        if (age >= 1) continue;
+        for (let i = 0; i < 4; i += 1) {
+          dot(pose.shoulder.x + 4.5 - age * (0.5 + i * 0.3),
+            -Math.sin(age * Math.PI) * (0.5 + i * 0.4), "#a1fff5", 0.14 * (1 - age));
+        }
+      }
+      for (let i = 0; i < 7; i += 1) {
+        const age = wrap(cycle * 3 + i / 7);
+        dot(-10.5 - age * 2.7, 0.8 + Math.sin(i * 2.4) * 0.5 - age * 0.35,
+          "#65d8ff", 0.12 * (1 - age));
+      }
+      ctx.restore();
+      return pose;
+    }
+
+    function drawPool(width, height, waterY, unit, playerX, foreground = false) {
+      const camera = state.distance * unit - playerX;
+      if (!foreground) {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "rgba(7, 36, 44, 0.8)";
+        ctx.fillRect(0, waterY, width, height - waterY);
+        const offset = ((camera % (unit * 3)) + unit * 3) % (unit * 3);
+        for (let x = -offset; x < width; x += unit * 3) {
+          dot(x, waterY + unit * 6.3, "#e86c98", unit * 0.14);
+          dot(x + unit * 0.48, waterY + unit * 6.3, "#e86c98", unit * 0.14);
+          dot(x, waterY + unit * 9.5, "#24535c", unit * 0.09);
+        }
+        return;
+      }
+      ctx.fillStyle = "rgba(7, 36, 44, 0.24)";
+      ctx.fillRect(0, waterY, width, height - waterY);
+      for (let x = 0; x <= width; x += unit * 0.48) {
+        const wave = Math.sin((x + camera) / unit * 0.85 - state.cycle * TAU) * unit * 0.11;
+        dot(x, waterY + wave, "#62e6da", unit * 0.13);
+      }
+    }
+
+    function drawWorld(width, height, groundY, unit, playerX) {
+      ctx.clearRect(0, 0, width, height);
+      const camera = state.distance * unit - playerX;
+
+      // Sparse parallax silhouettes and a stationary world floor establish travel direction.
+      ctx.fillStyle = "#122320";
+      const buildingStep = unit * 12;
+      const buildingOffset = ((camera * 0.18) % buildingStep + buildingStep) % buildingStep;
+      for (let i = -1; i < width / buildingStep + 1; i += 1) {
+        const h = (4 + ((i + Math.floor(camera * 0.18 / buildingStep)) % 4 + 4) % 4 * 2) * unit;
+        const bx = i * buildingStep - buildingOffset;
+        ctx.fillRect(bx, groundY - h, unit * 6.5, h);
+        ctx.fillStyle = "#28443e";
+        for (let j = 1; j < h / unit - 1; j += 2) {
+          ctx.fillRect(bx + unit, groundY - h + j * unit, unit * 0.25, unit * 0.25);
+          ctx.fillRect(bx + unit * 4.8, groundY - h + j * unit, unit * 0.25, unit * 0.25);
+        }
+        ctx.fillStyle = "#122320";
+      }
+
+      ctx.fillStyle = "#0e1a1c";
+      ctx.fillRect(0, groundY + unit * 0.3, width, height - groundY);
+      ctx.fillStyle = "#65d8ff";
+      ctx.fillRect(0, groundY + unit * 0.3, width, 2);
+      const tileWidth = unit * 4;
+      const offset = ((camera % tileWidth) + tileWidth) % tileWidth;
+      ctx.strokeStyle = "#2b4441";
+      ctx.lineWidth = 1;
+      for (let x = -offset; x < width; x += tileWidth) {
+        ctx.beginPath();
+        ctx.moveTo(x, groundY + unit * 0.7);
+        ctx.lineTo(x, groundY + unit * 2.3);
+        ctx.stroke();
+        ctx.fillStyle = "#ffcf5a";
+        ctx.fillRect(x + unit * 1.6, groundY + unit, unit * 0.35, unit * 0.35);
+      }
+      ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+      ctx.beginPath();
+      ctx.ellipse(playerX, groundY + unit * 0.35, unit * 3.4, unit * 0.3, 0, 0, TAU);
+      ctx.fill();
+    }
+
+    function advance(seconds) {
+      const mode = modeInput.value;
+      if (mode !== state.mode) {
+        state.mode = mode;
+        state.cycle = 0;
+      }
+      const gait = mode === "swim" ? SWIM : mode === "cycle" ? BIKE : GAITS[mode];
+      const deltaCycle = seconds * Number(speedInput.value) / gait.duration;
+      state.cycle = wrap(state.cycle + deltaCycle);
+      const travel = deltaCycle * (mode === "swim" ? SWIM.distancePerCycle : mode === "cycle"
+        ? TAU * BIKE.wheelRadius * BIKE.gearRatio : 2 * gait.stride / gait.stance);
+      state.distance += state.direction * travel;
+      // The wheel's circumference covers exactly the distance the road moves.
+      if (mode === "cycle") state.wheelAngle = (state.wheelAngle + travel / BIKE.wheelRadius) % TAU;
+    }
+
+    function render() {
+      const width = viewWidth;
+      const height = viewHeight;
+      const cycling = state.mode === "cycle";
+      const swimming = state.mode === "swim";
+      const unit = Math.min(clamp(width / 72, 11, 20) * Number(scaleInput.value), (height - 65) / 18.5, width / (swimming ? 29 : cycling ? 23 : 15));
+      const groundY = height - 44;
+      const playerX = width * 0.5 + (swimming ? unit * 2 : 0);
+      let pose;
+      if (swimming) {
+        const waterY = height * 0.48;
+        drawPool(width, height, waterY, unit, playerX);
+        pose = drawSwimmer(playerX, waterY, unit, state.cycle);
+        drawPool(width, height, waterY, unit, playerX, true);
+      } else {
+        drawWorld(width, height, groundY, unit, playerX);
+        pose = cycling ? drawCyclist(playerX, groundY, unit, state.cycle)
+          : drawCharacter(playerX, groundY, unit, state.mode, state.cycle);
+      }
+      const contacts = cycling || swimming ? 0 : pose.limbs.filter(limb => limb.foot.contact).length;
+      const step = wrap(state.cycle * 2) / 2;
+      phaseOut.textContent = swimming ? (state.cycle < 0.08 ? "Entry" : state.cycle < 0.22 ? "Catch"
+        : state.cycle < 0.4 ? "Pull" : state.cycle < SWIM.underwater ? "Push" : "Recovery")
+        : cycling ? (state.cycle < 0.5 ? "Downstroke" : "Recovery")
+        : state.mode === "idle" ? "Rest"
+        : contacts === 0 ? "Flight"
+        : step < 0.07 ? "Contact"
+        : step < 0.2 ? "Down"
+        : step < 0.37 ? "Passing" : "Push-off";
+      statusOut.textContent = swimming ? "Swimming" : cycling ? "Cycling" : state.mode === "idle" ? "Idle" : state.mode === "walk" ? "Walking" : "Running";
+      frameOut.textContent = String(Math.floor(state.cycle * 8) + 1).padStart(2, "0") + " / 08";
+      dotsOut.textContent = String(visibleDots);
+    }
+
+    function drawScene(now) {
+      const seconds = lastTime === null ? 0 : Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
+      advance(seconds);
+      render();
+      fpsFrames += 1;
+      fpsTime += seconds;
+      if (fpsTime >= 0.5) {
+        fpsOut.textContent = String(Math.round(fpsFrames / fpsTime));
+        fpsFrames = 0;
+        fpsTime = 0;
+      }
+      requestAnimationFrame(drawScene);
+    }
+
+    turnButton.addEventListener("click", () => {
+      state.direction *= -1;
+    });
+    document.addEventListener("visibilitychange", () => { lastTime = null; });
+    const resizeObserver = new ResizeObserver(() => { fitCanvas(); render(); });
+    resizeObserver.observe(canvas);
+    fitCanvas();
+    requestAnimationFrame(drawScene);
+  </script>
+</body>
+</html>

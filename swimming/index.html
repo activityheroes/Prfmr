@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101313">
+  <title>50M Freestyle | Dot Athletics</title>
+  <link rel="stylesheet" href="../sprint/sprint.css">
+</head>
+<body data-sport="swimming">
+  <main class="game">
+    <header class="masthead">
+      <div class="identity"><span class="brand">DOT ATHLETICS / 03</span><h1>50M FREESTYLE<span class="event-tag">RHYTHM ZONES</span></h1></div>
+      <label class="sound-toggle"><input id="sound" type="checkbox" checked><span>Sound</span></label>
+    </header>
+    <nav class="event-nav" aria-label="Event"><a href="../sprint/">Sprint</a><a href="../cycling/">Cycling</a><a href="./" aria-current="page">Swimming</a><a href="../javelin/">Javelin</a><a href="../pole-vault/">Pole vault</a><a href="../long-jump/">Long jump</a></nav>
+
+    <section class="scoreboard" aria-label="Race telemetry">
+      <div class="clock-block"><span class="eyebrow">RACE TIME</span><div class="clock"><output id="clock" aria-live="off">00.000</output><span>s</span></div></div>
+      <div class="metric"><span class="eyebrow">SPEED</span><div><output id="speed" aria-live="off">0.0</output><span>m/s</span></div></div>
+      <div class="metric best"><span class="eyebrow">PERSONAL BEST</span><div><output id="best">--.---</output><span>s</span></div></div>
+    </section>
+
+    <section class="race-surface" aria-label="50 meter swimming pool">
+      <div class="timeline-head"><span id="distance">0.0 M</span><span>50 M</span></div>
+      <div class="timeline" role="progressbar" aria-label="Distance" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+        <div id="progress"></div><i class="marker finish" title="Final reach: 49 meters"></i>
+      </div>
+      <div class="track">
+        <canvas id="track" role="img" aria-label="Dot-matrix front-crawl swimmer approaching blue boost zones in a 3D pool"></canvas>
+        <div class="track-top"><span class="lane">LANE <b>04</b></span><span class="live-label"><i></i><span id="meet-label">RHYTHM SWIM</span></span></div>
+        <div class="race-call" id="race-call">READY</div>
+        <div id="scene-error" class="pause-panel" hidden><strong>3D VIEW UNAVAILABLE</strong><span>WebGL is unavailable in this browser.</span></div>
+        <div class="track-bottom"><span id="feedback">ON YOUR MARKS</span><span id="zone-count">ZONES 0 / 6</span></div>
+        <div id="pause-panel" class="pause-panel" hidden><strong>PAUSED</strong><button id="resume" type="button">Resume race</button></div>
+      </div>
+    </section>
+
+    <section class="interaction" aria-label="Race control">
+      <ol class="phases" aria-label="Race phases">
+        <li data-phase="run" class="active"><span>01</span><b>SWIM</b></li>
+        <li data-phase="zone"><span>02</span><b>BOOST ZONE</b></li>
+        <li data-phase="line"><span>03</span><b>THE WALL</b></li>
+      </ol>
+      <div class="control-row">
+        <div class="control-stat"><span class="eyebrow" id="left-label">NEXT ZONE</span><strong id="left-value">7.5<span>M</span></strong></div>
+        <button id="trigger" class="trigger" type="button" aria-label="Start race" title="Hold / release: Space">
+          <span class="trigger-ring"></span><span class="trigger-core"><small id="trigger-top">READY</small><strong id="trigger-main">START RACE</strong><small id="trigger-bottom">50 METERS</small></span>
+        </button>
+        <div class="control-stat right"><span class="eyebrow" id="right-label">TIMING SCORE</span><strong id="right-value">0<span>/ 100</span></strong></div>
+      </div>
+      <div class="control-footer"><span id="phase-note">6 BOOST ZONES</span><button id="restart" class="text-button" type="button">Restart</button></div>
+    </section>
+
+    <details class="equipment">
+      <summary><span>EQUIPMENT</span><span id="kit-label">CLUB LOADOUT</span><span class="chevron" aria-hidden="true">+</span></summary>
+      <fieldset id="gear"><legend class="sr-only">Equipped swimming gear</legend>
+        <label>GOGGLES<select id="gear-band"><option value="0">Club goggles</option><option value="1">Clearview goggles</option><option value="2">Race goggles</option></select><output id="stat-band"></output></label>
+        <label>STARTING BLOCK<select id="gear-blocks"><option value="0">Club block</option><option value="1">Grip block</option><option value="2">Launch block</option></select><output id="stat-blocks"></output></label>
+        <label>RACE SUIT<select id="gear-spikes"><option value="0">Club suit</option><option value="1">Streamline suit</option><option value="2">Elite suit</option></select><output id="stat-spikes"></output></label>
+        <label>SWIM CAP<select id="gear-kit"><option value="0">Club cap</option><option value="1">Hydro cap</option><option value="2">Endurance cap</option></select><output id="stat-kit"></output></label>
+      </fieldset>
+    </details>
+    <footer class="page-footer"><a href="../dot-matrix-demo.html">Motion lab</a><span>50 METERS. SIX ZONES.</span></footer>
+    <div id="announcer" class="sr-only" aria-live="polite"></div>
+  </main>
+
+  <dialog id="result-dialog" aria-labelledby="result-title">
+    <div class="result-tag" id="result-tag">OFFICIAL RESULT</div>
+    <h2 id="result-title">Finish</h2>
+    <div class="result-time" id="result-time"></div>
+    <p id="result-detail"></p>
+    <dl id="result-stats"></dl>
+    <details class="zone-breakdown"><summary>Zone breakdown</summary><ol id="zone-results"></ol></details>
+    <button id="again" class="primary-button" type="button">Race again</button>
+  </dialog>
+  <script type="module" src="../sprint/game.mjs?v=swimming-1"></script>
+</body>
+</html>

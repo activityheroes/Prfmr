@@ -1,0 +1,6 @@
+.throw-marker{position:absolute;top:-3px;height:11px;left:88.889%;width:7.778%;background:var(--gold);border:1px solid var(--bg)}
+.result-time #result-mark{font:inherit;color:var(--ink);margin:0}.result-time small{font:16px Arial,sans-serif;color:var(--muted);margin-left:8px}
+.trigger[data-mode=line] .trigger-core strong{white-space:pre-line;font-size:25px;line-height:1.05}
+.track-top{color:var(--ink);text-shadow:0 1px 3px #101313}.clock-block{min-width:155px}
+@media(max-width:650px){.trigger[data-mode=line] .trigger-core strong{font-size:22px}.clock-block{min-width:122px}}
+@media(max-width:360px){.clock-block{min-width:100px}.event-nav{gap:20px}}

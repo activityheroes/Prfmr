@@ -1,0 +1,7 @@
+.plant-marker{position:absolute;top:-3px;height:11px;left:87.778%;width:5.556%;background:var(--gold);border:1px solid var(--bg)}
+.scoreboard{align-items:center}.clock-block{width:150px;flex:none}#bar-height{display:block;width:130px;height:14px;margin:10px 0 0;accent-color:var(--gold);cursor:pointer}#bar-height:disabled{cursor:default;opacity:.4}
+.result-time #result-mark{font:inherit;color:var(--ink);margin:0}.result-time small{font:16px Arial,sans-serif;color:var(--muted);margin-left:8px}
+.trigger[data-mode=line] .trigger-core strong{white-space:pre-line;font-size:25px;line-height:1.05}
+.track-top{color:var(--ink);text-shadow:0 1px 3px #101313}.retry{display:block;width:100%;margin-top:10px;padding:8px}.retry[hidden]{display:none}
+@media(max-width:650px){.clock-block{width:110px}#bar-height{width:104px}.scoreboard{padding:18px 0 14px;gap:14px}.trigger[data-mode=line] .trigger-core strong{font-size:22px}.event-nav{gap:16px;flex-wrap:wrap;row-gap:1px;font-size:10px}.track{height:285px}}
+@media(max-width:360px){.clock-block{width:92px}#bar-height{width:90px}.scoreboard{gap:10px}.event-nav{gap:12px;font-size:9px}.page-footer{font-size:8px}}

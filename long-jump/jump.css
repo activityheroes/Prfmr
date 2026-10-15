@@ -1,0 +1,5 @@
+.takeoff-marker{position:absolute;top:-3px;height:11px;left:88.889%;width:10.556%;background:var(--gold);border:1px solid var(--bg)}
+.clock-block{width:215px;flex:none}.clock{min-height:46px}.result-time #result-mark{font:inherit;color:var(--ink);margin:0}.result-time small{font:16px Arial,sans-serif;color:var(--muted);margin-left:8px}
+.trigger[data-mode=line] .trigger-core strong{white-space:pre-line;font-size:25px;line-height:1.05}.track-top{color:var(--ink);text-shadow:0 1px 3px #101313}
+@media(max-width:650px){.clock-block{width:140px}.clock{min-height:36px}.scoreboard{padding:18px 0 14px;gap:14px}.trigger[data-mode=line] .trigger-core strong{font-size:22px}.track{height:285px}.event-nav{gap:12px;row-gap:1px;font-size:10px}}
+@media(max-width:360px){.clock-block{width:120px}.clock{min-height:30px}.scoreboard{gap:10px}.page-footer{font-size:8px}.event-nav{gap:12px;row-gap:1px;font-size:9px}}
