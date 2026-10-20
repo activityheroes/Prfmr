@@ -1,5 +1,6 @@
 import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs";
 import { clamp } from "../sprint/engine.mjs";
+import { blendPose, ease, reactionAge, reactionPose } from "../sprint/finish.mjs";
 
 const TAU = Math.PI * 2;
 export function getThrowerPose(race) {
@@ -16,7 +17,8 @@ export function getThrowerPose(race) {
     pose.limbs[1].foot = { ankle: { x: -3.5, y: -0.5 }, heel: { x: -4, y: 0 }, toe: { x: -2.8, y: 0 } };
     pose.limbs[1].knee = { x: -2.5, y: -4.2 };
   }
-  return { ...pose, spearAngle: -0.06 - windup * 0.4 };
+  const reacted = race.presentation ? blendPose(pose, reactionPose(getRunnerPose(0, 0, true), reactionAge(race), race.presentation.success), ease(reactionAge(race) / 0.65)) : pose;
+  return { ...reacted, spearAngle: -0.06 - windup * 0.4 };
 }
 export function drawThrower(ctx, x, ground, unit, race) {
   const pose = getThrowerPose(race);
@@ -37,7 +39,7 @@ export function drawThrower(ctx, x, ground, unit, race) {
   for(let row=-2;row<=2;row++)for(let col=-2;col<=2;col++)if(row*row+col*col<=6)dot(pose.head.x+col*0.61,pose.head.y+row*0.61,row<-1?"#ff7f86":"#f0f5f1",0.27);
   dot(pose.head.x+1.2,pose.head.y-0.3,"#65c9ff",0.3);dot(pose.head.x+1.65,pose.head.y+0.25,"#f0f5f1");
   leg(pose.limbs[0],"#b7fa76","#ffd473");arm(pose.limbs[0],"#e7ffd3");
-  if(!race.launch){
+  if(!race.launch && !race.presentation){
     const grip=pose.limbs[0].hand,point=d=>({x:grip.x+Math.cos(pose.spearAngle)*d,y:grip.y+Math.sin(pose.spearAngle)*d});
     bone(point(-5.8),point(10.5),"#ffd473",0.14,0.45);bone(point(-0.6),point(0.6),"#ff7f86",0.23,0.3);
     const tip=point(10.7);dot(tip.x,tip.y,"#f0f5f1",0.18);

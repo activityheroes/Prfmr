@@ -2,6 +2,7 @@ import * as THREE from "./vendor/three.module.min.js";
 import { SPRINT_COURSE, clamp } from "./engine.mjs";
 import { drawRunner } from "./runner.mjs";
 import { createPool, createPoolWall } from "../swimming/pool.mjs";
+import { finishTravel, reactionAge } from "./finish.mjs";
 
 const RUNNER_ART = { width: 256, height: 256, x: 104, ground: 238, unit: 12,
   scaleX: 3.8, scaleY: 3.8, anchorX: 104 / 256, anchorY: 0.07,
@@ -47,9 +48,11 @@ export class TrackScene {
       const glow = this.plate(-0.08, length + 0.16, 1.34, 0, "#0ba5ff", 0.18, group, 0.029);
       const surface = this.plate(0, length, 1.2, 0, "#139ff5", 0.62, group, 0.034);
       const core = this.plate(0, length, 0.24, 0, "#8cecff", 0.48, group, 0.039);
+      const entryBand = this.plate(-0.1, 0.2, 1.28, 0, "#d9fcff", 0.25, group, 0.045);
+      const exitBand = this.plate(length - 0.1, 0.2, 1.28, 0, "#d9fcff", 0.25, group, 0.045);
       const entry = this.plate(-0.035, 0.07, 1.28, 0, "#d9fcff", 1, group, 0.05);
       const exit = this.plate(length - 0.035, 0.07, 1.28, 0, "#d9fcff", 1, group, 0.05);
-      return { group, glow, surface, core, entry, exit };
+      return { group, glow, surface, core, entry, exit, entryBand, exitBand };
     });
     this.cursor = this.plate(-0.035, 0.07, 1.42, 0, "#f4ffd9", 1, this.scene, 0.075);
 
@@ -112,6 +115,8 @@ export class TrackScene {
     return { x: (p.x + 1) * this.width / 2, y: (1 - p.y) * this.height / 2 };
   }
   render(race) {
+    const travel = finishTravel(race);
+    if (travel) { const view = Object.create(race); view.distance = race.distance + travel; race = view; }
     this.updateEnvironment?.(race);
     this.updatePool?.(race);
     this.marks.forEach((mark, i) => { mark.position.x = i * 5 - 15 - race.distance % 5; });
@@ -123,6 +128,11 @@ export class TrackScene {
       mesh.surface.material.opacity = zone.status === "holding" ? 0.88 : zone.status === "done" ? 0.32 : 0.62;
       mesh.glow.material.opacity = zone.status === "holding" ? 0.3 : 0.18;
       mesh.core.material.opacity = zone.status === "holding" ? 0.9 : 0.48;
+      const window = race.timingWindow(zone), next = race.nextZone === zone;
+      mesh.entryBand.scale.x = mesh.exitBand.scale.x = window.perfectEdge * 2;
+      mesh.entryBand.material.opacity = mesh.exitBand.material.opacity = zone.status === "done" ? 0.08 : 0.25;
+      mesh.entry.material.color.set(next && ["prepare", "press"].includes(race.cue) ? "#ffd473" : "#d9fcff");
+      mesh.exit.material.color.set(next && race.cue === "release" ? "#ffd473" : "#d9fcff");
     });
     this.cursor.material.color.set(race.activeHold ? "#c5fcff" : "#f4ffd9");
     const missed = ["Early", "Late", "Miss"].includes(race.lastAttempt?.grade);
@@ -134,20 +144,23 @@ export class TrackScene {
     this.runnerTexture.needsUpdate = true;
     const age = race.lastAttempt === null ? 100 : race.time - race.lastAttempt.time;
     this.runner.material.rotation = this.course.id === "sprint" && missed && age < 0.5 ? Math.sin(age * 30) * 0.055 * (1 - age * 2) : 0;
-    this.sparks.visible = race.lastAttempt?.grade === "Perfect" && age < 0.55;
+    const celebrating = race.presentation?.success && reactionAge(race) > 0.4 && !race.presentation.reducedMotion;
+    this.sparks.visible = celebrating || !race.presentation && race.lastAttempt?.grade === "Perfect" && age < 0.55;
     if (this.sparks.visible) {
-      const t = clamp(age / 0.55, 0, 1);
+      const t = celebrating ? (reactionAge(race) - 0.4) % 1.1 / 1.1 : clamp(age / 0.55, 0, 1);
+      const origin = celebrating ? this.finishFocus ?? { x: art.feedbackX, y: 1.1 } : { x: art.feedbackX, y: 1.1 };
       for (let i = 0; i < 24; i++) {
         const angle = i * 2.399;
-        this.sparkPositions[i * 3] = art.feedbackX + Math.cos(angle) * (0.3 + t * 1.1);
-        this.sparkPositions[i * 3 + 1] = 1.1 + Math.sin(angle * 1.3) * 0.8 + t * 1.5;
-        this.sparkPositions[i * 3 + 2] = Math.sin(angle) * (0.15 + t * 0.55);
+        this.sparkPositions[i * 3] = origin.x + Math.cos(angle) * (0.3 + t * 1.1);
+        this.sparkPositions[i * 3 + 1] = origin.y + Math.sin(angle * 1.3) * 0.8 + t * 1.1;
+        this.sparkPositions[i * 3 + 2] = (origin.z ?? 0) + Math.sin(angle) * (0.15 + t * 0.55);
       }
       this.sparks.geometry.attributes.position.needsUpdate = true;
       this.sparks.material.opacity = 1 - t;
     }
     this.finish.position.x = race.course.distance - race.distance;
     this.finish.visible = race.distance > race.course.distance - 13;
+    this.positionCourse?.(race);
     this.renderer.render(this.scene, this.camera);
   }
 }

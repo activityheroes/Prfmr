@@ -19,16 +19,16 @@ export class JavelinRace extends RhythmRace {
     this.throwStart = null; this.launch = null; this.projectile = null; this.flightTime = 0;
   }
   get racing() { return super.racing || this.phase === "flight"; }
+  get finishZone() { return THROW_ZONE; }
   get cue() {
     if (this.phase !== "line") return super.cue;
-    return this.holding ? this.distance >= THROW_ZONE.end - THROW_ZONE.perfectEdge * this.stats.timingTolerance ? "release" : "hold"
-      : this.distance >= THROW_ZONE.start - THROW_ZONE.perfectEdge * this.stats.timingTolerance ? "press" : "run";
+    return this.zoneCue(THROW_ZONE, this.throwStart);
   }
   press() {
     if (this.phase === "flight") return false;
     if (this.phase !== "line") return super.press();
     if (this.holding) return false;
-    this.holding = true; this.throwStart = { distance: this.distance, time: this.time }; return true;
+    this.holding = true; this.throwStart = { distance: this.distance, time: this.time, timing: this.timingWindow(THROW_ZONE) }; return true;
   }
   release() {
     if (this.phase === "line" && this.throwStart && this.holding) this.throwJavelin();
@@ -36,7 +36,7 @@ export class JavelinRace extends RhythmRace {
   }
   cancelInput() { this.throwStart = null; super.cancelInput(); }
   throwJavelin() {
-    const timing = scoreZone(THROW_ZONE, this.throwStart.distance, this.distance, this.stats.timingTolerance);
+    const timing = scoreZone({ ...THROW_ZONE, ...this.throwStart.timing }, this.throwStart.distance, this.distance);
     const angle = clamp(38 + (this.distance - THROW_ZONE.end) * 12, 22, 52);
     const speed = (12 + this.speed * 1.6) * (0.55 + timing.score / 100 * 0.45);
     const radians = angle * Math.PI / 180, vx = speed * Math.cos(radians), vy = speed * Math.sin(radians);

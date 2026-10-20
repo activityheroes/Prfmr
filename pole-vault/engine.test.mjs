@@ -44,7 +44,7 @@ test("upgraded run-up equipment can clear the maximum selectable bar", () => {
 test("early plant timing lowers the height and a badly missed plant aborts", () => {
   const perfect = finish(planted()), early = finish(planted(3.5, {}, true, 41.2));
   assert.ok(early.peakHeight < perfect.peakHeight); assert.ok(early.result.plantScore < perfect.result.plantScore);
-  const missed = planted(3.5, {}, true, 43.2); assert.equal(missed.terminal, true); assert.equal(missed.result.reason, "Missed plant"); assert.equal(missed.plant, null);
+  const missed = planted(3.5, {}, true, 44.4); assert.equal(missed.terminal, true); assert.equal(missed.result.reason, "Missed plant"); assert.equal(missed.plant, null);
 });
 test("missing or holding through the plant box cannot award a clearance", () => {
   const held = started(); to(held, 39.5); held.press(); to(held, 45); assert.equal(held.result.reason, "Missed plant");

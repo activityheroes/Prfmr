@@ -1,6 +1,8 @@
 import { JavelinRace, JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs";
 import { getStats, GEAR, clamp } from "../sprint/engine.mjs";
 import { JavelinScene } from "./scene.mjs";
+import { createTimingGuide } from "../sprint/timing-guide.mjs";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs";
 
 const $=id=>document.getElementById(id),trigger=$("trigger"),dialog=$("result-dialog"),canvas=$("track");
 const storageKey="dot-javelin-zones-v1",colors={Perfect:"#d9fbff",Great:"#81f6b6",Good:"#ffd473",Early:"#e8aa62",Late:"#ff7f86",Miss:"#9eabb0"};
@@ -28,17 +30,33 @@ function reset(){
   $("stat-spikes").textContent=stats.maxSpeed.toFixed(1)+" m/s maximum";$("stat-kit").textContent=stats.endurance.toFixed(2)+"x endurance";
   $("kit-label").textContent=Object.values(loadout).some(Boolean)?"CUSTOM LOADOUT":"CLUB LOADOUT";$("attempt").textContent=String(attempt).padStart(2,"0");render();trigger.focus({preventScroll:true});
 }
-function sync(now=performance.now()){const dt=Math.max(0,(now-lastTime)/1000);lastTime=Math.max(lastTime,now);if(!paused)race.advance(dt);events();}
+function sync(now=performance.now()){
+  const dt=Math.max(0,(now-lastTime)/1000);lastTime=Math.max(lastTime,now);
+  if(!paused){
+    if(race.presentation&&!resultShown){if(advanceFinish(race,dt))showResult();}
+    else race.advance(dt);
+  }
+  events();
+}
 function events(){
   for(const event of race.events.splice(0)){
     if(event==="start"){tone(550);document.querySelector(".equipment").open=false;announce("Automatic approach. Hold through each blue zone and release at its end.");}
     if(event.type==="zone"){tone(event.result.grade==="Perfect"?990:660);announce("Zone "+event.result.zoneId+": "+event.result.grade);}
     if(event==="line"){clearInput();tone(1100);announce("Throw zone. Press at the gold strip, hold, then release at its white end line before the foul line.");}
     if(event==="throw"){clearInput();tone(1350,0.2);announce("Javelin released. "+race.launch.timing.grade+" timing.");}
-    if(event==="finish"){clearInput();showResult();}
+    if(event==="finish"){
+      clearInput();
+      const finish=beginFinish(race,best,matchMedia("(prefers-reduced-motion: reduce)").matches);
+      if(finish.personalBest){best=finish.value;persist();}
+      tone(finish.success?880:150,0.2);
+      announce(finish.success?"Javelin landed. "+race.result.mark.toFixed(2)+" meters.":"Foul. No mark.");
+    }
   }
 }
-function activate(kind){if(!scene||paused||race.terminal||input.kind||!race.press())return false;input.kind=kind;events();render();return true;}
+function activate(kind){
+  if(race.terminal){if(!paused&&canShowResult(race))showResult();return false;}
+  if(!scene||paused||input.kind||!race.press())return false;input.kind=kind;events();render();return true;
+}
 function release(kind,canceled=false){if(input.kind!==kind)return;sync();if(canceled)race.cancelInput();else race.release();clearInput();events();render();}
 function inside(x,y){const r=trigger.getBoundingClientRect();return Math.hypot(x-r.left-r.width/2,y-r.top-r.height/2)<=r.width/2;}
 trigger.addEventListener("pointerdown",e=>{if(e.button!==0||!e.isPrimary||!inside(e.clientX,e.clientY))return;e.preventDefault();sync();if(activate("pointer")){input.id=e.pointerId;trigger.setPointerCapture(e.pointerId);}});
@@ -47,17 +65,18 @@ trigger.addEventListener("pointerup",e=>{if(input.id===e.pointerId)release("poin
 trigger.addEventListener("pointercancel",e=>{if(input.id===e.pointerId)release("pointer",true);});
 trigger.addEventListener("lostpointercapture",()=>{if(input.kind==="pointer")release("pointer",true);});
 trigger.addEventListener("contextmenu",e=>e.preventDefault());
+trigger.addEventListener("click",e=>{if(e.detail===0&&race.terminal)activate("keyboard");});
 document.addEventListener("keydown",e=>{if(e.code!=="Space"||e.repeat||e.target.closest("select,input,summary,button:not(#trigger)"))return;e.preventDefault();sync();activate("keyboard");});
 document.addEventListener("keyup",e=>{if(e.code==="Space"&&input.kind==="keyboard"){e.preventDefault();release("keyboard");}});
 $("restart").addEventListener("click",reset);$("again").addEventListener("click",()=>{attempt++;reset();});
 dialog.addEventListener("cancel",e=>{e.preventDefault();attempt++;reset();});
 for(const key of Object.keys(GEAR)){$("gear-"+key).value=String(loadout[key]);$("gear-"+key).addEventListener("change",e=>{if(race.phase!=="ready")return;loadout[key]=Number(e.target.value);persist();reset();});}
-function pause(){if(!race.racing||paused)return;sync();if(!race.racing)return;race.cancelInput();clearInput();paused=true;$("pause-panel").hidden=false;events();render();}
+function pause(){if(paused||!race.racing&&(!race.presentation||resultShown))return;sync();if(!race.racing&&(!race.presentation||resultShown))return;race.cancelInput();clearInput();paused=true;$("pause-panel").hidden=false;events();render();}
 window.addEventListener("blur",pause);document.addEventListener("visibilitychange",()=>{if(document.hidden)pause();});
 $("resume").addEventListener("click",()=>{paused=false;lastTime=performance.now();$("pause-panel").hidden=true;trigger.focus({preventScroll:true});});
 function showResult(){
-  if(resultShown)return;resultShown=true;const r=race.result,old=best;
-  const improved=!r.foul&&(best===null||r.mark>best);if(improved){best=r.mark;persist();}
+  if(resultShown)return;resultShown=true;const r=race.result,old=race.presentation?race.presentation.previousBest:best;
+  const improved=race.presentation?.personalBest??(!r.foul&&(best===null||r.mark>best));if(improved){best=r.mark;persist();}
   $("result-tag").textContent=r.foul?"NO MARK":improved?"PERSONAL BEST":"OFFICIAL MARK";
   $("result-title").textContent=r.foul?"Foul":"Javelin";$("result-mark").textContent=r.foul?"FOUL":r.mark.toFixed(2);$("result-unit").hidden=r.foul;
   $("result-detail").textContent=r.foul?"Crossed the foul line without a valid release.":old===null?"Your first measured throw.":improved?(r.mark-old).toFixed(2)+" m beyond your previous best.":(old-r.mark).toFixed(2)+" m short of your personal best.";
@@ -68,6 +87,7 @@ function showResult(){
   $("zone-results").replaceChildren();for(const z of r.zones){const li=document.createElement("li");li.textContent="ZONE "+z.zoneId+" / "+z.grade.toUpperCase()+" / "+Math.round(z.score);li.style.color=colors[z.grade];$("zone-results").append(li);}
   announce(r.foul?"Foul. No mark.":"Throw distance "+r.mark.toFixed(2)+" meters.");tone(r.foul?150:880,0.25);dialog.showModal();
 }
+const timingGuide = createTimingGuide({ trigger, tone, finishZone: THROW_ZONE, holdKey: "throwStart" });
 function render(){
   if(!race)return;scene?.render(race);
   const p=race.phase,flying=!!race.launch,throwing=p==="line",cue=race.cue,z=race.nextZone;
@@ -96,6 +116,8 @@ function render(){
   $("phase-note").textContent=throwing?"GOLD ZONE / 40 - 43.5 M":flying?"MEASURED FROM THE FOUL LINE":"45 M RUNWAY";
   $("feedback").style.color=throwing?"#ffd473":colors[grade]??"#65c9ff";
   $("feedback").textContent=race.terminal?race.result.foul?"FOUL / NO MARK":"VALID THROW":flying?race.launch.timing.grade.toUpperCase()+" RELEASE":throwing?race.holding?"HOLD / RELEASE AT WHITE LINE":"GOLD THROW ZONE":p==="ready"?"ON YOUR MARKS":recent?feedback+(race.lastAttempt.boost?" / +"+Math.round(race.lastAttempt.boost*100)+"%":""):race.activeHold?"ZONE "+z.id+" / HOLD ACTIVE":"AUTOMATIC RUN-UP";
+  timingGuide(race, paused);
+  renderFinish(race, scene, trigger);
 }
 function fit(){const r=canvas.getBoundingClientRect();scene?.resize(r.width,r.height);}
 new ResizeObserver(()=>{fit();render();}).observe(canvas);fit();reset();

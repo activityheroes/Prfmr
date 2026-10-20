@@ -1,4 +1,5 @@
 import { clamp, DIP } from "./engine.mjs";
+import { blendPose, reactionAge, reactionPose } from "./finish.mjs";
 
 const TAU = Math.PI * 2;
 const gait = { stance: 0.3, stride: 3.2, lift: 5, arm: 1.12, elbow: 1.6, lean: 1.6 };
@@ -81,6 +82,10 @@ export function drawRunner(ctx, x, ground, unit, race) {
   let pose = getRunnerPose(cycle, race.dipAmount, race.phase === "ready");
   if (race.phase === "ready") pose = crouchPose();
   else if (race.releaseAt !== null && race.time - race.releaseAt < 0.25) pose = blend(crouchPose(), pose, ease((race.time - race.releaseAt) / 0.25));
+  if (race.presentation) {
+    const idle = getRunnerPose(0, 0, true);
+    pose = blendPose(pose, reactionPose(idle, reactionAge(race), race.presentation.success), ease((race.presentation.age - 0.35) / 0.65));
+  }
   ctx.save(); ctx.translate(x, ground); ctx.scale(unit, unit);
   const dot = (x, y, color, radius = 0.255) => { ctx.beginPath(); ctx.fillStyle = color; ctx.arc(x, y, radius, 0, TAU); ctx.fill(); };
   const bone = (a, b, color, radius = 0.255) => {

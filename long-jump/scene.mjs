@@ -1,7 +1,7 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
 import { TrackScene } from "../sprint/track-scene.mjs";
 import { LONG_JUMP_COURSE, TAKEOFF_ZONE, JUMP } from "./engine.mjs";
-import { jumperDots } from "./jumper.mjs";
+import { jumperDots, getJumperPose } from "./jumper.mjs";
 
 const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1, anchorX: 0, anchorY: 0,
   headHeight: 3, feedbackX: 0, shadowStart: -1, shadowLength: 1.5, planar: true, draw() {} };
@@ -59,6 +59,8 @@ export class LongJumpScene extends TrackScene {
   }
   render(race) {
     this.frameCamera(race); this.visibleDots = jumperDots(race); this.jumper.count = this.visibleDots.length;
+    const head = getJumperPose(race).head;
+    this.finishFocus = { x: head.x - race.distance, y: head.y + 0.2 };
     this.visibleDots.forEach((p, i) => {
       this.dummy.position.set(p.x - race.distance, p.y, 0); this.dummy.scale.setScalar(p.radius); this.dummy.updateMatrix();
       this.jumper.setMatrixAt(i, this.dummy.matrix); this.jumper.setColorAt(i, this.color.set(p.color));

@@ -8,7 +8,8 @@ export const LONG_JUMP_COURSE = {
   zones: [6, 12, 18, 24, 30, 36].map((start, i) => ({ id: i + 1, start, end: start + (i === 5 ? 1.6 : 2.4),
     edgeWindow: i === 5 ? 0.48 : 0.8, perfectEdge: i === 5 ? 0.07 : 0.12 }))
 };
-export const TAKEOFF_ZONE = { start: 40, end: 44.75, edgeWindow: 1.2, perfectEdge: 0.15 };
+// The physical board cannot grant late grace, so give the release cue extra lead time.
+export const TAKEOFF_ZONE = { start: 40, end: 44.75, edgeWindow: 1.2, perfectEdge: 0.15, releaseLead: 0.2 };
 export const JUMP = { gravity: 9.81, board: 45, pitStart: 47, pitEnd: 58, hipHeight: 1.25, landingHeight: 0.6 };
 
 export class LongJumpRace extends RhythmRace {
@@ -18,16 +19,16 @@ export class LongJumpRace extends RhythmRace {
     this.flightTime = 0; this.landTime = 0; this.peakHeight = 0; this.landing = null;
   }
   get racing() { return super.racing || this.phase === "flight" || this.phase === "landing"; }
+  get finishZone() { return TAKEOFF_ZONE; }
   get cue() {
     if (this.phase !== "line") return super.cue;
-    return this.holding ? this.distance >= TAKEOFF_ZONE.end - TAKEOFF_ZONE.perfectEdge * this.stats.timingTolerance ? "release" : "hold"
-      : this.distance >= TAKEOFF_ZONE.start - TAKEOFF_ZONE.perfectEdge * this.stats.timingTolerance ? "press" : "run";
+    return this.zoneCue(TAKEOFF_ZONE, this.takeoffStart);
   }
   press() {
     if (this.launch) return false;
     if (this.phase !== "line") return super.press();
     if (this.holding) return false;
-    this.holding = true; this.takeoffStart = { distance: this.distance, time: this.time }; return true;
+    this.holding = true; this.takeoffStart = { distance: this.distance, time: this.time, timing: this.timingWindow(TAKEOFF_ZONE) }; return true;
   }
   release() {
     if (this.phase === "line" && this.holding && this.takeoffStart) this.takeoff();
@@ -35,7 +36,7 @@ export class LongJumpRace extends RhythmRace {
   }
   cancelInput() { this.takeoffStart = null; super.cancelInput(); }
   takeoff() {
-    const timing = scoreZone(TAKEOFF_ZONE, this.takeoffStart.distance, this.distance, this.stats.timingTolerance);
+    const timing = scoreZone({ ...TAKEOFF_ZONE, ...this.takeoffStart.timing }, this.takeoffStart.distance, this.distance);
     this.holding = false;
     if (this.distance >= JUMP.board) { this.finishAttempt("Over the board"); return; }
     if (timing.entry <= 0 || timing.hold < 0.25) { this.finishAttempt("Missed takeoff"); return; }

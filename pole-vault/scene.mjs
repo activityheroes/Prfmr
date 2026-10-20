@@ -1,7 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
 import { TrackScene } from "../sprint/track-scene.mjs";
 import { VAULT_COURSE, VAULT, PLANT_ZONE } from "./engine.mjs";
-import { vaulterDots, poleCurve } from "./vaulter.mjs";
+import { vaulterDots, poleCurve, getVaulterPose } from "./vaulter.mjs";
+import { ease } from "../sprint/finish.mjs";
 
 const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 3, feedbackX: 0, shadowStart: -1, shadowLength: 1.5, planar: true, draw() {} };
@@ -53,11 +54,17 @@ export class VaultScene extends TrackScene {
   frameCamera(race) {
     const small = this.width < 650, planted = !!race?.plant;
     const t = planted ? Math.min(1, race.vaultTime / 0.8) : 0;
-    const x = (small ? 1.4 : 2.8) * (1 - t) + (race ? VAULT.barX - race.distance + 0.8 : 4.5) * t;
+    let x = (small ? 1.4 : 2.8) * (1 - t) + (race ? VAULT.barX - race.distance + 0.8 : 4.5) * t;
     const extraHeight = Math.max(0, (race?.plant?.launchY ?? 5.2) - 5.2);
-    const y = 1.45 * (1 - t) + (3.2 + extraHeight * 0.55) * t;
+    let y = 1.45 * (1 - t) + (3.2 + extraHeight * 0.55) * t;
     const base = (small ? 9 : 17.2) * (1 - t) + (small ? 13 : 22) * t;
-    const span = Math.max(base, this.width / this.height * (6.2 + (3 + extraHeight) * t));
+    let span = Math.max(base, this.width / this.height * (6.2 + (3 + extraHeight) * t));
+    if (race?.presentation && planted) {
+      const settle = race.presentation.reducedMotion ? 1 : ease((race.presentation.age - 0.6) / 1.1);
+      x += (race.athlete.x - race.distance - x) * settle;
+      y += (1.7 - y) * settle;
+      span += (Math.max(small ? 11 : 18, this.width / this.height * 6.5) - span) * settle;
+    }
     const half = span / (this.width / this.height) / 2;
     this.camera.position.set(x + 7, y + 7, 22); this.camera.lookAt(x, y, 0);
     this.camera.left = -span / 2; this.camera.right = span / 2; this.camera.top = half; this.camera.bottom = -half;
@@ -75,6 +82,8 @@ export class VaultScene extends TrackScene {
   render(race) {
     this.frameCamera(race);
     this.visibleDots = vaulterDots(race); this.instances(this.vaulter, this.visibleDots, race.distance);
+    const head = getVaulterPose(race).head;
+    this.finishFocus = { x: head.x - race.distance, y: head.y + 0.2 };
     const curve = poleCurve(race), dots = [];
     for (let i = 0; i < 70; i++) {
       const t = i / 69, k = 1 - t;
@@ -84,9 +93,10 @@ export class VaultScene extends TrackScene {
     }
     this.instances(this.pole, dots, race.distance);
     this.cursor.visible = !race.plant; this.shadow.visible = !race.plant;
-    const age = race.barHitAt === null ? 0 : Math.max(0, race.time - race.barHitAt);
+    const age = race.barHitAt === null ? 0 : Math.min(1.2, Math.max(0, race.time + (race.presentation?.age ?? 0) - race.barHitAt));
     this.bar.position.set(1.6 + age * 0.1, Math.max(0.72, race.barHeight - 4.9 * age * age), 0);
-    this.bar.rotation.set(Math.PI / 2 + age * 1.2, 0, age * 0.3);
+    const settling = 1 - ease(age / 1.2);
+    this.bar.rotation.set(Math.PI / 2 + Math.sin(age * 7) * 0.25 * settling, age * 0.25, 0);
     this.bar.material.color.set(race.barHit ? "#ff7f86" : "#ffd473");
     this.barSupports.forEach(support => { support.position.y = race.barHeight; });
     super.render(race);

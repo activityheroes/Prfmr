@@ -1,11 +1,13 @@
 import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs";
 import { clamp } from "../sprint/engine.mjs";
-import { poseDots } from "../pole-vault/vaulter.mjs";
+import { poseDots, worldStandingPose } from "../pole-vault/vaulter.mjs";
+import { blendPose, reactionAge } from "../sprint/finish.mjs";
 
 const ease = value => { const t = clamp(value, 0, 1); return t * t * (3 - 2 * t); };
 const mix = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
 export function getJumperPose(race) {
   if (!race.launch) {
+    if (race.presentation) return worldStandingPose(race, race.distance - 0.48);
     const raw = getRunnerPose(race.distance / STRIDE_METERS, 0, race.phase === "ready" || race.terminal);
     const at = p => ({ x: race.distance + (p.x - 3) * 0.16, y: 0.08 - p.y * 0.16 });
     return { hip: at(raw.hip), shoulder: at(raw.shoulder), head: at(raw.head),
@@ -26,7 +28,8 @@ export function getJumperPose(race) {
     const elbow = mix(shoulder, hand, 0.5); elbow.x -= 0.13;
     return { knee, ankle, heel, toe, elbow, hand };
   });
-  return { hip, shoulder, head, limbs };
+  const pose = { hip, shoulder, head, limbs };
+  return race.presentation ? blendPose(pose, worldStandingPose(race, race.athlete.x + 2.45), ease(reactionAge(race) / 0.85)) : pose;
 }
 export const jumperDots = race => poseDots(getJumperPose(race));
 export const landingHeels = race => getJumperPose(race).limbs.map(limb => limb.heel);

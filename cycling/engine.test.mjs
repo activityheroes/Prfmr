@@ -52,14 +52,14 @@ test("timing all six zones is faster than riding unattended", () => {
 test("continuous holding cannot award or repeat a zone", () => {
   const race = new CyclingRace(); race.press(); to(race, 200);
   assert.equal(race.counts.Miss, 6); assert.equal(race.momentum, 0);
-  const over = started(); to(over, 30); over.press(); to(over, 70);
+  const over = started(); to(over, 30); over.press(); to(over, 71);
   assert.equal(over.counts.Late, 1); assert.equal(over.counts.Miss, 1);
   over.release(); assert.equal(over.attempts, 2); play(over, 2); assert.equal(over.counts.Perfect, 1);
 });
 test("early, late and canceled cycling attempts cannot award full boosts", () => {
   const early = started(); play(early, 0, 0, -2.25); assert.equal(early.lastAttempt.grade, "Early");
   close(early.speed, 12 * 1.02);
-  const late = started(); play(late, 0, 0, 1.6); assert.equal(late.lastAttempt.grade, "Late");
+  const late = started(); play(late, 0, 0, 2.8); assert.equal(late.lastAttempt.grade, "Late");
   const canceled = started(); to(canceled, 30); canceled.press(); to(canceled, 37.5); canceled.cancelInput();
   assert.equal(canceled.lastAttempt.grade, "Miss"); assert.equal(canceled.lastAttempt.score, 0);
   canceled.release(); assert.equal(canceled.attempts, 1);

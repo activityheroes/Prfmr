@@ -1,6 +1,8 @@
 import { PoleVaultRace, VAULT_COURSE, PLANT_ZONE, VAULT, normalizeBar } from "./engine.mjs";
 import { getStats, GEAR, clamp } from "../sprint/engine.mjs";
 import { VaultScene } from "./scene.mjs";
+import { createTimingGuide } from "../sprint/timing-guide.mjs";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-pole-vault-zones-v1";
@@ -42,7 +44,12 @@ function reset() {
   $("attempt").textContent = String(attempt).padStart(2, "0"); render(); trigger.focus({ preventScroll: true });
 }
 function sync(now = performance.now()) {
-  const dt = Math.max(0, (now - lastTime) / 1000); lastTime = Math.max(lastTime, now); if (!paused) race.advance(dt); events();
+  const dt = Math.max(0, (now - lastTime) / 1000); lastTime = Math.max(lastTime, now);
+  if (!paused) {
+    if (race.presentation && !resultShown) { if (advanceFinish(race, dt)) showResult(); }
+    else race.advance(dt);
+  }
+  events();
 }
 function events() {
   for (const event of race.events.splice(0)) {
@@ -52,10 +59,17 @@ function events() {
     if (event === "plant") { clearInput(); tone(1350, 0.2); announce(race.plant.timing.grade + " plant. Vaulting."); }
     if (event === "bar-hit") { tone(180, 0.2); announce("Crossbar knocked off."); }
     if (event === "clear") { tone(1200, 0.18); announce("Over the bar."); }
-    if (event === "finish") { clearInput(); showResult(); }
+    if (event === "finish") {
+      clearInput();
+      const finish = beginFinish(race, best, matchMedia("(prefers-reduced-motion: reduce)").matches);
+      if (finish.personalBest) { best = finish.value; persist(); }
+      tone(finish.success ? 880 : 150, 0.2);
+      announce(finish.success ? "Landed on the mat. Bar cleared!" : race.result.reason + ". No clearance.");
+    }
   }
 }
 function activate(kind) {
+  if (race.terminal) { if (!paused && canShowResult(race)) showResult(); return false; }
   if (!scene || paused || race.terminal || input.kind || !race.press()) return false;
   input.kind = kind; events(); render(); return true;
 }
@@ -73,6 +87,7 @@ trigger.addEventListener("pointerup", e => { if (input.id === e.pointerId) relea
 trigger.addEventListener("pointercancel", e => { if (input.id === e.pointerId) release("pointer", true); });
 trigger.addEventListener("lostpointercapture", () => { if (input.kind === "pointer") release("pointer", true); });
 trigger.addEventListener("contextmenu", e => e.preventDefault());
+trigger.addEventListener("click", e => { if (e.detail === 0 && race.terminal) activate("keyboard"); });
 document.addEventListener("keydown", e => {
   if (e.code !== "Space" || e.repeat || e.target.closest("select,input,summary,button:not(#trigger)")) return;
   e.preventDefault(); sync(); activate("keyboard");
@@ -88,14 +103,15 @@ for (const key of Object.keys(GEAR)) {
   $("gear-" + key).addEventListener("change", e => { if (race.phase !== "ready") return; loadout[key] = Number(e.target.value); persist(); reset(); });
 }
 function pause() {
-  if (!race.racing || paused) return; sync(); if (!race.racing) return;
+  if (paused || !race.racing && (!race.presentation || resultShown)) return;
+  sync(); if (!race.racing && (!race.presentation || resultShown)) return;
   race.cancelInput(); clearInput(); paused = true; $("pause-panel").hidden = false; events(); render();
 }
 window.addEventListener("blur", pause); document.addEventListener("visibilitychange", () => { if (document.hidden) pause(); });
 $("resume").addEventListener("click", () => { paused = false; lastTime = performance.now(); $("pause-panel").hidden = true; trigger.focus({ preventScroll: true }); });
 function showResult() {
   if (resultShown) return; resultShown = true; const r = race.result;
-  const improved = r.cleared && (best === null || r.mark > best); if (improved) { best = r.mark; persist(); }
+  const improved = race.presentation?.personalBest ?? (r.cleared && (best === null || r.mark > best)); if (improved) { best = r.mark; persist(); }
   $("result-tag").textContent = improved ? "PERSONAL BEST" : r.cleared ? "VALID CLEARANCE" : "NO CLEARANCE";
   $("result-title").textContent = r.cleared ? "Bar cleared" : "No clearance";
   $("result-mark").textContent = r.cleared ? r.mark.toFixed(2) : "MISS"; $("result-unit").hidden = !r.cleared;
@@ -113,6 +129,7 @@ function showResult() {
   announce(r.cleared ? "Cleared " + r.mark.toFixed(2) + " meters." : r.reason + ". No clearance.");
   tone(r.cleared ? 880 : 150, 0.25); dialog.showModal();
 }
+const timingGuide = createTimingGuide({ trigger, tone, finishZone: PLANT_ZONE, holdKey: "plantStart" });
 function render() {
   if (!race) return; scene?.render(race);
   const p = race.phase, planted = !!race.plant, planting = p === "line", cue = race.cue, z = race.nextZone;
@@ -148,6 +165,8 @@ function render() {
   $("feedback").style.color = race.barFailed ? "#ff7f86" : planting || planted ? "#ffd473" : colors[grade] ?? "#65c9ff";
   $("feedback").textContent = race.terminal ? race.result.cleared ? "VALID CLEARANCE" : race.result.reason.toUpperCase() : planted ? race.barHit ? "BAR KNOCKED OFF" : race.barPassed ? race.barFailed ? "BELOW THE BAR" : "BAR CLEARED" : p === "vault" ? "POLE BEND / RISE" : "CROSSBAR APPROACH"
     : planting ? race.holding ? "PLANT HOLD ACTIVE" : "GOLD PLANT ZONE" : p === "ready" ? "ON YOUR MARKS" : recent ? feedback + (race.lastAttempt.boost ? " / +" + Math.round(race.lastAttempt.boost * 100) + "%" : "") : race.activeHold ? "ZONE " + z.id + " / HOLD ACTIVE" : "AUTOMATIC RUN-UP";
+  timingGuide(race, paused);
+  renderFinish(race, scene, trigger);
 }
 function fit() { const r = canvas.getBoundingClientRect(); scene?.resize(r.width, r.height); }
 new ResizeObserver(() => { fit(); render(); }).observe(canvas); fit(); reset();

@@ -1,10 +1,18 @@
 import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs";
 import { clamp } from "../sprint/engine.mjs";
+import { blendPose, reactionAge, reactionPose } from "../sprint/finish.mjs";
 
 const ease = n => { const t = clamp(n, 0, 1); return t * t * (3 - 2 * t); };
 const mix = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+export function worldStandingPose(race, x, ground = 0.08) {
+  const raw = reactionPose(getRunnerPose(0, 0, true), Math.max(0, reactionAge(race) - 0.65), race.presentation.success);
+  const at = p => ({ x: x + p.x * 0.16, y: ground - p.y * 0.16 });
+  return { hip: at(raw.hip), shoulder: at(raw.shoulder), head: at(raw.head), grip: at(raw.limbs[0].hand),
+    limbs: raw.limbs.map(l => ({ knee: at(l.knee), ankle: at(l.foot.ankle), toe: at(l.foot.toe), heel: at(l.foot.heel), elbow: at(l.elbow), hand: at(l.hand) })) };
+}
 export function getVaulterPose(race) {
   if (!race.plant) {
+    if (race.presentation) return worldStandingPose(race, race.distance - 0.48);
     const raw = getRunnerPose(race.distance / STRIDE_METERS, 0, race.phase === "ready" || race.terminal);
     const point = p => ({ x: race.distance + (p.x - 3) * 0.16, y: 0.08 - p.y * 0.16 });
     const hip = point(raw.hip), shoulder = point(raw.shoulder), head = point(raw.head);
@@ -15,6 +23,7 @@ export function getVaulterPose(race) {
     return { hip, shoulder, head, limbs, grip };
   }
   const hip = { ...race.athlete }, pole = race.phase === "vault", u = race.vaultTime;
+  if (race.phase === "landing") hip.y -= Math.sin(Math.min(1, race.landTime / 0.55) * Math.PI) * 0.15;
   const turn = pole ? ease(u / 0.85) * Math.PI : Math.PI + ease(race.flightTime / 0.18) * Math.PI / 2;
   const point = (x, y) => ({ x: hip.x + x * Math.cos(turn) - y * Math.sin(turn), y: hip.y + x * Math.sin(turn) + y * Math.cos(turn) });
   const shoulder = point(0.08, 0.58), head = point(0.1, 1.04);
@@ -29,7 +38,8 @@ export function getVaulterPose(race) {
     const elbow = mix(shoulder, hand, 0.5); elbow.x -= pole ? 0.17 : 0;
     return { knee, ankle, toe: { x: ankle.x + 0.14, y: ankle.y + 0.02 }, heel: { x: ankle.x - 0.1, y: ankle.y }, hand, elbow };
   });
-  return { hip, shoulder, head, limbs, grip };
+  const pose = { hip, shoulder, head, limbs, grip };
+  return race.presentation ? blendPose(pose, worldStandingPose(race, hip.x + 0.2, 0.68), ease(reactionAge(race) / 0.85)) : pose;
 }
 export function clearancePoints(race) {
   const p = getVaulterPose(race);
@@ -71,6 +81,7 @@ export function poseDots(p) {
 
 export function poleCurve(race) {
   const p = getVaulterPose(race);
+  if (!race.plant && race.presentation) return { start: { x: race.distance - 1.8, y: 0.06 }, control: { x: race.distance + 0.4, y: 0.06 }, end: { x: race.distance + 2.6, y: 0.06 } };
   if (!race.plant) {
     const t = ease((race.distance - 39) / 3), angle = 0.16 * (1 - t) + Math.atan2(-p.grip.y, 45 - p.grip.x) * t;
     const at = d => ({ x: p.grip.x + Math.cos(angle) * d, y: p.grip.y + Math.sin(angle) * d });

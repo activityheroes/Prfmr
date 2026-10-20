@@ -1,6 +1,8 @@
 import { LongJumpRace, LONG_JUMP_COURSE, TAKEOFF_ZONE, JUMP } from "./engine.mjs";
 import { getStats, GEAR, clamp } from "../sprint/engine.mjs";
 import { LongJumpScene } from "./scene.mjs";
+import { createTimingGuide } from "../sprint/timing-guide.mjs";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-long-jump-zones-v1";
@@ -41,7 +43,12 @@ function reset() {
   $("attempt").textContent = String(attempt).padStart(2, "0"); render(); trigger.focus({ preventScroll: true });
 }
 function sync(now = performance.now()) {
-  const dt = Math.max(0, (now - lastTime) / 1000); lastTime = Math.max(lastTime, now); if (!paused) race.advance(dt); events();
+  const dt = Math.max(0, (now - lastTime) / 1000); lastTime = Math.max(lastTime, now);
+  if (!paused) {
+    if (race.presentation && !resultShown) { if (advanceFinish(race, dt)) showResult(); }
+    else race.advance(dt);
+  }
+  events();
 }
 function events() {
   for (const event of race.events.splice(0)) {
@@ -50,10 +57,17 @@ function events() {
     if (event === "line") { clearInput(); tone(1100); announce("Gold takeoff zone. Hold at entry, then release at the white line before the red foul line."); }
     if (event === "takeoff") { clearInput(); tone(1350, 0.2); announce(race.launch.timing.grade + " takeoff. In flight."); }
     if (event === "land") { tone(400, 0.1); announce("Landed in the sand."); }
-    if (event === "finish") { clearInput(); showResult(); }
+    if (event === "finish") {
+      clearInput();
+      const finish = beginFinish(race, best, matchMedia("(prefers-reduced-motion: reduce)").matches);
+      if (finish.personalBest) { best = finish.value; persist(); }
+      tone(finish.success ? 880 : 150, 0.2);
+      announce(finish.success ? "Landed. " + race.result.mark.toFixed(2) + " meters." : race.result.reason + ". No mark.");
+    }
   }
 }
 function activate(kind) {
+  if (race.terminal) { if (!paused && canShowResult(race)) showResult(); return false; }
   if (!scene || paused || race.terminal || input.kind || !race.press()) return false;
   input.kind = kind; events(); render(); return true;
 }
@@ -71,6 +85,7 @@ trigger.addEventListener("pointerup", e => { if (input.id === e.pointerId) relea
 trigger.addEventListener("pointercancel", e => { if (input.id === e.pointerId) release("pointer", true); });
 trigger.addEventListener("lostpointercapture", () => { if (input.kind === "pointer") release("pointer", true); });
 trigger.addEventListener("contextmenu", e => e.preventDefault());
+trigger.addEventListener("click", e => { if (e.detail === 0 && race.terminal) activate("keyboard"); });
 document.addEventListener("keydown", e => {
   if (e.code !== "Space" || e.repeat || e.target.closest("select,input,summary,button:not(#trigger)")) return;
   e.preventDefault(); sync(); activate("keyboard");
@@ -83,14 +98,15 @@ for (const key of Object.keys(GEAR)) {
   $("gear-" + key).addEventListener("change", e => { if (race.phase !== "ready") return; loadout[key] = Number(e.target.value); persist(); reset(); });
 }
 function pause() {
-  if (!race.racing || paused) return; sync(); if (!race.racing) return;
+  if (paused || !race.racing && (!race.presentation || resultShown)) return;
+  sync(); if (!race.racing && (!race.presentation || resultShown)) return;
   race.cancelInput(); clearInput(); paused = true; $("pause-panel").hidden = false; events(); render();
 }
 window.addEventListener("blur", pause); document.addEventListener("visibilitychange", () => { if (document.hidden) pause(); });
 $("resume").addEventListener("click", () => { paused = false; lastTime = performance.now(); $("pause-panel").hidden = true; trigger.focus({ preventScroll: true }); });
 function showResult() {
-  if (resultShown) return; resultShown = true; const r = race.result, old = best;
-  const improved = !r.foul && (best === null || r.mark > best); if (improved) { best = r.mark; persist(); }
+  if (resultShown) return; resultShown = true; const r = race.result, old = race.presentation ? race.presentation.previousBest : best;
+  const improved = race.presentation?.personalBest ?? (!r.foul && (best === null || r.mark > best)); if (improved) { best = r.mark; persist(); }
   $("result-tag").textContent = r.foul ? "NO MARK" : improved ? "PERSONAL BEST" : "OFFICIAL MARK";
   $("result-title").textContent = r.foul ? "Foul" : "Long jump";
   $("result-mark").textContent = r.foul ? "FOUL" : r.mark.toFixed(2); $("result-unit").hidden = r.foul;
@@ -106,6 +122,7 @@ function showResult() {
   announce(r.foul ? r.reason + ". No mark." : "Jump distance " + r.mark.toFixed(2) + " meters.");
   tone(r.foul ? 150 : 880, 0.25); dialog.showModal();
 }
+const timingGuide = createTimingGuide({ trigger, tone, finishZone: TAKEOFF_ZONE, holdKey: "takeoffStart" });
 function render() {
   if (!race) return; scene?.render(race);
   const p = race.phase, flying = !!race.launch, takeoff = p === "line", cue = race.cue, z = race.nextZone;
@@ -143,6 +160,8 @@ function render() {
   $("feedback").style.color = race.result?.foul ? "#ff7f86" : takeoff || flying ? "#ffd473" : colors[grade] ?? "#65c9ff";
   $("feedback").textContent = race.terminal ? race.result.foul ? "FOUL / NO MARK" : "VALID JUMP" : flying ? race.landing ? "LANDING / " + race.landing.mark.toFixed(2) + " M" : race.launch.timing.grade.toUpperCase() + " TAKEOFF"
     : takeoff ? race.holding ? "TAKEOFF HOLD ACTIVE" : "GOLD TAKEOFF ZONE" : p === "ready" ? "ON YOUR MARKS" : recent ? feedback + (race.lastAttempt.boost ? " / +" + Math.round(race.lastAttempt.boost * 100) + "%" : "") : race.activeHold ? "ZONE " + z.id + " / HOLD ACTIVE" : "AUTOMATIC RUN-UP";
+  timingGuide(race, paused);
+  renderFinish(race, scene, trigger);
 }
 function fit() { const r = canvas.getBoundingClientRect(); scene?.resize(r.width, r.height); }
 new ResizeObserver(() => { fit(); render(); }).observe(canvas); fit(); reset();

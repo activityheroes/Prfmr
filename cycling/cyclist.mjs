@@ -1,4 +1,5 @@
 import { clamp } from "../sprint/engine.mjs";
+import { blendPose, ease, reactionAge } from "../sprint/finish.mjs";
 
 const TAU = Math.PI * 2;
 export const BIKE = {
@@ -41,7 +42,16 @@ export function getBikePose(cycle) {
 
 // Ported from the motion lab: feet stay on opposed pedals, hands stay on the drops.
 export function drawCyclist(ctx, x, ground, unit, race) {
-  const { cycle, wheelAngle } = getBikeMotion(race.distance), pose = getBikePose(cycle);
+  const { cycle, wheelAngle } = getBikeMotion(race.distance);
+  let pose = getBikePose(cycle);
+  if (race.presentation) {
+    const target = structuredClone(pose), age = reactionAge(race);
+    target.shoulder = { x: 0.3, y: -14.4 }; target.head = { x: 1.5, y: -16.6 };
+    target.limbs[0].elbow = { x: 2.2, y: -15.4 };
+    target.limbs[0].hand = { x: 2.6, y: -17.5 + Math.sin(age * 5) * 0.3 };
+    target.limbs[1].elbow = joint(target.shoulder, target.limbs[1].hand, 2.35, 2.2, -1);
+    pose = blendPose(pose, target, ease(age / 0.6));
+  }
   ctx.save(); ctx.translate(x, ground); ctx.scale(unit, unit);
   const dot = (x, y, color, radius = 0.265) => { ctx.beginPath(); ctx.fillStyle = color; ctx.arc(x, y, radius, 0, TAU); ctx.fill(); };
   const bone = (a, b, color, spacing = 0.7, radius = 0.265) => {

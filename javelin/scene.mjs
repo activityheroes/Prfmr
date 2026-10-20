@@ -2,6 +2,7 @@ import * as THREE from "../sprint/vendor/three.module.min.js";
 import { TrackScene } from "../sprint/track-scene.mjs";
 import { JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs";
 import { THROWER_ART } from "./thrower.mjs";
+import { ease } from "../sprint/finish.mjs";
 
 const environment = {
   create(track) {
@@ -59,9 +60,16 @@ export class JavelinScene extends TrackScene {
   frameCamera(race){
     const flying=!!race?.launch,small=this.width<650;
     const t=flying?Math.min(1,race.flightTime/0.45):0;
-    const x=flying?(race.projectile.x-race.distance)*t+1.8*(1-t):small?1.4:3.2;
-    const y=flying?race.projectile.y*0.55:1.3;
-    const span=Math.max(flying?small?18:28:small?8.8:17.2,this.width/this.height*(flying?12:6.2));
+    let x=flying?(race.projectile.x-race.distance)*t+1.8*(1-t):small?1.4:3.2;
+    let y=flying?race.projectile.y*0.55:1.3;
+    let span=Math.max(flying?small?18:28:small?8.8:17.2,this.width/this.height*(flying?12:6.2));
+    if (race?.presentation && flying) {
+      const p = race.presentation;
+      const back = p.reducedMotion ? Number(p.age >= 3.2) : ease((p.age - 2.2) / 1.0);
+      const tip = race.projectile.x - race.distance;
+      x = tip * (1 - back) + 1.5 * back; y = 0.9 + 0.4 * back;
+      span = Math.max(small ? 11 : 18, this.width / this.height * 6.5) + Math.sin(back * Math.PI) * Math.abs(tip) * 1.1;
+    }
     const h=span/(this.width/this.height)/2;
     this.camera.position.set(x+8,y+10,20);this.camera.lookAt(x,y,0);
     this.camera.left=-span/2;this.camera.right=span/2;this.camera.top=h;this.camera.bottom=-h;this.camera.updateProjectionMatrix();
@@ -70,6 +78,8 @@ export class JavelinScene extends TrackScene {
     this.frameCamera(race);
     this.javelin.visible=!!race.launch;
     this.landing.visible=!!race.result&&!race.result.foul;
+    this.finishFocus = race.presentation && race.launch && race.presentation.age < 3.2
+      ? { x: race.projectile.x - race.distance, y: 0.7 } : { x: -0.3, y: 3.1 };
     if(race.launch){
       this.javelin.position.set(race.projectile.x-race.distance,race.projectile.y+0.02,0);
       this.javelin.rotation.z=race.projectile.angle;
@@ -77,8 +87,13 @@ export class JavelinScene extends TrackScene {
     }
     this.trail.forEach((dot,i)=>{
       const t=race.flightTime-i*0.06;
-      dot.visible=!!race.launch&&t>0&&!race.terminal;
-      if(dot.visible){
+      const impact = race.presentation && race.launch && race.presentation.age < 0.7 && !race.presentation.reducedMotion;
+      dot.visible=!!impact || !!race.launch&&t>0&&!race.terminal;
+      if (impact) {
+        const age = race.presentation.age, angle = i * 2.399;
+        dot.position.set(race.projectile.x - race.distance + Math.cos(angle) * age * 1.8, Math.max(0.06, (1 + i % 4 * 0.3) * age - 3 * age * age), Math.sin(angle) * age * 1.2);
+        dot.material.opacity = (1 - age / 0.7) * 0.8;
+      } else if(dot.visible){
         dot.position.set(race.launch.x+race.launch.vx*t-race.distance,Math.max(0.05,race.launch.height+race.launch.vy*t-9.81*t*t/2),0);
         dot.material.opacity=(1-i/this.trail.length)*0.28;
       }

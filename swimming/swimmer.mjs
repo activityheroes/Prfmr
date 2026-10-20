@@ -1,4 +1,5 @@
 import { clamp } from "../sprint/engine.mjs";
+import { blendPose, reactionAge } from "../sprint/finish.mjs";
 
 const TAU = Math.PI * 2;
 const wrap = n => ((n % 1) + 1) % 1;
@@ -41,7 +42,19 @@ export function getSwimPose(cycle, finish = 0) {
 export function drawSwimmer(ctx, x, waterY, unit, race) {
   const cycle = getSwimCycle(race.distance);
   const finish = clamp(race.distance - 49, 0, 1);
-  const pose = getSwimPose(cycle, finish);
+  let pose = getSwimPose(cycle, finish);
+  if (race.presentation) {
+    const age = reactionAge(race), target = structuredClone(pose);
+    target.hip = { x: 3.7, y: 3.6 }; target.shoulder = { x: 4.6, y: -0.15 };
+    target.head = { x: 5, y: -2.15, angle: 0 };
+    target.arms[0].elbow = { x: 5.6, y: 0.35 }; target.arms[0].hand = { x: SWIM.reach, y: 0.12 };
+    target.arms[1].elbow = { x: 2.5, y: -1.1 }; target.arms[1].hand = { x: 2.9, y: -3.2 + Math.sin(age * 5) * 0.25 };
+    target.legs.forEach((leg, i) => {
+      leg.knee = { x: 2.4 + i * 0.65, y: 5.25 }; leg.ankle = { x: 3.2 + i * 0.5, y: 7.45 };
+      leg.toe = { x: 4 + i * 0.5, y: 7.65 };
+    });
+    pose = blendPose(pose, target, ease(age / 0.8));
+  }
   ctx.save(); ctx.translate(x, waterY); ctx.scale(unit, unit);
   const dot = (x, y, color, radius = 0.265) => {
     ctx.beginPath(); ctx.fillStyle = color; ctx.arc(x, y, radius, 0, TAU); ctx.fill();

@@ -23,16 +23,16 @@ export class PoleVaultRace extends RhythmRace {
     this.barHitAt = null; this.barPassed = false; this.clearanceMargin = null;
   }
   get racing() { return super.racing || ["vault", "flight", "landing"].includes(this.phase); }
+  get finishZone() { return PLANT_ZONE; }
   get cue() {
     if (this.phase !== "line") return super.cue;
-    return this.holding ? this.distance >= PLANT_ZONE.end - PLANT_ZONE.perfectEdge * this.stats.timingTolerance ? "release" : "hold"
-      : this.distance >= PLANT_ZONE.start - PLANT_ZONE.perfectEdge * this.stats.timingTolerance ? "press" : "run";
+    return this.zoneCue(PLANT_ZONE, this.plantStart);
   }
   press() {
     if (["vault", "flight", "landing"].includes(this.phase)) return false;
     if (this.phase !== "line") return super.press();
     if (this.holding) return false;
-    this.holding = true; this.plantStart = { distance: this.distance, time: this.time }; return true;
+    this.holding = true; this.plantStart = { distance: this.distance, time: this.time, timing: this.timingWindow(PLANT_ZONE) }; return true;
   }
   release() {
     if (this.phase === "line" && this.holding && this.plantStart) this.plantPole();
@@ -40,9 +40,10 @@ export class PoleVaultRace extends RhythmRace {
   }
   cancelInput() { this.plantStart = null; super.cancelInput(); }
   plantPole() {
-    const timing = scoreZone(PLANT_ZONE, this.plantStart.distance, this.distance, this.stats.timingTolerance);
+    const window = this.plantStart.timing;
+    const timing = scoreZone({ ...PLANT_ZONE, ...window }, this.plantStart.distance, this.distance);
     this.holding = false;
-    if (timing.entry <= 0 || timing.hold < 0.25 || Math.abs(timing.releaseError) > PLANT_ZONE.edgeWindow * this.stats.timingTolerance) {
+    if (timing.entry <= 0 || timing.hold < 0.25 || Math.abs(timing.releaseError) > window.edgeWindow) {
       this.finishAttempt("Missed plant"); return;
     }
     const quality = 0.65 + timing.score / 100 * 0.35;

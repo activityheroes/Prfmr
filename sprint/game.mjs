@@ -4,6 +4,8 @@ import { CyclingRace, CYCLING_COURSE } from "../cycling/engine.mjs";
 import { CYCLIST_ART } from "../cycling/cyclist.mjs";
 import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs";
 import { SWIMMER_ART } from "../swimming/swimmer.mjs";
+import { createTimingGuide } from "./timing-guide.mjs";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs";
 
 const $ = id => document.getElementById(id);
 const sports = {
@@ -11,13 +13,15 @@ const sports = {
   cycling: { course: CYCLING_COURSE, Race: CyclingRace, athlete: CYCLIST_ART, noun: "cyclist", event: "RIDE", action: "RIDE", status: "RIDING", finish: "FINISH", storageKey: "dot-cycling-zones-v1" },
   swimming: { course: SWIMMING_COURSE, Race: SwimmingRace, athlete: SWIMMER_ART, noun: "swimmer", event: "SWIM", action: "SWIM", status: "SWIMMING", finish: "THE WALL", storageKey: "dot-swimming-zones-v1" }
 };
-const sport = sports[document.body.dataset.sport] ?? sports.sprint;
+const sport = document.body.dataset.sport === "hurdles"
+  ? (await import("../hurdles/event.mjs")).default
+  : sports[document.body.dataset.sport] ?? sports.sprint;
 const { course, Race, storageKey } = sport;
 const speedUnit = course.id === "cycling" ? "km/h" : "m/s";
 const displaySpeed = speed => (speed * (course.id === "cycling" ? 3.6 : 1)).toFixed(1);
 const canvas = $("track"), trigger = $("trigger"), dialog = $("result-dialog");
 let scene;
-try { scene = new TrackScene(canvas, { course, athlete: sport.athlete }); }
+try { scene = new (sport.Scene ?? TrackScene)(canvas, { course, athlete: sport.athlete }); }
 catch (error) { $("scene-error").hidden = false; console.error("3D track could not start", error); }
 const input = { kind: null, id: null, y: 0, originY: 0 };
 const colors = { Perfect: "#d9fbff", Great: "#81f6b6", Good: "#ffd473", Early: "#e8aa62", Late: "#ff7f86", Miss: "#9eabb0" };
@@ -54,9 +58,13 @@ const audio = {
   }
 };
 function announce(text) { $("announcer").textContent = text; }
+const timingGuide = createTimingGuide({ trigger, tone: (frequency, duration) => audio.tone(frequency, duration) });
 function sync(now = performance.now()) {
   const dt = Math.max(0, (now - lastTime) / 1000); lastTime = Math.max(lastTime, now);
-  if (!paused) race.advance(dt);
+  if (!paused) {
+    if (race.presentation && !resultShown) { if (advanceFinish(race, dt)) showResult(); }
+    else race.advance(dt);
+  }
   handleEvents();
 }
 function clearInput() {
@@ -92,12 +100,20 @@ function handleEvents() {
     if (event === "line") {
       input.originY = input.y; audio.tone(1200, 0.08);
       if (!course.finishMove) { race.release(); clearInput(); }
-      announce(course.finishMove ? "Finish line. Tap or swipe up to dip." : "Final meters. " + (course.id === "swimming" ? "Reach for the wall." : "Keep riding through the line."));
+      announce(course.finishMove ? "Finish line. Tap or swipe up to dip." : "Final meters. " + (course.id === "swimming" ? "Reach for the wall." : "Keep going through the line."));
     }
-    if (event === "finish") { clearInput(); showResult(); }
+    if (event.type === "hurdle-hit") { audio.tone(150, 0.15); announce("Hurdle " + event.id + " clipped. Momentum lost."); }
+    if (event.type === "hurdle-clear") { audio.tone(1040, 0.06); announce("Hurdle " + event.id + " cleared."); }
+    if (event === "finish") {
+      clearInput();
+      const finish = beginFinish(race, best, matchMedia("(prefers-reduced-motion: reduce)").matches);
+      if (finish.personalBest) { best = finish.value; persist(); updateStats(); }
+      audio.tone(880, 0.2); announce("Finished in " + race.result.time.toFixed(3) + " seconds. " + (finish.personalBest ? "Personal best!" : "Well done!"));
+    }
   }
 }
 function activate(kind) {
+  if (race.terminal) { if (!paused && canShowResult(race)) showResult(); return false; }
   if (!scene || paused || race.terminal || input.kind) return false;
   if (!race.press()) return false;
   input.kind = kind;
@@ -134,6 +150,7 @@ trigger.addEventListener("pointerup", event => {
 trigger.addEventListener("pointercancel", event => { if (event.pointerId === input.id) release("pointer", true); });
 trigger.addEventListener("lostpointercapture", () => { if (input.kind === "pointer") release("pointer", true); });
 trigger.addEventListener("contextmenu", event => event.preventDefault());
+trigger.addEventListener("click", event => { if (event.detail === 0 && race.terminal) activate("keyboard"); });
 document.addEventListener("keydown", event => {
   if (event.code !== "Space" || event.repeat || event.target.closest("select,input,summary,button:not(#trigger)")) return;
   event.preventDefault(); sync(); activate("keyboard");
@@ -152,8 +169,8 @@ for (const key of Object.keys(GEAR)) {
   });
 }
 function pause() {
-  if (!race.racing || paused) return;
-  sync(); if (!race.racing) return;
+  if (paused || !race.racing && (!race.presentation || resultShown)) return;
+  sync(); if (!race.racing && (!race.presentation || resultShown)) return;
   race.cancelInput(); clearInput(); paused = true;
   $("pause-panel").hidden = false; handleEvents(); render();
 }
@@ -165,13 +182,13 @@ $("resume").addEventListener("click", () => {
 function showResult() {
   if (resultShown) return;
   resultShown = true;
-  const result = race.result, oldBest = best;
+  const result = race.result, oldBest = race.presentation ? race.presentation.previousBest : best;
   $("result-title").textContent = "Finish"; $("result-time").textContent = result.time.toFixed(3);
   $("result-tag").textContent = "OFFICIAL RESULT";
-  if (best === null || result.time < best) {
+  if (race.presentation?.personalBest ?? (best === null || result.time < best)) {
     best = result.time; persist(); updateStats(); $("result-tag").textContent = "PERSONAL BEST";
   }
-  $("result-detail").textContent = oldBest === null ? "Your first six-zone " + sport.event.toLowerCase() + "."
+  $("result-detail").textContent = oldBest === null ? "Your first " + course.zones.length + "-zone " + sport.event.toLowerCase() + "."
     : result.time <= oldBest ? (oldBest - result.time).toFixed(3) + " s faster than your previous best."
       : (result.time - oldBest).toFixed(3) + " s from your personal best.";
   $("result-stats").replaceChildren();
@@ -181,7 +198,8 @@ function showResult() {
     ["Early / late / missed", result.counts.Early + " / " + result.counts.Late + " / " + result.counts.Miss],
     ["Best zone streak", String(result.bestCombo)],
     ["Peak speed", displaySpeed(result.peakSpeed) + " " + speedUnit],
-    ...(course.finishMove ? [["Finish dip", result.dip]] : [])
+    ...(course.finishMove ? [["Finish dip", result.dip]] : []),
+    ...(sport.resultStats?.(result) ?? [])
   ]) {
     const div = document.createElement("div"), dt = document.createElement("dt"), dd = document.createElement("dd");
     dt.textContent = name; dd.textContent = value; div.append(dt, dd); $("result-stats").append(div);
@@ -209,7 +227,7 @@ function render() {
   $("distance").textContent = (race.terminal ? course.distance : Math.min(course.distance, race.distance)).toFixed(1) + " M";
   $("progress").style.width = (race.terminal ? 100 : clamp(race.distance / course.distance * 100, 0, 100)) + "%";
   document.querySelector(".timeline").setAttribute("aria-valuenow", String(Math.round(race.terminal ? course.distance : race.distance)));
-  $("zone-count").textContent = "ZONES " + race.attempts + " / 6";
+  $("zone-count").textContent = "ZONES " + race.attempts + " / " + course.zones.length;
   $("meet-label").textContent = race.combo ? "STREAK " + race.combo : "RHYTHM " + sport.event;
   zoneMarkers.forEach((marker, i) => { marker.style.background = colors[race.zones[i].result?.grade] ?? "#65c9ff"; });
   $("gear").disabled = phase !== "ready";
@@ -221,7 +239,7 @@ function render() {
   $("trigger-top").textContent = phase === "ready" ? "READY" : phase === "line" ? "THE LINE" : race.terminal ? "FINISHED"
     : ({ release: "RELEASE", hold: "HOLD", press: "PRESS", lift: "LET GO", run: sport.status })[cue];
   $("trigger-bottom").textContent = phase === "ready" ? course.distance + " METERS" : phase === "line" ? course.finishMove ? "TAP / SWIPE UP" : "FINAL METERS"
-    : race.terminal ? "RACE COMPLETE" : zone ? "ZONE " + zone.id + " / 6" : "HOME STRAIGHT";
+    : race.terminal ? "RACE COMPLETE" : zone ? "ZONE " + zone.id + " / " + course.zones.length : "HOME STRAIGHT";
   trigger.setAttribute("aria-label", phase === "ready" ? "Start race" : phase === "line" ? course.finishMove ? "Tap or swipe up to dip" : sport.status.toLowerCase() + " to the finish" : "Press on zone entry, hold through the blue zone, and release on exit. Space also controls the race.");
   const group = phase === "line" || race.terminal ? "line" : race.activeHold || cue === "press" ? "zone" : "run";
   document.querySelectorAll(".phases li").forEach(li => li.classList.toggle("active", li.dataset.phase === group));
@@ -239,11 +257,14 @@ function render() {
   $("left-value").innerHTML = zone ? Math.max(0, (race.activeHold ? zone.end : zone.start) - race.distance).toFixed(1) + "<span>M</span>" : "--<span>M</span>";
   $("right-label").textContent = "TIMING SCORE";
   $("right-value").innerHTML = Math.round(race.rhythmScore) + "<span>/ 100</span>";
-  $("phase-note").textContent = phase === "line" ? course.finishMove ? "98.5 M - 100 M / DIP" : course.distance + " M / " + sport.finish : zone?.id === 6 ? "FINAL BOOST" : "6 BOOST ZONES";
+  $("phase-note").textContent = phase === "line" ? course.finishMove ? "98.5 M - 100 M / DIP" : course.distance + " M / " + sport.finish : zone?.id === course.zones.length ? "FINAL BOOST" : course.zones.length + " BOOST ZONES";
   $("feedback").style.color = colors[grade] ?? "#65c9ff";
   $("feedback").textContent = phase === "ready" ? "ON YOUR MARKS" : phase === "line" ? "FINISH LINE" : race.terminal ? "RACE COMPLETE"
     : recent ? race.lastAttempt.canceled ? "ZONE CANCELED" : feedbackText + (race.lastAttempt.boost ? " / +" + Math.round(race.lastAttempt.boost * 100) + "%" : "")
       : race.activeHold ? "ZONE " + zone.id + " / HOLD ACTIVE" : "AUTOMATIC " + sport.action;
+  timingGuide(race, paused);
+  sport.render?.(race, scene);
+  renderFinish(race, scene, trigger);
 }
 new ResizeObserver(() => { fit(); render(); }).observe(canvas);
 fit(); reset();

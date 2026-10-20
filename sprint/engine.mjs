@@ -19,6 +19,14 @@ export const GEAR = {
   kit: { label: "Race kit", options: ["Club kit", "Aero kit", "Endurance kit"] }
 };
 export const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+export const TIMING = { prepare: 0.65, cueLead: 0.12 };
+export function getTimingWindow(zone, speed, tolerance = 1) {
+  const difficulty = zone.id == null ? 0.65 : clamp((zone.id - 1) / 5, 0, 1);
+  return {
+    edgeWindow: Math.max(zone.edgeWindow, speed * (0.24 - difficulty * 0.06)) * tolerance,
+    perfectEdge: Math.max(zone.perfectEdge, speed * (0.07 - difficulty * 0.025)) * tolerance
+  };
+}
 export function getStats(loadout = {}, course = SPRINT_COURSE) {
   const tier = key => clamp(Math.floor(Number(loadout[key]) || 0), 0, 2);
   return {
@@ -31,15 +39,14 @@ export function scoreZone(zone, pressDistance, releaseDistance, tolerance = 1) {
   const edgeWindow = zone.edgeWindow * tolerance, perfectEdge = zone.perfectEdge * tolerance;
   const accuracy = error => 1 - clamp((Math.abs(error) - perfectEdge) / (edgeWindow - perfectEdge), 0, 1);
   const entryError = pressDistance - zone.start, releaseError = releaseDistance - zone.end;
-  // Intersection-over-union rewards covering the zone, not simply holding for a preset duration.
+  // Edge accuracy already penalizes early/late input; hold measures zone coverage only.
   const overlap = Math.max(0, Math.min(releaseDistance, zone.end) - Math.max(pressDistance, zone.start));
-  const union = Math.max(releaseDistance, zone.end) - Math.min(pressDistance, zone.start);
-  const entry = accuracy(entryError), hold = overlap / union, release = accuracy(releaseError);
+  const entry = accuracy(entryError), hold = overlap / (zone.end - zone.start), release = accuracy(releaseError);
   const score = (entry * 0.3 + hold * 0.3 + release * 0.4) * 100;
   let grade;
   if (hold < 0.25 || entry <= 1e-9) grade = "Miss";
-  else if (releaseError > edgeWindow * 0.5) grade = "Late";
-  else if (score >= 92) grade = "Perfect";
+  else if (releaseError > edgeWindow * 0.85) grade = "Late";
+  else if (score >= 92 && entry >= 0.9 && release >= 0.9) grade = "Perfect";
   else if (score >= 80) grade = "Great";
   else if (score >= 65) grade = "Good";
   else grade = releaseError < -perfectEdge ? "Early" : releaseError > perfectEdge ? "Late" : "Miss";
@@ -68,10 +75,20 @@ export class RhythmRace {
   get nextZone() { return this.activeHold ?? this.zones.find(z => z.status === "pending") ?? null; }
   get cue() {
     if (this.phase !== "sprint") return this.phase;
-    if (this.activeHold) return this.distance >= this.activeHold.end - this.activeHold.perfectEdge * this.stats.timingTolerance ? "release" : "hold";
+    return this.zoneCue(this.nextZone, this.activeHold?.attempt);
+  }
+  timingWindow(zone, attempt = zone?.attempt) {
+    return attempt?.timing ?? getTimingWindow(zone, Math.max(this.stats.baseSpeed, this.speed), this.stats.timingTolerance);
+  }
+  zoneCue(zone, attempt = null) {
+    if (!zone) return this.holding ? "lift" : "run";
+    const speed = Math.max(this.stats.baseSpeed, this.speed), window = this.timingWindow(zone, attempt);
+    const lead = Math.min(speed * TIMING.cueLead, window.edgeWindow * 0.75);
+    const releaseLead = Math.min(speed * (zone.releaseLead ?? TIMING.cueLead), window.edgeWindow * 0.95);
+    if (attempt && this.holding) return this.distance >= zone.end - releaseLead ? "release" : "hold";
     if (this.holding) return "lift";
-    const zone = this.nextZone;
-    if (zone && this.distance >= zone.start - zone.perfectEdge * this.stats.timingTolerance && this.distance <= zone.end) return "press";
+    if (this.distance >= zone.start - lead && this.distance <= Math.min(zone.end, zone.start + window.edgeWindow)) return "press";
+    if (this.distance < zone.start && zone.start - this.distance <= speed * TIMING.prepare) return "prepare";
     return "run";
   }
   leanAt(time) {
@@ -90,8 +107,9 @@ export class RhythmRace {
     if (this.phase === "line") return this.dip();
     this.holding = true;
     const zone = this.nextZone;
-    if (zone && this.distance >= zone.start - zone.edgeWindow * this.stats.timingTolerance && this.distance <= zone.end) {
-      zone.status = "holding"; zone.attempt = { distance: this.distance, time: this.time };
+    const timing = zone && this.timingWindow(zone);
+    if (zone && this.distance >= zone.start - timing.edgeWindow && this.distance <= Math.min(zone.end, zone.start + timing.edgeWindow)) {
+      zone.status = "holding"; zone.attempt = { distance: this.distance, time: this.time, timing };
       this.activeHold = zone; this.events.push("hold");
     } else { this.offZoneAt = this.time; this.events.push("off-zone"); }
     return true;
@@ -106,7 +124,7 @@ export class RhythmRace {
   }
   resolveZone(zone, forcedGrade = null, canceled = false) {
     if (zone.status === "done") return;
-    const metrics = zone.attempt ? scoreZone(zone, zone.attempt.distance, this.distance, this.stats.timingTolerance)
+    const metrics = zone.attempt ? scoreZone({ ...zone, ...this.timingWindow(zone) }, zone.attempt.distance, this.distance)
       : { grade: "Miss", score: 0, entry: 0, hold: 0, release: 0, entryError: null, releaseError: null };
     if (forcedGrade) metrics.grade = forcedGrade;
     if (canceled) metrics.score = metrics.entry = metrics.hold = metrics.release = 0;
@@ -161,11 +179,12 @@ export class RhythmRace {
     const previousDistance = this.distance;
     this.distance += (previousSpeed + this.speed) * 0.5 * dt;
     for (const zone of this.zones) {
-      if (zone.status !== "done" && this.distance > zone.end + zone.edgeWindow * this.stats.timingTolerance) {
+      if (zone.status !== "done" && this.distance > zone.end + this.timingWindow(zone).edgeWindow) {
         this.resolveZone(zone, zone.attempt ? "Late" : "Miss");
       }
     }
-    if (this.phase === "sprint" && this.distance >= this.course.finishAt) { this.phase = "line"; this.events.push("line"); }
+    const preparingAction = this.finishZone && !this.nextZone && this.distance >= this.finishZone.start - Math.max(this.speed, this.stats.baseSpeed) * TIMING.prepare;
+    if (this.phase === "sprint" && (this.distance >= this.course.finishAt || preparingAction)) { this.phase = "line"; this.events.push("line"); }
     const beforeFront = previousDistance + this.leanAt(beforeTime) * DIP.reach;
     const afterFront = this.distance + this.dipAmount * DIP.reach;
     if (afterFront >= this.course.distance) {

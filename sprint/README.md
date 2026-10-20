@@ -21,24 +21,26 @@ At 98.5m the button becomes DIP. Tap, or swipe upward during an existing hold, t
 
 ## Timing Score
 
-Entry and release accuracy compare the player's input position against the actual zone boundaries. Hold accuracy is the overlap of the held track interval with the zone divided by their union: both uncovered distance and holding outside the strip lower the score. This spatial measurement remains valid as momentum changes the traversal duration.
+Entry and release accuracy compare the player's input position against the actual zone boundaries. Hold accuracy is the fraction of the zone covered while holding. Early and late input are already penalized by the two edge scores, so holding slightly beyond a boundary no longer incurs a second hold penalty. Very short holds, continuous holding from the start, cancellations and missed zones still fail.
 
 ```
 Timing score = entry accuracy * 30 + hold accuracy * 30 + release accuracy * 40
 ```
 
-Normal zones allow a 0.25m perfect edge margin, falling linearly to zero edge accuracy at 1.6m of error. The final zone uses 0.13m and 0.9m respectively. The visible blue surface is smooth; scoring distinguishes entry, covered interval, and exit internally.
+Timing windows now scale with approach speed. The first blue zone has a minimum edge allowance of 240ms and full edge accuracy within 70ms; those floors gradually tighten to 180ms and 45ms on the final zone. Existing distance allowances remain minimums. Gear widens both bands. Each attempt freezes its windows on press, so changing speed cannot retroactively change a grade. Perfect additionally requires at least 90% accuracy at both boundaries; hold coverage still matters.
+
+GET READY appears 650ms ahead. PRESS and RELEASE cues lead the boundary by 120ms, with short optional tones respecting the Sound toggle. A fixed guide near the button displays the athlete's approach to stationary entry/exit bands; its marker advances automatically, not in response to charging input. The same full-accuracy bands are projected on the track. Long jump's final release gets 200ms of warning because the physical foul board has no late grace. The track boundaries and all speed rewards are unchanged.
 
 | Outcome | Score / condition | Speed multiplier | Momentum change |
 | --- | --- | --- | --- |
-| Perfect | At least 92 | +15% | +0.8 m/s |
+| Perfect | At least 92, with both edge accuracies at least 90% | +15% | +0.8 m/s |
 | Great | At least 80 | +10% | +0.5 m/s |
 | Good | At least 65 | +6% | +0.25 m/s |
 | Early | Below 65 with an early release | +2% | None |
 | Late | Excessive exit error or timed-out hold | No boost; slight slowdown | -0.4 m/s |
 | Miss | No input, invalid entry, less than 25% overlap, or cancellation | No boost | -0.4 m/s |
 
-Late release beyond half the edge-error window overrides successful score tiers. A hold extending past the full window times out once and requires release before another press. Canceling a touch, dragging off the button, or pausing invalidates the active attempt. Cancellation scores zero rather than granting a valid release.
+Late release beyond 85% of the edge-error window overrides successful score tiers. A hold extending past the full window times out once and requires release before another press. Canceling a touch, dragging off the button, or pausing invalidates the active attempt. Cancellation scores zero rather than granting a valid release.
 
 ## Momentum And Physics
 
@@ -68,5 +70,5 @@ Restart resets the race. Switching tabs or losing focus pauses it; resume explic
 - `index.html`, `sprint.css`: responsive interface.
 
 ```sh
-node --test sprint/engine.test.mjs
+node --test sprint/*.test.mjs
 ```

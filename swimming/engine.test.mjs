@@ -58,7 +58,7 @@ test("holding from the start and holding past the exit cannot farm boosts", () =
 });
 test("early, late and canceled swim attempts never award a perfect boost", () => {
   const early = started(); play(early, 0, 0, -0.375); assert.equal(early.lastAttempt.grade, "Early"); close(early.lastAttempt.boost, 0.02);
-  const late = started(); play(late, 0, 0, 0.27); assert.equal(late.lastAttempt.grade, "Late");
+  const late = started(); play(late, 0, 0, 0.43); assert.equal(late.lastAttempt.grade, "Late");
   const canceled = started(); to(canceled, 7.5); canceled.press(); to(canceled, 8.75); canceled.cancelInput(); canceled.release();
   assert.equal(canceled.lastAttempt.grade, "Miss"); assert.equal(canceled.lastAttempt.score, 0); assert.equal(canceled.attempts, 1);
 });

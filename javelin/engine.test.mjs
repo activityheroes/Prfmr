@@ -31,7 +31,7 @@ test("release timing changes angle, power and final distance",()=>{
   const perfect=finish(launch()),early=finish(launch(true,40,41)),late=finish(launch(true,40,44.4));
   assert.ok(early.result.angle<perfect.result.angle);assert.ok(late.result.angle>perfect.result.angle);
   assert.ok(perfect.result.mark>early.result.mark);assert.ok(perfect.result.mark>late.result.mark);
-  assert.equal(late.result.releaseGrade,"Late");
+  assert.equal(late.result.releaseGrade,"Great");
 });
 test("a held or missed throw crossing the foul line records no mark",()=>{
   const r=started();to(r,40);r.press();to(r,45);assert.equal(r.result.foul,true);assert.equal(r.result.mark,null);assert.equal(r.launch,null);
