@@ -1,0 +1,5 @@
+body[data-sport=speed-skating] .track-top{color:#25464a;text-shadow:0 1px 0 #ffffff77}
+body[data-sport=speed-skating] .lane b{color:#25464a}
+body[data-sport=speed-skating] .race-call{background:#163a40e6;padding:3px 5px;border-radius:3px;min-height:26px}
+body[data-sport=speed-skating] .race-call:empty{display:none}
+@media(max-width:650px){body[data-sport=speed-skating] .track{height:280px}body[data-sport=speed-skating] .race-call{min-height:24px}}

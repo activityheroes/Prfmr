@@ -13,12 +13,14 @@ const sports = {
   cycling: { course: CYCLING_COURSE, Race: CyclingRace, athlete: CYCLIST_ART, noun: "cyclist", event: "RIDE", action: "RIDE", status: "RIDING", finish: "FINISH", storageKey: "dot-cycling-zones-v1" },
   swimming: { course: SWIMMING_COURSE, Race: SwimmingRace, athlete: SWIMMER_ART, noun: "swimmer", event: "SWIM", action: "SWIM", status: "SWIMMING", finish: "THE WALL", storageKey: "dot-swimming-zones-v1" }
 };
-const sport = document.body.dataset.sport === "hurdles"
-  ? (await import("../hurdles/event.mjs")).default
+const eventModules = { hurdles: "../hurdles/event.mjs", "speed-skating": "../speed-skating/event.mjs" };
+const sport = eventModules[document.body.dataset.sport]
+  ? (await import(eventModules[document.body.dataset.sport])).default
   : sports[document.body.dataset.sport] ?? sports.sprint;
 const { course, Race, storageKey } = sport;
-const speedUnit = course.id === "cycling" ? "km/h" : "m/s";
-const displaySpeed = speed => (speed * (course.id === "cycling" ? 3.6 : 1)).toFixed(1);
+const speedFactor = sport.speedFactor ?? (course.id === "cycling" ? 3.6 : 1);
+const speedUnit = speedFactor === 3.6 ? "km/h" : "m/s";
+const displaySpeed = speed => (speed * speedFactor).toFixed(1);
 const canvas = $("track"), trigger = $("trigger"), dialog = $("result-dialog");
 let scene;
 try { scene = new (sport.Scene ?? TrackScene)(canvas, { course, athlete: sport.athlete }); }
