@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { CyclingRace, CYCLING_COURSE } from "./engine.mjs";
 import { SprintRace, getStats, scoreZone } from "../sprint/engine.mjs";
 import { BIKE, METERS_PER_UNIT, getBikeMotion, getBikePose, drawCyclist, CYCLIST_ART } from "./cyclist.mjs";
+import { VELODROME, ovalPoint, bankAngle, trackPoint, bikeFrame } from "./velodrome.mjs";
+import { DotBike } from "./dot-bike.mjs";
 
 const close = (a, b, tolerance = 1e-8) => assert.ok(Math.abs(a - b) <= tolerance, `${a} != ${b}`);
 function started(gear = {}) { const r = new CyclingRace(gear); r.press(); r.release(); return r; }
@@ -110,4 +112,69 @@ test("all dot artwork fits inside the texture across the complete pedal cycle", 
     }
   };
   for (let i = 0; i < 40; i++) drawCyclist(ctx, art.x, art.ground, art.unit, { distance: i * 0.3 });
+});
+
+test("the closed 250m velodrome has continuous position and tangent through both bends", () => {
+  for (let s = -20; s <= 270; s += 0.25) {
+    const a = ovalPoint(s), b = ovalPoint(s + 250), next = ovalPoint(s + 0.001);
+    close(a.x, b.x, 1e-10); close(a.z, b.z, 1e-10);
+    close(Math.cos(a.heading), Math.cos(b.heading)); close(Math.sin(a.heading), Math.sin(b.heading));
+    close(Math.hypot(next.x - a.x, next.z - a.z), 0.001, 1e-8);
+    assert.ok(Math.cos(next.heading - a.heading) > 0.999999);
+  }
+  close(2 * VELODROME.straight + 2 * Math.PI * VELODROME.radius, VELODROME.length);
+});
+test("banking transitions smoothly between the straights and steeper bends", () => {
+  close(bankAngle(0), VELODROME.bendBank * Math.PI / 180);
+  close(bankAngle(200), VELODROME.straightBank * Math.PI / 180);
+  for (let s = -20; s <= 270; s += 0.1) {
+    const angle = bankAngle(s), inner = trackPoint(s, VELODROME.inner), outer = trackPoint(s, VELODROME.outer);
+    assert.ok(angle >= 12 * Math.PI / 180 && angle <= 42 * Math.PI / 180);
+    close(angle, bankAngle(s + 250)); assert.ok(Math.abs(bankAngle(s + 0.001) - angle) < 0.0001);
+    close(inner.y, 0); close(trackPoint(s, VELODROME.apron).y, 0); assert.ok(outer.y > inner.y);
+  }
+});
+test("both tires stay on the banked track and the rider frame stays orthonormal", () => {
+  const frontOffset = BIKE.wheelRadius * METERS_PER_UNIT, wheelbase = (BIKE.front.x - BIKE.rear.x) * METERS_PER_UNIT;
+  for (let s = 0; s <= 210; s += 0.1) {
+    const f = bikeFrame(s);
+    for (const axis of [f.forward, f.up, f.side]) close(axis.length(), 1);
+    close(f.forward.dot(f.up), 0); close(f.up.dot(f.side), 0); close(f.side.dot(f.forward), 0);
+    assert.ok(f.stretch > 0.995 && f.stretch < 1.005);
+    for (const [offset, contact] of [[frontOffset, f.front], [frontOffset + wheelbase, f.rear]]) {
+      const tire = f.origin.clone().addScaledVector(f.forward, -offset * f.stretch).addScaledVector(f.up, -0.04);
+      close(tire.distanceTo(contact), 0); assert.ok([tire.x, tire.y, tire.z].every(Number.isFinite));
+    }
+  }
+});
+test("the 200m timing line is on the home straight and the boost distances stay unchanged", () => {
+  close(ovalPoint(200).heading, 0); close(ovalPoint(197).heading, 0);
+  assert.deepEqual(CYCLING_COURSE.zones.map(z => z.start), [30, 60, 90, 120, 150, 180]);
+  const r = completed(); close(r.distance, 200); assert.equal(r.counts.Perfect, 6);
+});
+
+test("overview rider scales keep both wheels planted through the entire lap", () => {
+  for (const scale of [1.8, 2.8]) for (let s = 0; s <= 250; s += 0.5) {
+    const f = bikeFrame(s, scale), frontOffset = BIKE.wheelRadius * METERS_PER_UNIT * scale;
+    const wheelbase = (BIKE.front.x - BIKE.rear.x) * METERS_PER_UNIT * scale;
+    for (const [offset, contact] of [[frontOffset, f.front], [frontOffset + wheelbase, f.rear]]) {
+      const tire = f.origin.clone().addScaledVector(f.forward, -offset * f.stretch).addScaledVector(f.up, -0.04);
+      close(tire.distanceTo(contact), 0);
+    }
+  }
+});
+
+test("the volumetric dot cyclist has finite animated joints and fits one instanced draw", () => {
+  const bike = new DotBike(); let previous;
+  for (let s = 0; s < 20; s += 0.2) {
+    bike.update({ distance: s });
+    assert.ok(bike.count > 300 && bike.count < bike.instanceMatrix.count);
+    const data = bike.instanceMatrix.array.slice(0, bike.count * 16);
+    assert.ok(data.every(Number.isFinite));
+    const depths = Array.from({ length: bike.count }, (_, i) => data[i * 16 + 14]);
+    assert.ok(Math.max(...depths) > 0.1 && Math.min(...depths) < -0.1);
+    if (previous) assert.notDeepEqual(data, previous);
+    previous = data;
+  }
+  bike.geometry.dispose(); bike.material.dispose(); bike.dispose();
 });

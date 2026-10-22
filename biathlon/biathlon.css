@@ -1,0 +1,16 @@
+@import url("../sprint/sprint.css");
+.track-top{color:#28504d}.lane b{color:#28504d}.race-call{background:#f0f5f1e6;color:#244b47!important;border-radius:3px;padding:3px 5px;width:max-content;max-width:154px;font-size:12px}
+.race-call:empty{display:none}#range-title{background:#f0f5f1e6;padding:3px 6px;border-radius:2px}
+.range-marker{position:absolute;top:-5px;left:50%;height:14px;width:5px;background:var(--gold);border:1px solid var(--bg)}
+.range-panel{position:absolute;top:56px;right:20px;width:164px;display:flex;align-items:center;flex-direction:column;gap:10px;color:#173e40;font:600 11px ui-monospace,SFMono-Regular,Consolas,monospace;pointer-events:none}
+.range-panel[hidden],.scope[hidden]{display:none}.target-row{display:flex;gap:9px}.target-light{display:block;width:22px;height:22px;border:3px dotted #567a7c;border-radius:50%;background:#143a40}
+.target-light[data-state=active]{border-color:#65c9ff}.target-light[data-state=hit]{border-color:#42775d;background:#b7fa76}.target-light[data-state=miss]{border-color:#ac485a;background:#ff7f86}
+.scope{--radius:.4;position:relative;width:136px;height:136px;border:2px solid #345957;border-radius:50%;background:#14393eeb;box-shadow:0 0 0 5px #eff5efaa}
+.scope .sweet-spot{position:absolute;width:calc(var(--radius)*80%);height:calc(var(--radius)*80%);left:50%;top:50%;transform:translate(-50%,-50%);border:2px dotted #a1f4ff;border-radius:50%;background:#65c9ff44}
+.scope[data-hit=true]{border-color:#d7ffff;box-shadow:0 0 0 5px #9ee9e866}.scope[data-hit=true] .sweet-spot{background:#65c9ff88}
+.sight{position:absolute;width:18px;height:18px;transform:translate(-50%,-50%)}.sight:before,.sight:after{content:"";position:absolute;background:#fff}.sight:before{left:8px;top:0;width:2px;height:18px}.sight:after{left:0;top:8px;width:18px;height:2px}.scope[data-hit=true] .sight:before,.scope[data-hit=true] .sight:after{background:#65e9ff}
+.range-score{min-height:16px;background:#f0f5f1dd;padding:2px 6px;border-radius:2px}.phases [data-phase=shoot].active{color:var(--gold)}
+.trigger[data-mode=shoot]{--accent:var(--gold)}.trigger[data-mode=shoot][data-cue=release]{--accent:#d9fcff}.trigger[data-mode=shoot] .trigger-core strong{white-space:pre-line;font-size:23px}
+body[data-stage=shooting] .timing-track{visibility:hidden}body[data-stage=shooting] .timing-guide{opacity:1;color:var(--gold)}
+@media(max-width:650px){.range-panel{right:12px;width:144px;top:54px;gap:8px}.scope{width:120px;height:120px}.target-row{gap:7px}.target-light{width:20px;height:20px}.trigger[data-mode=shoot] .trigger-core strong{font-size:21px}}
+@media(min-width:651px) and (max-height:800px){.range-panel{top:43px;gap:6px}.scope{width:105px;height:105px}}

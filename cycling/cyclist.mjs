@@ -40,10 +40,8 @@ export function getBikePose(cycle) {
   return { hip, shoulder, head, limbs };
 }
 
-// Ported from the motion lab: feet stay on opposed pedals, hands stay on the drops.
-export function drawCyclist(ctx, x, ground, unit, race) {
-  const { cycle, wheelAngle } = getBikeMotion(race.distance);
-  let pose = getBikePose(cycle);
+export function getCyclistPose(race) {
+  let pose = getBikePose(getBikeMotion(race.distance).cycle);
   if (race.presentation) {
     const target = structuredClone(pose), age = reactionAge(race);
     target.shoulder = { x: 0.3, y: -14.4 }; target.head = { x: 1.5, y: -16.6 };
@@ -52,6 +50,12 @@ export function drawCyclist(ctx, x, ground, unit, race) {
     target.limbs[1].elbow = joint(target.shoulder, target.limbs[1].hand, 2.35, 2.2, -1);
     pose = blendPose(pose, target, ease(age / 0.6));
   }
+  return pose;
+}
+
+// Ported from the motion lab: feet stay on opposed pedals, hands stay on the drops.
+export function drawCyclist(ctx, x, ground, unit, race) {
+  const { wheelAngle } = getBikeMotion(race.distance), pose = getCyclistPose(race);
   ctx.save(); ctx.translate(x, ground); ctx.scale(unit, unit);
   const dot = (x, y, color, radius = 0.265) => { ctx.beginPath(); ctx.fillStyle = color; ctx.arc(x, y, radius, 0, TAU); ctx.fill(); };
   const bone = (a, b, color, spacing = 0.7, radius = 0.265) => {

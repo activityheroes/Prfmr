@@ -39,7 +39,7 @@ export const reactionAge = race => race.presentation
   : 0;
 export function finishTravel(race) {
   const p = race.presentation;
-  if (!p || !["sprint", "cycling", "hurdles", "speed-skating"].includes(race.course.id)) return 0;
+  if (!p || !["sprint", "cycling", "hurdles", "speed-skating", "biathlon"].includes(race.course.id)) return 0;
   const t = Math.min(1, p.age / 1.1);
   return race.speed * 0.4 * 1.1 * (t - t * t / 2);
 }

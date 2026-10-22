@@ -1,6 +1,6 @@
 # Prfmr - Dot Athletics
 
-Ten browser-based athletics games with procedural dot-matrix athletes and press, hold, release timing mechanics. The project uses HTML, CSS, JavaScript, Three.js and Cannon. It has no build step or backend requirement.
+Eleven browser-based athletics games with procedural dot-matrix athletes and press, hold, release timing mechanics. The project uses HTML, CSS, JavaScript, Three.js and Cannon. It has no build step or backend requirement.
 
 ## Play Locally
 
@@ -15,7 +15,7 @@ Open <http://127.0.0.1:8080/>. The root page opens Sprint, and the event navigat
 | Event | Path |
 | --- | --- |
 | 100m sprint | `sprint/` |
-| 200m cycling | `cycling/` |
+| 200m track cycling | `cycling/` |
 | 50m swimming | `swimming/` |
 | Javelin | `javelin/` |
 | Pole vault | `pole-vault/` |
@@ -24,9 +24,12 @@ Open <http://127.0.0.1:8080/>. The root page opens Sprint, and the event navigat
 | 100m hurdles | `hurdles/` |
 | 500m speed skating | `speed-skating/` |
 | Ski jumping | `ski-jumping/` |
+| 400m biathlon | `biathlon/` |
 | Animation motion lab | `dot-matrix-demo.html` |
 
 Use the on-screen control or Space to press, hold and release. Timed zones build momentum; field events add their own takeoff or release. Each event's README describes its mechanics and equipment.
+
+Biathlon adds rolling hills and a five-target shooting stop at 200m. Hold to steady the sight and release inside the cyan circle. Misses add a forgiving two-second penalty, then skiing resumes after the fifth shot.
 
 A WebGL-capable browser is required for the games. Personal bests and equipment are stored in the current browser's localStorage. There is no shared leaderboard, account system or multiplayer server.
 
@@ -43,12 +46,12 @@ The presentation clock is separate from race physics: official times, marks, and
 With a recent Node.js installation:
 
 ```sh
-node --test sprint/*.test.mjs cycling/engine.test.mjs swimming/engine.test.mjs javelin/engine.test.mjs pole-vault/engine.test.mjs long-jump/engine.test.mjs high-jump/engine.test.mjs hurdles/engine.test.mjs speed-skating/engine.test.mjs ski-jumping/engine.test.mjs
+node --test sprint/*.test.mjs cycling/engine.test.mjs swimming/engine.test.mjs javelin/engine.test.mjs pole-vault/engine.test.mjs long-jump/engine.test.mjs high-jump/engine.test.mjs hurdles/engine.test.mjs speed-skating/engine.test.mjs ski-jumping/engine.test.mjs biathlon/engine.test.mjs
 ```
 
 ## Static Hosting
 
-Upload the repository contents to a static host, preserving the folder structure. No build command or environment variables are required. Serve JavaScript modules with a JavaScript MIME type. The games share modules, styles and vendored libraries across directories, so keep all ten event folders together.
+Upload the repository contents to a static host, preserving the folder structure. No build command or environment variables are required. Serve JavaScript modules with a JavaScript MIME type. The games share modules, styles and vendored libraries across directories, so keep all eleven event folders together.
 
 Three.js and its license are in `sprint/vendor/`. Cannon and its license are in `javelin/`. No runtime CDN requests or library installation are needed.
 

@@ -1,7 +1,5 @@
 import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs";
 import { TrackScene } from "./track-scene.mjs";
-import { CyclingRace, CYCLING_COURSE } from "../cycling/engine.mjs";
-import { CYCLIST_ART } from "../cycling/cyclist.mjs";
 import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs";
 import { SWIMMER_ART } from "../swimming/swimmer.mjs";
 import { createTimingGuide } from "./timing-guide.mjs";
@@ -10,10 +8,9 @@ import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finis
 const $ = id => document.getElementById(id);
 const sports = {
   sprint: { course: SPRINT_COURSE, Race: SprintRace, athlete: undefined, noun: "runner", event: "SPRINT", action: "RUN", status: "RUNNING", finish: "DIP", storageKey: "dot-sprint-zones-v4" },
-  cycling: { course: CYCLING_COURSE, Race: CyclingRace, athlete: CYCLIST_ART, noun: "cyclist", event: "RIDE", action: "RIDE", status: "RIDING", finish: "FINISH", storageKey: "dot-cycling-zones-v1" },
   swimming: { course: SWIMMING_COURSE, Race: SwimmingRace, athlete: SWIMMER_ART, noun: "swimmer", event: "SWIM", action: "SWIM", status: "SWIMMING", finish: "THE WALL", storageKey: "dot-swimming-zones-v1" }
 };
-const eventModules = { hurdles: "../hurdles/event.mjs", "speed-skating": "../speed-skating/event.mjs" };
+const eventModules = { cycling: "../cycling/event.mjs?v=track-3", hurdles: "../hurdles/event.mjs", "speed-skating": "../speed-skating/event.mjs", biathlon: "../biathlon/event.mjs?v=2" };
 const sport = eventModules[document.body.dataset.sport]
   ? (await import(eventModules[document.body.dataset.sport])).default
   : sports[document.body.dataset.sport] ?? sports.sprint;
@@ -90,6 +87,7 @@ function updateStats() {
 }
 function handleEvents() {
   for (const event of race.events.splice(0)) {
+    sport.handleEvent?.(event, { clearInput, tone: (frequency, duration) => audio.tone(frequency, duration), announce });
     if (event === "start") {
       audio.unlock(); audio.tone(550); document.querySelector(".equipment").open = false;
       announce("Race started. The " + sport.noun + " moves automatically. Press at each blue zone's entry, hold through it, and release at its exit.");
@@ -265,7 +263,7 @@ function render() {
     : recent ? race.lastAttempt.canceled ? "ZONE CANCELED" : feedbackText + (race.lastAttempt.boost ? " / +" + Math.round(race.lastAttempt.boost * 100) + "%" : "")
       : race.activeHold ? "ZONE " + zone.id + " / HOLD ACTIVE" : "AUTOMATIC " + sport.action;
   timingGuide(race, paused);
-  sport.render?.(race, scene);
+  sport.render?.(race, scene, paused);
   renderFinish(race, scene, trigger);
 }
 new ResizeObserver(() => { fit(); render(); }).observe(canvas);
