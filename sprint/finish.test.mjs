@@ -9,6 +9,7 @@ import { PoleVaultRace } from "../pole-vault/engine.mjs";
 import { HighJumpRace } from "../high-jump/engine.mjs";
 import { HurdlesRace } from "../hurdles/engine.mjs";
 import { SpeedSkatingRace } from "../speed-skating/engine.mjs";
+import { SkiJumpRace } from "../ski-jumping/engine.mjs";
 import { jumperDots as highJumperDots } from "../high-jump/jumper.mjs";
 import { jumperDots } from "../long-jump/jumper.mjs";
 import { vaulterDots } from "../pole-vault/vaulter.mjs";
@@ -34,7 +35,7 @@ function completed(Race, valid = true, height) {
   return race;
 }
 
-for (const Race of [SprintRace, CyclingRace, SwimmingRace, JavelinRace, LongJumpRace, PoleVaultRace, HighJumpRace, HurdlesRace, SpeedSkatingRace]) {
+for (const Race of [SprintRace, CyclingRace, SwimmingRace, JavelinRace, LongJumpRace, PoleVaultRace, HighJumpRace, HurdlesRace, SpeedSkatingRace, SkiJumpRace]) {
   test(`${Race.name}: reaction clock leaves the official result and physical landing unchanged`, () => {
     const race = completed(Race), result = structuredClone(race.result);
     const physical = JSON.stringify([race.time, race.distance, race.athlete, race.projectile, race.landing]);

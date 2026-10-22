@@ -1,0 +1,8 @@
+@import url("../long-jump/jump.css");
+.takeoff-marker{left:89.286%;width:9.286%}
+.track-top,.lane b{color:#25474b;text-shadow:0 1px 1px #ffffff99}
+.race-call{background:#193d42e8;padding:3px 5px;border-radius:3px;min-height:26px}
+.race-call:empty{display:none}
+.clock-block{width:225px}
+@media(max-width:650px){.clock-block{width:140px}.track{height:280px}.race-call{min-height:24px}}
+@media(max-width:360px){.clock-block{width:120px}}

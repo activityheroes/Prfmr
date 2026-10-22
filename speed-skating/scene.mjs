@@ -4,7 +4,7 @@ import { ease, finishTravel } from "../sprint/finish.mjs";
 import { SKATING_COURSE, ovalPoint } from "./course.mjs";
 import { getSkaterPose, skaterDots } from "./skater.mjs";
 
-const ATHLETE_SCALE = 1.25;
+const ATHLETE_SCALE = 1;
 const ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 2.5, feedbackX: 0, shadowStart: -0.5, shadowLength: 1.2, planar: true, draw() {} };
 function ribbon(start, end, width, offset = 0, y = 0.01) {
@@ -64,7 +64,7 @@ export class SkatingScene extends TrackScene {
   frameCamera(distance, lift = 0) {
     const p = ovalPoint(distance), c = Math.cos(p.heading), s = Math.sin(p.heading), ahead = this.width < 650 ? 1.7 : 3;
     this.camera.position.set(c * 8 - s * 14, 8 + lift, s * 8 + c * 14); this.camera.lookAt(c * ahead, 0.8 + lift, s * ahead);
-    const span = Math.max(this.width < 650 ? 7.2 : 13, this.width / this.height * 4.1), half = span / (this.width / this.height) / 2;
+    const span = 1.65 * Math.max(this.width < 650 ? 7.2 : 13, this.width / this.height * 4.1), half = span / (this.width / this.height) / 2;
     this.camera.left = -span / 2; this.camera.right = span / 2; this.camera.top = half; this.camera.bottom = -half; this.camera.updateProjectionMatrix();
   }
   positionCourse(race) {

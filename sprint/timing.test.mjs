@@ -9,8 +9,9 @@ import { LongJumpRace, TAKEOFF_ZONE } from "../long-jump/engine.mjs";
 import { HighJumpRace, TAKEOFF_ZONE as HIGH_TAKEOFF_ZONE } from "../high-jump/engine.mjs";
 import { HurdlesRace } from "../hurdles/engine.mjs";
 import { SpeedSkatingRace } from "../speed-skating/engine.mjs";
+import { SkiJumpRace } from "../ski-jumping/engine.mjs";
 
-const races = [SprintRace, CyclingRace, SwimmingRace, JavelinRace, PoleVaultRace, LongJumpRace, HighJumpRace, HurdlesRace, SpeedSkatingRace];
+const races = [SprintRace, CyclingRace, SwimmingRace, JavelinRace, PoleVaultRace, LongJumpRace, HighJumpRace, HurdlesRace, SpeedSkatingRace, SkiJumpRace];
 const successCount = r => r.counts.Perfect + r.counts.Great + r.counts.Good;
 const close = (a, b, epsilon = 1e-8) => assert.ok(Math.abs(a - b) < epsilon, `${a} != ${b}`);
 function react(Race, delay, gear = {}, finish = false) {

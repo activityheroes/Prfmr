@@ -15,7 +15,7 @@ export function beginFinish(race, previousBest = null, reducedMotion = false) {
   if (race.presentation || !race.terminal || !race.result) return race.presentation;
   const id = race.course.id, result = race.result;
   const success = !result.foul && result.cleared !== false;
-  const field = ["javelin", "long-jump", "pole-vault", "high-jump"].includes(id);
+  const field = ["javelin", "long-jump", "pole-vault", "high-jump", "ski-jumping"].includes(id);
   const value = field ? result.mark : result.time;
   const personalBest = success && (previousBest === null || (field ? value > previousBest : value < previousBest));
   const landedSpear = id === "javelin" && !!race.launch;
@@ -63,10 +63,10 @@ export function renderFinish(race, scene, trigger) {
   const $ = id => document.getElementById(id), id = race.course.id;
   const clearance = ["pole-vault", "high-jump"].includes(id);
   const mark = clearance ? (p.success ? race.result.mark.toFixed(2) + " M CLEARED" : "NO CLEARANCE")
-    : p.success && ["long-jump", "javelin"].includes(id) ? race.result.mark.toFixed(2) + " M"
-      : p.success ? race.result.time.toFixed(3) + " S" : "FOUL";
+    : p.success && ["long-jump", "javelin", "ski-jumping"].includes(id) ? race.result.mark.toFixed(2) + " M"
+      : p.success ? race.result.time.toFixed(3) + " S" : id === "ski-jumping" ? "NO MARK" : "FOUL";
   const watchingLanding = id === "javelin" && race.launch && p.age < 2.2;
-  const message = watchingLanding ? mark : p.personalBest ? "PERSONAL BEST!" : p.success ? clearance ? "BAR CLEARED!" : "WELL DONE!" : clearance ? "NO CLEARANCE" : "FOUL";
+  const message = watchingLanding ? mark : p.personalBest ? "PERSONAL BEST!" : p.success ? clearance ? "BAR CLEARED!" : "WELL DONE!" : clearance ? "NO CLEARANCE" : id === "ski-jumping" ? "NO JUMP" : "FOUL";
   trigger.disabled = !canShowResult(race);
   trigger.dataset.mode = "finish"; trigger.dataset.tier = p.success ? "success" : "failed";
   $("trigger-main").textContent = canShowResult(race) ? "RESULTS" : p.success ? "FINISH" : "NO MARK";
