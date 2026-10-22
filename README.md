@@ -31,6 +31,16 @@ Use the on-screen control or Space to press, hold and release. Timed zones build
 
 Biathlon adds rolling hills and a five-target shooting stop at 200m. Hold to steady the sight and release inside the cyan circle. Misses add a forgiving two-second penalty, then skiing resumes after the fifth shot.
 
+## Boost Modes
+
+- Good, Great and Perfect release bursts add 6%, 10% and 15% speed, up to the active speed limit. The temporary component is held for 1.25 seconds before gradually fading; momentum carries into later zones.
+- Three consecutive successful zones activate cyan Flow, adding 5% of baseline speed to the target pace.
+- Three consecutive Perfects ignite Flame Mode for six seconds. A dot-flame trail, ignition tone, three-segment charge indicator and fuel timer accompany a real acceleration burst. Another three Perfects refill the timer; early, late, missed and canceled zones break the streak and extinguish Flame.
+- Flame adds 20% of baseline speed to target pace. Racing events also gain 20% speed-limit headroom (Flow grants 5%). Technical events keep their original safe approach-speed ceiling so hurdles, takeoff collisions and landing areas remain playable.
+- The boost display reports the actual awarded burst percentage and current pace above baseline, not just the nominal reward. Pauses freeze physics and fuel. The biathlon range suspends fuel consumption. Restart clears all mode state. Reduced motion retains the HUD and a static, sparse dot trail without animated flames.
+
+Cycling now starts rolling at 36 km/h and settles at 54 km/h. Ride view follows the rider from a readable side angle; Track view retains the full banked oval.
+
 A WebGL-capable browser is required for the games. Personal bests and equipment are stored in the current browser's localStorage. There is no shared leaderboard, account system or multiplayer server.
 
 ## Finish Sequences

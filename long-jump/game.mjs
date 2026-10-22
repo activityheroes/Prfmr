@@ -1,8 +1,8 @@
-import { LongJumpRace, LONG_JUMP_COURSE, TAKEOFF_ZONE, JUMP } from "./engine.mjs";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs";
-import { LongJumpScene } from "./scene.mjs";
-import { createTimingGuide } from "../sprint/timing-guide.mjs";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs";
+import { LongJumpRace, LONG_JUMP_COURSE, TAKEOFF_ZONE, JUMP } from "./engine.mjs?v=boost-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=boost-1";
+import { LongJumpScene } from "./scene.mjs?v=boost-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=boost-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=boost-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-long-jump-zones-v1";

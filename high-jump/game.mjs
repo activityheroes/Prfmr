@@ -1,8 +1,8 @@
-import { HighJumpRace, HIGH_JUMP_COURSE, TAKEOFF_ZONE, HIGH_JUMP, normalizeBar } from "./engine.mjs";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs";
-import { HighJumpScene } from "./scene.mjs";
-import { createTimingGuide } from "../sprint/timing-guide.mjs";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs";
+import { HighJumpRace, HIGH_JUMP_COURSE, TAKEOFF_ZONE, HIGH_JUMP, normalizeBar } from "./engine.mjs?v=boost-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=boost-1";
+import { HighJumpScene } from "./scene.mjs?v=boost-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=boost-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=boost-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-high-jump-zones-v1";

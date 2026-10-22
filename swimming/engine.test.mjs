@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { SwimmingRace, SWIMMING_COURSE } from "./engine.mjs";
-import { SprintRace, scoreZone } from "../sprint/engine.mjs";
+import { SprintRace, scoreZone, MODES } from "../sprint/engine.mjs";
 import { CyclingRace } from "../cycling/engine.mjs";
 import { SWIM, SWIMMER_ART, getSwimCycle, getSwimPose, drawSwimmer } from "./swimmer.mjs";
 
@@ -47,7 +47,7 @@ test("perfect swimming gives 15% speed and scaled momentum that carries forward"
 test("six successful zones beat baseline and remain under the swimming speed cap", () => {
   const race = completed(), baseline = started(); to(baseline, 50);
   assert.equal(race.counts.Perfect, 6); assert.equal(race.bestCombo, 6);
-  assert.ok(race.rhythmScore > 99.9); assert.ok(race.peakSpeed <= 2.65);
+  assert.ok(race.rhythmScore > 99.9); assert.ok(race.peakSpeed <= 2.65 * (1 + MODES.flameGain));
   assert.ok(race.finishTime < baseline.finishTime - 2);
 });
 test("holding from the start and holding past the exit cannot farm boosts", () => {
@@ -68,7 +68,7 @@ test("swim gear scales timing, acceleration, cap and endurance independently of 
   close(elite.stats.maxSpeed, 2.95); close(elite.stats.endurance, 1.8);
   assert.deepEqual(club.zones, elite.zones);
   assert.ok(completed({ kit: 2 }).finishTime < completed().finishTime);
-  assert.equal(new SprintRace().stats.baseSpeed, 8); assert.equal(new CyclingRace().stats.baseSpeed, 12);
+  assert.equal(new SprintRace().stats.baseSpeed, 8); assert.equal(new CyclingRace().stats.baseSpeed, 15);
 });
 test("the wall finish is automatic, frozen and frame-rate independent", () => {
   const a = completed({}, 1 / 30), b = completed({}, 1 / 120); close(a.finishTime, b.finishTime, 0.01);

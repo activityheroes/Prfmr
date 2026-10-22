@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SprintRace, ZONES, REWARDS, DIP, getStats, scoreZone } from "./engine.mjs";
+import { SprintRace, ZONES, REWARDS, DIP, MODES, getStats, scoreZone } from "./engine.mjs";
 import { getRunnerPose, METERS_PER_UNIT } from "./runner.mjs";
 
 const close = (a, b, tolerance = 1e-8) => assert.ok(Math.abs(a - b) <= tolerance, `${a} != ${b}`);
@@ -125,10 +125,11 @@ test("timing gear widens edge tolerance without moving the track zones", () => {
   assert.ok(geared.score > normal.score); assert.equal(geared.grade, "Perfect");
   assert.equal(getStats({ band: -4 }).timingTolerance, 1); assert.equal(getStats({ band: 20 }).timingTolerance, 1.3);
 });
-test("speed is capped, only spikes raise the cap, and endurance retains momentum", () => {
+test("gear sets the base cap, Flame raises it temporarily, and endurance retains momentum", () => {
   assert.equal(getStats({ band: 2, blocks: 2, kit: 2 }).maxSpeed, getStats().maxSpeed);
   const club = completed(), elite = completed({ spikes: 2 }), endurance = completed({ kit: 2 });
-  assert.ok(club.peakSpeed <= 11.2); assert.ok(elite.peakSpeed > club.peakSpeed && elite.peakSpeed <= 12.4);
+  assert.ok(club.peakSpeed <= 11.2 * (1 + MODES.flameGain));
+  assert.ok(elite.peakSpeed > club.peakSpeed && elite.peakSpeed <= 12.4 * (1 + MODES.flameGain));
   assert.ok(endurance.finishTime < club.finishTime); assert.ok(endurance.fatigue < club.fatigue);
   const normal = started(), blocks = started({ blocks: 2 }); normal.advance(1); blocks.advance(1);
   assert.ok(blocks.distance > normal.distance);

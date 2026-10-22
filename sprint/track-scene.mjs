@@ -1,8 +1,9 @@
 import * as THREE from "./vendor/three.module.min.js";
-import { SPRINT_COURSE, clamp } from "./engine.mjs";
-import { drawRunner } from "./runner.mjs";
+import { SPRINT_COURSE, clamp } from "./engine.mjs?v=boost-1";
+import { drawRunner } from "./runner.mjs?v=boost-1";
 import { createPool, createPoolWall } from "../swimming/pool.mjs";
-import { finishTravel, reactionAge } from "./finish.mjs";
+import { finishTravel, reactionAge } from "./finish.mjs?v=boost-1";
+import { BoostEffects } from "./boost-effects.mjs?v=boost-1";
 
 const RUNNER_ART = { width: 256, height: 256, x: 104, ground: 238, unit: 12,
   scaleX: 3.8, scaleY: 3.8, anchorX: 104 / 256, anchorY: 0.07,
@@ -13,7 +14,7 @@ export class TrackScene {
     this.course = course; this.art = athlete;
     const cycling = course.id === "cycling";
     const swimming = course.id === "swimming";
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.scene = new THREE.Scene();
@@ -81,6 +82,7 @@ export class TrackScene {
     sparks.setAttribute("position", new THREE.BufferAttribute(this.sparkPositions, 3));
     this.sparks = new THREE.Points(sparks, new THREE.PointsMaterial({ color: "#acfbff", size: 0.095, transparent: true, depthWrite: false }));
     this.sparks.frustumCulled = false; this.scene.add(this.sparks);
+    this.boostEffects = new BoostEffects(); this.scene.add(this.boostEffects);
     this.finish = new THREE.Group(); this.scene.add(this.finish);
     if (environment) environment.finish(this, this.finish);
     else if (swimming) createPoolWall(this, this.finish);
@@ -139,9 +141,11 @@ export class TrackScene {
 
     const ctx = this.runnerContext;
     const art = this.art;
-    ctx.clearRect(0, 0, art.width, art.height);
-    art.draw(ctx, art.x, art.ground, art.unit, race);
-    this.runnerTexture.needsUpdate = true;
+    if (this.runner.visible) {
+      ctx.clearRect(0, 0, art.width, art.height);
+      art.draw(ctx, art.x, art.ground, art.unit, race);
+      this.runnerTexture.needsUpdate = true;
+    }
     const age = race.lastAttempt === null ? 100 : race.time - race.lastAttempt.time;
     this.runner.material.rotation = this.course.id === "sprint" && missed && age < 0.5 ? Math.sin(age * 30) * 0.055 * (1 - age * 2) : 0;
     const celebrating = race.presentation?.success && reactionAge(race) > 0.4 && !race.presentation.reducedMotion;
@@ -161,6 +165,7 @@ export class TrackScene {
     this.finish.position.x = race.course.distance - race.distance;
     this.finish.visible = race.distance > race.course.distance - 13;
     this.positionCourse?.(race);
+    this.boostEffects.update(race, this);
     this.renderer.render(this.scene, this.camera);
   }
 }

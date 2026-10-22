@@ -1,10 +1,17 @@
-import { CyclingRace, CYCLING_COURSE } from "./engine.mjs";
-import { CyclingScene } from "./scene.mjs?v=track-3";
-import { bankAngle } from "./velodrome.mjs?v=track-3";
+import { CyclingRace, CYCLING_COURSE } from "./engine.mjs?v=boost-1";
+import { CyclingScene } from "./scene.mjs?v=boost-1";
+import { bankAngle } from "./velodrome.mjs?v=boost-1";
 
 export default { course: CYCLING_COURSE, Race: CyclingRace, Scene: CyclingScene, speedFactor: 3.6,
   noun: "cyclist", event: "RIDE", action: "RIDE", status: "RIDING", finish: "FINISH", storageKey: "dot-cycling-zones-v1",
   render(race, scene) {
+    if (scene && !scene.viewControls) {
+      scene.viewControls = true;
+      document.querySelectorAll("[data-camera]").forEach(button => button.addEventListener("click", () => {
+        scene.setView(button.dataset.camera);
+        document.querySelectorAll("[data-camera]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+      }));
+    }
     if (race.terminal) return;
     const $ = id => document.getElementById(id);
     $("meet-label").textContent = race.combo ? "STREAK " + race.combo : "VELODROME / 200 M";

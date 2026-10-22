@@ -1,6 +1,8 @@
-import { clamp } from "./engine.mjs";
+import { clamp } from "./engine.mjs?v=boost-1";
+import { createBoostUI } from "./boost-ui.mjs?v=boost-1";
 
 export function createTimingGuide({ trigger, tone, finishZone = null, holdKey = null }) {
+  const boostUI = createBoostUI(tone);
   const guide = document.createElement("div"); guide.className = "timing-guide";
   const label = document.createElement("span"); label.className = "timing-label";
   const track = document.createElement("span"); track.className = "timing-track"; track.setAttribute("aria-hidden", "true");
@@ -12,6 +14,7 @@ export function createTimingGuide({ trigger, tone, finishZone = null, holdKey = 
   const call = document.getElementById("race-call"), main = document.getElementById("trigger-main"), top = document.getElementById("trigger-top");
   let currentRace, sounded = new Set();
   return (race, paused) => {
+    boostUI(race, paused);
     if (currentRace !== race) { currentRace = race; sounded = new Set(); }
     const finishing = race.phase === "line" && finishZone;
     const zone = finishing ? finishZone : race.nextZone;

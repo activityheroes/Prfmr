@@ -1,4 +1,4 @@
-import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs";
+import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=boost-1";
 import { bendAmount } from "./course.mjs";
 
 export const SKATE_CYCLE_METERS = 18;

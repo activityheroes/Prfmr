@@ -1,5 +1,5 @@
-import { clamp } from "../sprint/engine.mjs";
-import { blendPose, reactionAge } from "../sprint/finish.mjs";
+import { clamp } from "../sprint/engine.mjs?v=boost-1";
+import { blendPose, reactionAge } from "../sprint/finish.mjs?v=boost-1";
 
 const TAU = Math.PI * 2;
 const wrap = n => ((n % 1) + 1) % 1;

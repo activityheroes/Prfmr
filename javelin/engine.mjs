@@ -1,6 +1,6 @@
-import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs";
+import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=boost-1";
 import { World, Body, Vec3, Sphere } from "./cannon-es.mjs";
-import { getReleaseOrigin } from "./thrower.mjs";
+import { getReleaseOrigin } from "./thrower.mjs?v=boost-1";
 
 export const JAVELIN_COURSE = {
   id: "javelin", distance: 45, finishAt: 39.5, fatigueAt: 41, finishMove: false,

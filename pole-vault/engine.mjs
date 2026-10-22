@@ -1,6 +1,6 @@
-import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs";
+import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=boost-1";
 import { World, Body, Vec3, Sphere, Box } from "../javelin/cannon-es.mjs";
-import { clearancePoints } from "./vaulter.mjs";
+import { clearancePoints } from "./vaulter.mjs?v=boost-1";
 
 export const VAULT_COURSE = {
   id: "pole-vault", distance: 45, finishAt: 39, fatigueAt: 43, finishMove: false,

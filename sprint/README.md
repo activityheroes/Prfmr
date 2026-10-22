@@ -44,11 +44,11 @@ Late release beyond 85% of the edge-error window overrides successful score tier
 
 ## Momentum And Physics
 
-Target running speed is `baseSpeed + momentum + temporaryBoost`, limited by equipped spikes and final-10m fatigue. Momentum decays slowly at 0.1 m/s per second; temporary boost decays at 0.65 m/s per second. Race kits reduce both decay rates.
+Target running speed is `baseSpeed * (1 + modeGain) + momentum + temporaryBoost`, limited by the active speed ceiling and final-10m fatigue. Momentum decays slowly at 0.1 m/s per second; temporary boost holds for 1.25 seconds, then decays at 0.32 m/s per second. Race kits reduce both decay rates. Three successful zones activate Flow (+5% baseline target pace and ceiling); three consecutive Perfects ignite six seconds of Flame (+20%). Misses, early/late releases and canceled holds end the mode. Another three Perfects refill Flame fuel.
 
 A reward multiplies current speed by its tier percentage, subject to the speed cap. Its persistent portion is represented by the momentum increment; any remaining portion becomes temporary boost, avoiding double-counting. A perfect first zone raises 8.0 to 9.2 m/s, retaining momentum after the temporary portion wears off. Misses reduce existing momentum but never subtract it below zero.
 
-The engine uses steps no larger than 1/240s. Holding by itself does not accelerate the runner; boosts are awarded only when a zone resolves. Results report average weighted timing, all six zone grades and component scores, longest successful streak, peak speed, and finish dip. Above-runner feedback and sparks show the latest result. Momentum is internal, with no meter on the HUD.
+The engine uses steps no larger than 1/240s. Holding by itself does not accelerate the runner; boosts are awarded only when a zone resolves. Results report average weighted timing, all six zone grades and component scores, longest successful streak, peak speed, and finish dip. Above-runner feedback and dot trails show the latest result. The shared mode HUD shows Perfect charge, Flame fuel, actual awarded burst and pace above baseline; raw momentum remains internal.
 
 ## Equipment And Records
 

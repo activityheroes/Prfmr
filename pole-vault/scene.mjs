@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs";
-import { VAULT_COURSE, VAULT, PLANT_ZONE } from "./engine.mjs";
-import { vaulterDots, poleCurve, getVaulterPose } from "./vaulter.mjs";
-import { ease } from "../sprint/finish.mjs";
+import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
+import { VAULT_COURSE, VAULT, PLANT_ZONE } from "./engine.mjs?v=boost-1";
+import { vaulterDots, poleCurve, getVaulterPose } from "./vaulter.mjs?v=boost-1";
+import { ease } from "../sprint/finish.mjs?v=boost-1";
 
 const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 3, feedbackX: 0, shadowStart: -1, shadowLength: 1.5, planar: true, draw() {} };

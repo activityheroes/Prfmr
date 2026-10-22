@@ -1,5 +1,5 @@
-import { blendPose, ease, reactionAge } from "../sprint/finish.mjs";
-import { inrunPoint, landingPoint } from "./course.mjs";
+import { blendPose, ease, reactionAge } from "../sprint/finish.mjs?v=boost-1";
+import { inrunPoint, landingPoint } from "./course.mjs?v=boost-1";
 
 export const SKIER_SCALE = 1.5;
 const mix = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t });

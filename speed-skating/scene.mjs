@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs";
-import { ease, finishTravel } from "../sprint/finish.mjs";
+import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
+import { ease, finishTravel } from "../sprint/finish.mjs?v=boost-1";
 import { SKATING_COURSE, ovalPoint } from "./course.mjs";
-import { getSkaterPose, skaterDots } from "./skater.mjs";
+import { getSkaterPose, skaterDots } from "./skater.mjs?v=boost-1";
 
 const ATHLETE_SCALE = 1;
 const ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
@@ -74,6 +74,10 @@ export class SkatingScene extends TrackScene {
     const end = ovalPoint(500); this.finish.position.set(end.x - origin.x, 0, end.z - origin.z); this.finish.rotation.y = -end.heading; this.finish.visible = Math.abs(race.distance - 500) < 22;
     this.cursor.rotation.y = -origin.heading;
     this.shadow.position.set(-s * this.pose.hip.z * ATHLETE_SCALE, 0.023, c * this.pose.hip.z * ATHLETE_SCALE); this.shadow.rotation.y = -origin.heading;
+  }
+  boostPoint(x, y, z) {
+    const a = -this.cursor.rotation.y, c = Math.cos(a), s = Math.sin(a);
+    return { x: c * x - s * z, y, z: s * x + c * z };
   }
   render(race) {
     const distance = race.distance + finishTravel(race), origin = ovalPoint(distance), c = Math.cos(origin.heading), s = Math.sin(origin.heading);

@@ -1,16 +1,16 @@
-import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs";
-import { TrackScene } from "./track-scene.mjs";
-import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs";
-import { SWIMMER_ART } from "../swimming/swimmer.mjs";
-import { createTimingGuide } from "./timing-guide.mjs";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs";
+import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs?v=boost-1";
+import { TrackScene } from "./track-scene.mjs?v=boost-1";
+import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs?v=boost-1";
+import { SWIMMER_ART } from "../swimming/swimmer.mjs?v=boost-1";
+import { createTimingGuide } from "./timing-guide.mjs?v=boost-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs?v=boost-1";
 
 const $ = id => document.getElementById(id);
 const sports = {
   sprint: { course: SPRINT_COURSE, Race: SprintRace, athlete: undefined, noun: "runner", event: "SPRINT", action: "RUN", status: "RUNNING", finish: "DIP", storageKey: "dot-sprint-zones-v4" },
   swimming: { course: SWIMMING_COURSE, Race: SwimmingRace, athlete: SWIMMER_ART, noun: "swimmer", event: "SWIM", action: "SWIM", status: "SWIMMING", finish: "THE WALL", storageKey: "dot-swimming-zones-v1" }
 };
-const eventModules = { cycling: "../cycling/event.mjs?v=track-3", hurdles: "../hurdles/event.mjs", "speed-skating": "../speed-skating/event.mjs", biathlon: "../biathlon/event.mjs?v=2" };
+const eventModules = { cycling: "../cycling/event.mjs?v=boost-1", hurdles: "../hurdles/event.mjs?v=boost-1", "speed-skating": "../speed-skating/event.mjs?v=boost-1", biathlon: "../biathlon/event.mjs?v=boost-1" };
 const sport = eventModules[document.body.dataset.sport]
   ? (await import(eventModules[document.body.dataset.sport])).default
   : sports[document.body.dataset.sport] ?? sports.sprint;

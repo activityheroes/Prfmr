@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs";
+import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
 import { HIGH_JUMP_COURSE, HIGH_JUMP, TAKEOFF_ZONE, approachPoint } from "./course.mjs";
-import { getHighJumperPose, jumperDots } from "./jumper.mjs";
-import { ease } from "../sprint/finish.mjs";
+import { getHighJumperPose, jumperDots } from "./jumper.mjs?v=boost-1";
+import { ease } from "../sprint/finish.mjs?v=boost-1";
 
 const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 2.2, feedbackX: 0, shadowStart: -0.6, shadowLength: 1.1, planar: true, draw() {} };
@@ -98,5 +98,9 @@ export class HighJumpScene extends TrackScene {
     const head = getHighJumperPose(race).head;
     this.finishFocus = { x: head.x - origin.x, y: head.y + 0.18, z: head.z - origin.z };
     super.render(race);
+  }
+  boostPoint(x, y, z) {
+    const a = -this.cursor.rotation.y, c = Math.cos(a), s = Math.sin(a);
+    return { x: c * x - s * z, y, z: s * x + c * z };
   }
 }

@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs";
-import { JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs";
-import { THROWER_ART } from "./thrower.mjs";
-import { ease } from "../sprint/finish.mjs";
+import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
+import { JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=boost-1";
+import { THROWER_ART } from "./thrower.mjs?v=boost-1";
+import { ease } from "../sprint/finish.mjs?v=boost-1";
 
 const environment = {
   create(track) {

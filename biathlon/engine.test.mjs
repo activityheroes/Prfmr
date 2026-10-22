@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { MODES } from "../sprint/engine.mjs";
 import { BiathlonRace, BIATHLON_COURSE, RANGE } from "./engine.mjs";
 import { HILLS, trailHeight, trailGrade, terrainFactor, aimAt } from "./course.mjs";
 import { STRIDE, SKIER_SCALE, getSkierPose, skierDots } from "./skier.mjs";
@@ -74,7 +75,7 @@ test("holding forever does not auto-fire or farm hits", () => {
 test("six perfect boost zones build momentum and improve the total", () => {
   const a = complete(), b = complete({ good: true });
   assert.equal(b.counts.Perfect, 6); assert.equal(b.hits, 5); assert.ok(b.result.time < a.result.time); assert.equal(b.bestCombo, 6);
-  assert.ok(b.peakSpeed > BIATHLON_COURSE.baseSpeed); assert.ok(b.peakSpeed <= b.stats.maxSpeed + 1e-5);
+  assert.ok(b.peakSpeed > BIATHLON_COURSE.baseSpeed); assert.ok(b.peakSpeed <= b.stats.maxSpeed * (1 + MODES.flameGain) + 1e-5);
 });
 test("all misses still finish, with total time and result penalties agreeing", () => {
   const r = complete({ hits: 0 }); close(r.distance, 400); close(r.result.penalty, 10); close(r.result.time, r.result.courseTime + 10);

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#101313">
   <title>200M Track Cycling | Dot Athletics</title>
-  <link rel="stylesheet" href="./cycling.css?v=track-3">
+  <link rel="stylesheet" href="./cycling.css?v=boost-1">
 </head>
 <body data-sport="cycling">
   <main class="game">
@@ -22,7 +22,7 @@
     </section>
 
     <section class="race-surface" aria-label="Cycling track">
-      <div class="timeline-head"><span id="distance">0.0 M</span><span>200 M</span></div>
+      <div class="timeline-head"><span id="distance">0.0 M</span><div class="camera-modes" role="group" aria-label="Camera view"><button type="button" data-camera="ride" aria-pressed="true">Ride</button><button type="button" data-camera="track" aria-pressed="false">Track</button></div><span>200 M</span></div>
       <div class="timeline" role="progressbar" aria-label="Distance" aria-valuemin="0" aria-valuemax="200" aria-valuenow="0">
         <div id="progress"></div><i class="marker finish" title="Final straight: 197 meters"></i>
       </div>
@@ -74,6 +74,6 @@
     <details class="zone-breakdown"><summary>Zone breakdown</summary><ol id="zone-results"></ol></details>
     <button id="again" class="primary-button" type="button">Race again</button>
   </dialog>
-  <script type="module" src="../sprint/game.mjs?v=cycling-track-4"></script>
+  <script type="module" src="../sprint/game.mjs?v=boost-1"></script>
 </body>
 </html>

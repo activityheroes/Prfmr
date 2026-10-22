@@ -1,8 +1,8 @@
-import { JavelinRace, JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs";
-import { JavelinScene } from "./scene.mjs";
-import { createTimingGuide } from "../sprint/timing-guide.mjs";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs";
+import { JavelinRace, JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=boost-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=boost-1";
+import { JavelinScene } from "./scene.mjs?v=boost-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=boost-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=boost-1";
 
 const $=id=>document.getElementById(id),trigger=$("trigger"),dialog=$("result-dialog"),canvas=$("track");
 const storageKey="dot-javelin-zones-v1",colors={Perfect:"#d9fbff",Great:"#81f6b6",Good:"#ffd473",Early:"#e8aa62",Late:"#ff7f86",Miss:"#9eabb0"};

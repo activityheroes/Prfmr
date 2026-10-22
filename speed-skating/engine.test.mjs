@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { MODES } from "../sprint/engine.mjs";
 import { SpeedSkatingRace, SKATING_COURSE, OVAL, ovalPoint, bendAmount } from "./engine.mjs";
 import { getSkaterPose, skaterDots, SKATE_CYCLE_METERS, GLIDE, CONTACT, LEG } from "./skater.mjs";
 import { beginFinish, advanceFinish, finishTravel } from "../sprint/finish.mjs";
@@ -32,7 +33,7 @@ test("precise holds reward speed and momentum that carries between zones", () =>
   const perfect = completed(), idle = started(); to(idle, 500);
   assert.equal(perfect.counts.Perfect, 6); assert.equal(perfect.bestCombo, 6);
   assert.ok(perfect.finishTime < idle.finishTime - 2); assert.ok(perfect.rhythmScore > 99.9);
-  assert.ok(perfect.peakSpeed <= perfect.stats.maxSpeed);
+  assert.ok(perfect.peakSpeed <= perfect.stats.maxSpeed * (1 + MODES.flameGain));
 });
 test("early, late, canceled and endless holds cannot award a perfect zone", () => {
   const early = started(); play(early, early.zones[0], 0, -3); assert.notEqual(early.lastAttempt.grade, "Perfect");

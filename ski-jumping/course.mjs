@@ -1,5 +1,5 @@
-import { clamp } from "../sprint/engine.mjs";
-import { ease } from "../sprint/finish.mjs";
+import { clamp } from "../sprint/engine.mjs?v=boost-1";
+import { ease } from "../sprint/finish.mjs?v=boost-1";
 
 export const SKI_COURSE = {
   id: "ski-jumping", distance: 140, finishAt: 122, fatigueAt: 145, finishMove: false,

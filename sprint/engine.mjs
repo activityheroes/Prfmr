@@ -12,6 +12,7 @@ export const REWARDS = {
   Good: { boost: 0.06, momentum: 0.25 }, Early: { boost: 0.02, momentum: 0 },
   Late: { boost: 0, momentum: -0.4 }, Miss: { boost: 0, momentum: -0.4 }
 };
+export const MODES = { flowStreak: 3, perfectStreak: 3, flameDuration: 6, flowGain: 0.05, flameGain: 0.2, burstDuration: 1.25 };
 export const GEAR = {
   band: { label: "Timing band", options: ["Club band", "Focus band", "Reflex band"] },
   blocks: { label: "Starting blocks", options: ["Club blocks", "Launch blocks", "Carbon blocks"] },
@@ -64,10 +65,18 @@ export class RhythmRace {
     this.lastAttempt = null; this.offZoneAt = -100;
     this.counts = { Perfect: 0, Great: 0, Good: 0, Early: 0, Late: 0, Miss: 0 };
     this.combo = 0; this.bestCombo = 0; this.peakSpeed = 0;
+    this.perfectStreak = 0; this.flameRemaining = 0; this.flameCount = 0; this.burstRemaining = 0;
     this.dipAt = null; this.earlyDip = false; this.finishTime = null; this.result = null; this.events = [];
   }
   get racing() { return this.phase === "sprint" || this.phase === "line"; }
   get terminal() { return this.phase === "finished"; }
+  get mode() { return this.flameRemaining > 0 ? "flame" : this.combo >= MODES.flowStreak ? "flow" : "normal"; }
+  get modeGain() { return this.mode === "flame" ? MODES.flameGain : this.mode === "flow" ? MODES.flowGain : 0; }
+  get speedLimit() {
+    // Technical events retain their tested launch envelope; modes build speed up to it faster.
+    const technical = !!this.finishZone || this.course.id === "hurdles";
+    return this.stats.maxSpeed * (1 + (technical ? 0 : this.modeGain));
+  }
   get attempts() { return Object.values(this.counts).reduce((sum, count) => sum + count, 0); }
   get rhythmScore() { return this.attempts ? this.zones.reduce((sum, z) => sum + (z.result?.score ?? 0), 0) / this.attempts : 0; }
   get elapsed() { return this.finishTime ?? (this.startAt === null ? 0 : this.time - this.startAt); }
@@ -102,6 +111,7 @@ export class RhythmRace {
     if (this.terminal || this.holding) return false;
     if (this.phase === "ready") {
       this.phase = "sprint"; this.startAt = this.releaseAt = this.time; this.holding = true;
+      this.speed = this.course.rollingSpeed ?? 0;
       this.events.push("start"); return true;
     }
     if (this.phase === "line") return this.dip();
@@ -128,21 +138,29 @@ export class RhythmRace {
       : { grade: "Miss", score: 0, entry: 0, hold: 0, release: 0, entryError: null, releaseError: null };
     if (forcedGrade) metrics.grade = forcedGrade;
     if (canceled) metrics.score = metrics.entry = metrics.hold = metrics.release = 0;
-    const { grade } = metrics, reward = REWARDS[grade];
+    const { grade } = metrics, reward = REWARDS[grade], beforeSpeed = this.speed, previousMode = this.mode;
     zone.status = "done";
     zone.result = { ...metrics, zoneId: zone.id, time: this.time, canceled,
       duration: zone.attempt ? this.time - zone.attempt.time : 0, boost: reward.boost };
     this.lastAttempt = zone.result; this.counts[grade]++;
     this.combo = ["Perfect", "Great", "Good"].includes(grade) ? this.combo + 1 : 0;
     this.bestCombo = Math.max(this.bestCombo, this.combo);
+    this.perfectStreak = grade === "Perfect" ? this.perfectStreak + 1 : 0;
+    if (!this.combo) this.flameRemaining = 0;
+    const ignited = this.perfectStreak > 0 && this.perfectStreak % MODES.perfectStreak === 0;
+    if (ignited) { this.flameRemaining = MODES.flameDuration; this.flameCount++; }
     this.momentum = clamp(this.momentum + reward.momentum * (this.course.momentumScale ?? 1), 0, this.stats.maxSpeed - this.stats.baseSpeed);
     if (reward.boost) {
-      const boostedSpeed = Math.min(this.stats.maxSpeed, this.speed * (1 + reward.boost));
-      this.temporaryBoost = Math.max(this.temporaryBoost, boostedSpeed - this.stats.baseSpeed - this.momentum, 0);
+      const ignition = ignited && previousMode !== "flame" ? this.stats.baseSpeed * MODES.flameGain : 0;
+      const boostedSpeed = Math.min(this.speedLimit, this.speed * (1 + reward.boost) + ignition);
+      this.temporaryBoost = Math.max(this.temporaryBoost, boostedSpeed - this.stats.baseSpeed * (1 + this.modeGain) - this.momentum, 0);
+      this.burstRemaining = MODES.burstDuration;
       this.speed = boostedSpeed;
     } else if (grade === "Late") {
       this.temporaryBoost *= 0.4; this.speed = Math.max(this.stats.baseSpeed, this.speed * 0.97);
     }
+    Object.assign(zone.result, { speedBefore: beforeSpeed, speedAfter: this.speed,
+      speedGain: Math.max(0, this.speed - beforeSpeed), mode: this.mode, ignited });
     this.peakSpeed = Math.max(this.peakSpeed, this.speed);
     if (this.activeHold === zone) this.activeHold = null;
     this.events.push({ type: "zone", result: zone.result });
@@ -162,12 +180,14 @@ export class RhythmRace {
   step(dt) {
     const beforeTime = this.time; this.time += dt;
     if (!this.racing) return;
+    this.flameRemaining = Math.max(0, this.flameRemaining - dt);
+    this.burstRemaining = Math.max(0, this.burstRemaining - dt);
     const decayScale = this.course.momentumScale ?? 1;
     this.momentum = Math.max(0, this.momentum - 0.1 * decayScale * dt / this.stats.endurance);
-    this.temporaryBoost = Math.max(0, this.temporaryBoost - 0.65 * decayScale * dt / this.stats.endurance);
+    if (!this.burstRemaining) this.temporaryBoost = Math.max(0, this.temporaryBoost - 0.32 * decayScale * dt / this.stats.endurance);
     if (this.distance >= this.course.fatigueAt) this.fatigue += 0.045 * dt / this.stats.endurance;
-    const cap = Math.max(this.stats.baseSpeed, this.stats.maxSpeed * (1 - Math.min(0.15, this.fatigue)));
-    const target = Math.min(cap, this.stats.baseSpeed + this.momentum + this.temporaryBoost);
+    const cap = Math.max(this.stats.baseSpeed, this.speedLimit * (1 - Math.min(0.15, this.fatigue)));
+    const target = Math.min(cap, this.stats.baseSpeed * (1 + this.modeGain) + this.momentum + this.temporaryBoost);
     if (this.dipAt !== null && !this.earlyDip && this.time - this.dipAt > DIP.peak + 0.035) {
       this.earlyDip = true; this.speed *= 0.9; this.events.push("early-dip");
     }
@@ -198,7 +218,8 @@ export class RhythmRace {
       this.phase = "finished"; this.holding = false;
       this.result = { title: "Finish", time: this.finishTime, rhythmScore: this.rhythmScore,
         counts: { ...this.counts }, attempts: this.attempts, bestCombo: this.bestCombo, peakSpeed: this.peakSpeed,
-        zones: this.zones.map(z => ({ ...z.result })), dip: dipGrade, torsoLead: this.dipAmount * DIP.reach };
+        zones: this.zones.map(z => ({ ...z.result })), dip: dipGrade, torsoLead: this.dipAmount * DIP.reach,
+        flameCount: this.flameCount };
       this.events.push("finish");
     }
   }

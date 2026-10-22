@@ -1,4 +1,4 @@
-@import url("../sprint/sprint.css");
+@import url("../sprint/sprint.css?v=boost-1");
 .track-top{color:#28504d}.lane b{color:#28504d}.race-call{background:#f0f5f1e6;color:#244b47!important;border-radius:3px;padding:3px 5px;width:max-content;max-width:154px;font-size:12px}
 .race-call:empty{display:none}#range-title{background:#f0f5f1e6;padding:3px 6px;border-radius:2px}
 .range-marker{position:absolute;top:-5px;left:50%;height:14px;width:5px;background:var(--gold);border:1px solid var(--bg)}

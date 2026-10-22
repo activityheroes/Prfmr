@@ -1,11 +1,11 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { BIKE, METERS_PER_UNIT, getBikeMotion, getCyclistPose } from "./cyclist.mjs?v=track-3";
+import { BIKE, METERS_PER_UNIT, getBikeMotion, getCyclistPose } from "./cyclist.mjs?v=boost-1";
 
 // The same pedal/limb poses as the motion lab, with depth for the oval's changing viewing angles.
 export class DotBike extends THREE.InstancedMesh {
   constructor() {
-    super(new THREE.SphereGeometry(1, 8, 6), new THREE.MeshBasicMaterial(), 1000);
-    this.dummy = new THREE.Object3D(); this.color = new THREE.Color(); this.frustumCulled = false;
+    super(new THREE.SphereGeometry(1, 6, 4), new THREE.MeshBasicMaterial(), 1000);
+    this.dummy = new THREE.Object3D(); this.colors = new Map(); this.frustumCulled = false;
     this.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   }
   update(race) {
@@ -15,7 +15,8 @@ export class DotBike extends THREE.InstancedMesh {
     const dot = (x, y, z, color, radius = 0.28) => {
       this.dummy.position.set((x - nose) * m, -y * m, z * m);
       this.dummy.scale.setScalar(radius * m); this.dummy.updateMatrix();
-      this.setMatrixAt(count, this.dummy.matrix); this.setColorAt(count++, this.color.set(color));
+      if (!this.colors.has(color)) this.colors.set(color, new THREE.Color(color));
+      this.setMatrixAt(count, this.dummy.matrix); this.setColorAt(count++, this.colors.get(color));
     };
     const bone = (a, b, color, z = 0, radius = 0.28) => {
       const n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y, (b.z ?? z) - (a.z ?? z)) / 0.6));
@@ -27,7 +28,7 @@ export class DotBike extends THREE.InstancedMesh {
     for (const center of [BIKE.rear, BIKE.front]) {
       for (let i = 0; i < 46; i++) {
         const a = i / 46 * Math.PI * 2;
-        dot(center.x + Math.cos(a) * BIKE.wheelRadius, center.y + Math.sin(a) * BIKE.wheelRadius, 0, "#65d8ff", 0.26);
+        dot(center.x + Math.cos(a) * BIKE.wheelRadius, center.y + Math.sin(a) * BIKE.wheelRadius, 0, i % 3 ? "#164e64" : "#65d8ff", 0.3);
       }
       for (let i = 0; i < 6; i++) {
         const a = wheelAngle + i * Math.PI / 3;

@@ -1,10 +1,10 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs";
-import { finishTravel } from "../sprint/finish.mjs";
-import { CYCLING_COURSE } from "./engine.mjs";
-import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=track-3";
-import { VELODROME, trackPoint, bikeFrame } from "./velodrome.mjs?v=track-3";
-import { DotBike } from "./dot-bike.mjs?v=track-3";
+import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
+import { finishTravel } from "../sprint/finish.mjs?v=boost-1";
+import { CYCLING_COURSE } from "./engine.mjs?v=boost-1";
+import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=boost-1";
+import { VELODROME, trackPoint, bikeFrame } from "./velodrome.mjs?v=boost-1";
+import { DotBike } from "./dot-bike.mjs?v=boost-1";
 
 function ribbon(start, end, width, offset = 0, lift = 0.01) {
   const positions = [], uv = [], indices = [], count = Math.max(1, Math.ceil((end - start) / 0.5));
@@ -81,7 +81,8 @@ export class CyclingScene extends TrackScene {
     this.basis = new THREE.Matrix4(); this.shadow.material.opacity = 0.15; this.runner.visible = false;
     this.cyclist = new DotBike(); this.scene.add(this.cyclist);
     this.origin = new THREE.Vector3(VELODROME.straight / 2, 0, VELODROME.radius);
-    this.riderScale = 1.5;
+    this.riderScale = 1.8; this.viewMode = "ride";
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
     this.zoneMeshes.forEach((mesh, i) => {
       const z = CYCLING_COURSE.zones[i];
       for (const [key, a, b, width, lift] of [["glow", z.start - 0.08, z.end + 0.08, 1.35, 0.045], ["surface", z.start, z.end, 1.2, 0.055], ["core", z.start, z.end, 0.18, 0.065], ["entry", z.start - 0.035, z.start + 0.035, 1.35, 0.075], ["exit", z.end - 0.035, z.end + 0.035, 1.35, 0.075]]) {
@@ -90,12 +91,28 @@ export class CyclingScene extends TrackScene {
       mesh.entryBand.visible = mesh.exitBand.visible = false;
     });
   }
-  resize(w, h) { super.resize(w, h); this.riderScale = w < 650 ? 2.8 : 1.8; this.frameCamera(); }
+  resize(w, h) { super.resize(w, h); this.setView(this.viewMode); }
+  setView(mode) {
+    this.viewMode = mode === "track" ? "track" : "ride";
+    this.riderScale = this.viewMode === "ride" ? 1.8 : this.width < 650 ? 3.4 : 2.4;
+    this.boostScale = this.riderScale;
+    this.bike = bikeFrame(this.lastDistance ?? 0, this.riderScale); this.frameCamera();
+  }
   frameCamera() {
-    this.camera.position.set(0, 120, 150); this.camera.lookAt(0, 0, 0); this.camera.far = 350;
-    const aspect = this.width / this.height, span = Math.max(126, aspect * 60);
+    const aspect = this.width / this.height, overview = this.viewMode === "track";
+    if (overview) { this.camera.position.set(0, 120, 150); this.camera.lookAt(0, 0, 0); }
+    else {
+      const f = this.bike, ahead = this.width < 650 ? 2 : 4;
+      const focus = f.origin.clone().sub(this.origin).addScaledVector(f.forward, ahead); focus.y += 1.1;
+      const side = new THREE.Vector3(-f.forward.z, 0, f.forward.x).normalize();
+      this.camera.position.copy(focus).addScaledVector(side, 28).addScaledVector(f.forward, 4); this.camera.position.y += 7;
+      this.camera.lookAt(focus);
+    }
+    this.camera.far = 350;
+    const span = overview ? Math.max(126, aspect * 60) : Math.max(this.width < 650 ? 21 : 32, aspect * 11.5);
     this.camera.left = -span / 2; this.camera.right = span / 2; this.camera.top = span / aspect / 2; this.camera.bottom = -this.camera.top; this.camera.updateProjectionMatrix();
   }
+  boostPoint(x, y, z) { return this.bikePoint(x - 2, y + 0.2, z); }
   bikePoint(x, y, z = 0) {
     const f = this.bike;
     return f.origin.clone().addScaledVector(f.forward, x * f.stretch * this.riderScale).addScaledVector(f.up, y * this.riderScale).addScaledVector(f.side, z * this.riderScale).sub(this.origin);
@@ -107,7 +124,7 @@ export class CyclingScene extends TrackScene {
     this.basis.makeBasis(this.bike.forward, this.bike.up, this.bike.side);
     this.runner.quaternion.setFromRotationMatrix(this.basis); this.runner.position.copy(this.bikePoint(0, 0));
     this.runner.scale.set(CYCLIST_ART.scaleX * this.bike.stretch * this.riderScale, CYCLIST_ART.scaleY * this.riderScale, 1);
-    const riderRace = Object.create(race); riderRace.distance = race.distance / this.riderScale;
+    const riderRace = Object.create(race); riderRace.distance = race.distance / this.riderScale; riderRace.cadenceMultiplier = 1.45;
     this.cyclist.update(riderRace); this.cyclist.quaternion.copy(this.runner.quaternion); this.cyclist.position.copy(this.runner.position);
     this.cyclist.scale.set(this.bike.stretch * this.riderScale, this.riderScale, this.riderScale);
     this.cursor.quaternion.copy(this.runner.quaternion); this.cursor.position.copy(this.bikePoint(0, 0.045));
@@ -122,7 +139,9 @@ export class CyclingScene extends TrackScene {
   }
   render(race) {
     const distance = race.distance + finishTravel(race);
+    this.lastDistance = distance;
     this.bike = bikeFrame(distance, this.riderScale);
+    this.frameCamera();
     const pose = getBikePose(getBikeMotion(distance).cycle), nose = BIKE.front.x + BIKE.wheelRadius;
     this.finishFocus = this.bikePoint((pose.head.x - nose) * METERS_PER_UNIT, race.presentation ? 3.1 : -pose.head.y * METERS_PER_UNIT + 0.25);
     super.render(race);

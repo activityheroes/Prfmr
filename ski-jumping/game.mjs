@@ -1,9 +1,9 @@
-import { SkiJumpRace, SKI_COURSE, TAKEOFF_ZONE, HILL } from "./engine.mjs";
-import { landingPoint } from "./course.mjs";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs";
-import { SkiJumpScene } from "./scene.mjs";
-import { createTimingGuide } from "../sprint/timing-guide.mjs";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs";
+import { SkiJumpRace, SKI_COURSE, TAKEOFF_ZONE, HILL } from "./engine.mjs?v=boost-1";
+import { landingPoint } from "./course.mjs?v=boost-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=boost-1";
+import { SkiJumpScene } from "./scene.mjs?v=boost-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=boost-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=boost-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-ski-jump-zones-v1";

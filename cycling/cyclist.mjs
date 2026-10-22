@@ -1,5 +1,5 @@
-import { clamp } from "../sprint/engine.mjs";
-import { blendPose, ease, reactionAge } from "../sprint/finish.mjs";
+import { clamp } from "../sprint/engine.mjs?v=boost-1";
+import { blendPose, ease, reactionAge } from "../sprint/finish.mjs?v=boost-1";
 
 const TAU = Math.PI * 2;
 export const BIKE = {
@@ -41,7 +41,7 @@ export function getBikePose(cycle) {
 }
 
 export function getCyclistPose(race) {
-  let pose = getBikePose(getBikeMotion(race.distance).cycle);
+  let pose = getBikePose(getBikeMotion(race.distance * (race.cadenceMultiplier ?? 1)).cycle);
   if (race.presentation) {
     const target = structuredClone(pose), age = reactionAge(race);
     target.shoulder = { x: 0.3, y: -14.4 }; target.head = { x: 1.5, y: -16.6 };

@@ -1,8 +1,8 @@
-import { PoleVaultRace, VAULT_COURSE, PLANT_ZONE, VAULT, normalizeBar } from "./engine.mjs";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs";
-import { VaultScene } from "./scene.mjs";
-import { createTimingGuide } from "../sprint/timing-guide.mjs";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs";
+import { PoleVaultRace, VAULT_COURSE, PLANT_ZONE, VAULT, normalizeBar } from "./engine.mjs?v=boost-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=boost-1";
+import { VaultScene } from "./scene.mjs?v=boost-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=boost-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=boost-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-pole-vault-zones-v1";

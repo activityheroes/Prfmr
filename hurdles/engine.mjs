@@ -1,7 +1,7 @@
-import { RhythmRace, clamp } from "../sprint/engine.mjs";
+import { RhythmRace, clamp } from "../sprint/engine.mjs?v=boost-1";
 import { World, Body, Vec3, Sphere } from "../javelin/cannon-es.mjs";
 import { HURDLES, HURDLES_COURSE } from "./course.mjs";
-import { getHurdlerPose, collisionPoints } from "./hurdler.mjs";
+import { getHurdlerPose, collisionPoints } from "./hurdler.mjs?v=boost-1";
 export { HURDLES, HURDLES_COURSE };
 
 export class HurdlesRace extends RhythmRace {
@@ -30,6 +30,7 @@ export class HurdlesRace extends RhythmRace {
     if (hurdle.status !== "pending") return;
     hurdle.status = "hit"; hurdle.hitAt = this.time; this.stumbleAt = this.time;
     this.speed *= 0.8; this.momentum = Math.max(0, this.momentum - 0.6); this.temporaryBoost = 0; this.combo = 0;
+    this.perfectStreak = 0; this.flameRemaining = 0; this.burstRemaining = 0;
     this.events.push({ type: "hurdle-hit", id: hurdle.id });
   }
   step(dt) {

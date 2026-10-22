@@ -1,4 +1,4 @@
-import { clamp } from "../sprint/engine.mjs";
+import { clamp } from "../sprint/engine.mjs?v=boost-1";
 
 export const BIATHLON_COURSE = {
   id: "biathlon", distance: 400, finishAt: 395, fatigueAt: 370, finishMove: false,

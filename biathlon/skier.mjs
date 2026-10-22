@@ -1,5 +1,5 @@
-import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=biathlon-1";
-import { trailGrade, RANGE } from "./course.mjs";
+import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=boost-1";
+import { trailGrade, RANGE } from "./course.mjs?v=boost-1";
 
 export const STRIDE = 7.5;
 export const SKIER_SCALE = 1.35;

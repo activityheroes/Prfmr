@@ -1,4 +1,4 @@
-import { RhythmRace } from "../sprint/engine.mjs";
+import { RhythmRace } from "../sprint/engine.mjs?v=boost-1";
 
 export const SWIMMING_COURSE = {
   id: "swimming", distance: 50, finishAt: 49, fatigueAt: 45, finishMove: false,
