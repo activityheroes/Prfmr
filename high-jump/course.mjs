@@ -1,4 +1,4 @@
-import { longZones } from "../sprint/engine.mjs?v=zones-2";
+import { longZones } from "../sprint/engine.mjs?v=weather-1";
 
 export const HIGH_JUMP_COURSE = {
   id: "high-jump", distance: 38, finishAt: 33, fatigueAt: 35, finishMove: false,

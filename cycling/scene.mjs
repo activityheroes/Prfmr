@@ -1,10 +1,10 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=zones-2";
-import { finishTravel } from "../sprint/finish.mjs?v=zones-2";
-import { CYCLING_COURSE } from "./engine.mjs?v=zones-2";
-import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=zones-2";
-import { VELODROME, trackPoint, bikeFrame } from "./velodrome.mjs?v=zones-2";
-import { DotBike } from "./dot-bike.mjs?v=zones-2";
+import { TrackScene } from "../sprint/track-scene.mjs?v=weather-1";
+import { finishTravel } from "../sprint/finish.mjs?v=weather-1";
+import { CYCLING_COURSE } from "./engine.mjs?v=weather-1";
+import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=weather-1";
+import { VELODROME, trackPoint, bikeFrame } from "./velodrome.mjs?v=weather-1";
+import { DotBike } from "./dot-bike.mjs?v=weather-1";
 
 function ribbon(start, end, width, offset = 0, lift = 0.01) {
   const positions = [], uv = [], indices = [], count = Math.max(1, Math.ceil((end - start) / 0.5));

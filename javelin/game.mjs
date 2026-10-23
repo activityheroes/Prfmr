@@ -1,9 +1,9 @@
-import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=zones-2";
-import { JavelinRace, JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=zones-2";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=zones-2";
-import { JavelinScene } from "./scene.mjs?v=zones-2";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=zones-2";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=zones-2";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=weather-1";
+import { JavelinRace, JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=weather-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=weather-1";
+import { JavelinScene } from "./scene.mjs?v=weather-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=weather-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=weather-1";
 
 const $=id=>document.getElementById(id),trigger=$("trigger"),dialog=$("result-dialog"),canvas=$("track");
 const storageKey="dot-javelin-zones-v1",colors={Perfect:"#81f6b6",Great:"#ffd473",Good:"#ffd473",Early:"#ed667d",Late:"#ff7f86",Miss:"#ed667d"};
@@ -23,9 +23,10 @@ function tone(frequency,duration=0.12){
 }
 const announce=text=>{$("announcer").textContent=text;};
 function clearInput(){const id=input.id;input.kind=null;input.id=null;if(id!==null&&trigger.hasPointerCapture?.(id))trigger.releasePointerCapture(id);}
-function reset(){
+function reset(keepWeather = false) {
+  const seed = keepWeather === true ? race?.weather.seed : undefined;
   clearInput();paused=false;resultShown=false;$("pause-panel").hidden=true;if(dialog.open)dialog.close();
-  race=new JavelinRace(loadout);lastTime=performance.now();
+  race=new JavelinRace(loadout).setWeather(seed);lastTime=performance.now();
   const stats=getStats(loadout,JAVELIN_COURSE);
   $("stat-band").textContent=stats.timingTolerance.toFixed(2)+"x edge tolerance";$("stat-blocks").textContent=stats.acceleration.toFixed(2)+" m/s2";
   $("stat-spikes").textContent=stats.maxSpeed.toFixed(1)+" m/s maximum";$("stat-kit").textContent=stats.endurance.toFixed(2)+"x endurance";
@@ -71,7 +72,7 @@ document.addEventListener("keydown",e=>{if(e.code!=="Space"||e.repeat||e.target.
 document.addEventListener("keyup",e=>{if(e.code==="Space"&&input.kind==="keyboard"){e.preventDefault();release("keyboard");}});
 $("restart").addEventListener("click",reset);$("again").addEventListener("click",()=>{attempt++;reset();});
 dialog.addEventListener("cancel",e=>{e.preventDefault();attempt++;reset();});
-for(const key of Object.keys(GEAR)){$("gear-"+key).value=String(loadout[key]);$("gear-"+key).addEventListener("change",e=>{if(race.phase!=="ready")return;loadout[key]=Number(e.target.value);persist();reset();});}
+for(const key of Object.keys(GEAR)){$("gear-"+key).value=String(loadout[key]);$("gear-"+key).addEventListener("change",e=>{if(race.phase!=="ready")return;loadout[key]=Number(e.target.value);persist();reset(true);});}
 function pause(){if(paused||!race.racing&&(!race.presentation||resultShown))return;sync();if(!race.racing&&(!race.presentation||resultShown))return;race.cancelInput();clearInput();paused=true;$("pause-panel").hidden=false;events();render();}
 window.addEventListener("blur",pause);document.addEventListener("visibilitychange",()=>{if(document.hidden)pause();});
 $("resume").addEventListener("click",()=>{paused=false;lastTime=performance.now();$("pause-panel").hidden=true;trigger.focus({preventScroll:true});});

@@ -1,5 +1,5 @@
-import { clamp, DIP } from "./engine.mjs?v=zones-2";
-import { blendPose, reactionAge, reactionPose } from "./finish.mjs?v=zones-2";
+import { clamp, DIP } from "./engine.mjs?v=weather-1";
+import { blendPose, reactionAge, reactionPose } from "./finish.mjs?v=weather-1";
 
 const TAU = Math.PI * 2;
 const gait = { stance: 0.3, stride: 3.2, lift: 5, arm: 1.12, elbow: 1.6, lean: 1.6 };

@@ -1,7 +1,7 @@
-import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=zones-2";
+import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=weather-1";
 import { World, Body, Vec3, Sphere } from "../javelin/cannon-es.mjs";
-import { SKI_COURSE, TAKEOFF_ZONE, HILL, inrunPoint, landingPoint } from "./course.mjs?v=zones-2";
-export { SKI_COURSE, TAKEOFF_ZONE, HILL } from "./course.mjs?v=zones-2";
+import { SKI_COURSE, TAKEOFF_ZONE, HILL, inrunPoint, landingPoint } from "./course.mjs?v=weather-1";
+export { SKI_COURSE, TAKEOFF_ZONE, HILL } from "./course.mjs?v=weather-1";
 
 const missed = () => ({ grade: "Miss", score: 0, entry: 0, hold: 0, release: 0 });
 export class SkiJumpRace extends RhythmRace {
@@ -44,9 +44,10 @@ export class SkiJumpRace extends RhythmRace {
   step(dt) {
     if (this.phase === "flight") {
       const before = this.athlete, velocity = this.body.velocity, speed = Math.hypot(velocity.x, velocity.y);
-      const lift = Math.min(6.5, speed * speed * (0.0065 + this.launch.quality * 0.0065));
+      const wind = this.conditions.wind;
+      const lift = Math.min(6.5, speed * speed * (0.0065 + this.launch.quality * 0.0065)) * (1 - wind * 0.012);
       const drag = (0.0025 - this.launch.quality * 0.001) / (0.9 + this.stats.endurance * 0.1);
-      this.body.applyForce(new Vec3(-drag * speed * velocity.x * this.body.mass, lift * this.body.mass, 0));
+      this.body.applyForce(new Vec3((-drag * speed * velocity.x + wind * 0.08) * this.body.mass, lift * this.body.mass, 0));
       this.world.step(dt);
       const after = this.body.position, beforeGap = before.y - landingPoint(before.x).y - HILL.contact;
       const afterGap = after.y - landingPoint(after.x).y - HILL.contact;

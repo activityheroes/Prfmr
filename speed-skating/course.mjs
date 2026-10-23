@@ -1,4 +1,4 @@
-import { longZones } from "../sprint/engine.mjs?v=zones-2";
+import { longZones } from "../sprint/engine.mjs?v=weather-1";
 
 export const OVAL = { length: 400, radius: 28, straight: 200 - Math.PI * 28 };
 export const SKATING_COURSE = {

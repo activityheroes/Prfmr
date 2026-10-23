@@ -1,5 +1,5 @@
-import { clamp, longZones } from "../sprint/engine.mjs?v=zones-2";
-import { ease } from "../sprint/finish.mjs?v=zones-2";
+import { clamp, longZones } from "../sprint/engine.mjs?v=weather-1";
+import { ease } from "../sprint/finish.mjs?v=weather-1";
 
 export const SKI_COURSE = {
   id: "ski-jumping", distance: 140, finishAt: 122, fatigueAt: 145, finishMove: false,

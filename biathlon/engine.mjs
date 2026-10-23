@@ -1,5 +1,5 @@
-import { RhythmRace } from "../sprint/engine.mjs?v=zones-2";
-import { BIATHLON_COURSE, RANGE, aimAt, terrainFactor } from "./course.mjs?v=zones-2";
+import { RhythmRace } from "../sprint/engine.mjs?v=weather-1";
+import { BIATHLON_COURSE, RANGE, aimAt, terrainFactor } from "./course.mjs?v=weather-1";
 export { BIATHLON_COURSE, RANGE };
 
 export class BiathlonRace extends RhythmRace {
@@ -13,7 +13,12 @@ export class BiathlonRace extends RhythmRace {
   get hits() { return this.shots.filter(shot => shot.hit).length; }
   get rangeAge() { return this.rangeAt === null ? 0 : this.time - this.rangeAt; }
   get heldFor() { return this.aimStartedAt === null ? 0 : this.time - this.aimStartedAt; }
-  get aim() { return aimAt(this.rangeAge, this.heldFor, this.stats.timingTolerance); }
+  get aim() {
+    const aim = aimAt(this.rangeAge, this.heldFor, this.stats.timingTolerance);
+    const x = aim.x + this.conditions.wind * 0.025 / (1 + this.heldFor * 0.5);
+    const error = Math.hypot(x, aim.y);
+    return { ...aim, x, error, centered: error <= aim.radius };
+  }
   get canAim() { return this.phase === "shooting" && this.rangeAge >= RANGE.settle && this.time >= this.reloadUntil && this.shots.length < RANGE.targets; }
   get canHit() { return this.holding && this.heldFor >= RANGE.minimumHold && this.aim.centered; }
   press() {

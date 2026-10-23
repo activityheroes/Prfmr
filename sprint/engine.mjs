@@ -1,3 +1,5 @@
+import { createWeather, weatherAt, randomWeatherSeed, weatherSummary } from "./weather.mjs?v=weather-1";
+
 export const DIP = { peak: 0.09, duration: 0.32, reach: 0.34, perfectWindow: 0.022 };
 export function longZones(ranges, speed) {
   return ranges.map(([start, end], i) => ({ id: i + 1, start, end, longHold: true,
@@ -77,6 +79,7 @@ export function releaseBands(zone, pressDistance = zone.start, hardEnd = Infinit
 export class RhythmRace {
   constructor(loadout = {}, course = SPRINT_COURSE) {
     this.course = course;
+    this.weather = createWeather(course);
     this.stats = getStats(loadout, course);
     this.zones = course.zones.map(zone => ({ ...zone, status: "pending", attempt: null, result: null }));
     this.phase = "ready"; this.time = 0; this.distance = 0; this.speed = 0;
@@ -89,6 +92,11 @@ export class RhythmRace {
     this.dipAt = null; this.earlyDip = false; this.finishTime = null; this.result = null; this.events = [];
   }
   get racing() { return this.phase === "sprint" || this.phase === "line"; }
+  setWeather(seed = randomWeatherSeed(), kind = "random") {
+    if (this.phase === "ready") this.weather = createWeather(this.course, seed, kind);
+    return this;
+  }
+  get conditions() { return weatherAt(this.weather, this.startAt === null ? 0 : this.time - this.startAt); }
   get terminal() { return this.phase === "finished"; }
   get mode() { return this.flameRemaining > 0 ? "flame" : this.combo >= MODES.flowStreak ? "flow" : "normal"; }
   get modeGain() { return this.mode === "flame" ? MODES.flameGain : this.mode === "flow" ? MODES.flowGain : 0; }
@@ -178,7 +186,7 @@ export class RhythmRace {
       this.burstRemaining = MODES.burstDuration;
       this.speed = boostedSpeed;
     } else if (grade === "Late") {
-      this.temporaryBoost *= 0.4; this.speed = Math.max(this.stats.baseSpeed, this.speed * 0.97);
+      this.temporaryBoost *= 0.4; this.speed = Math.max(this.stats.baseSpeed * this.conditions.pace, this.speed * 0.97);
     }
     Object.assign(zone.result, { speedBefore: beforeSpeed, speedAfter: this.speed,
       speedGain: Math.max(0, this.speed - beforeSpeed), mode: this.mode, ignited });
@@ -197,6 +205,8 @@ export class RhythmRace {
     while (remaining > 1e-10 && !this.terminal) {
       const dt = Math.min(remaining, 1 / 240); this.step(dt); remaining -= dt;
     }
+    if (this.terminal && this.result) this.result.weather = { seed: this.weather.seed, summary: weatherSummary(this.weather),
+      finish: this.conditions.key, wind: this.conditions.wind };
   }
   step(dt) {
     const beforeTime = this.time; this.time += dt;
@@ -208,11 +218,12 @@ export class RhythmRace {
     if (!this.burstRemaining) this.temporaryBoost = Math.max(0, this.temporaryBoost - 0.32 * decayScale * dt / this.stats.endurance);
     if (this.distance >= this.course.fatigueAt) this.fatigue += 0.045 * dt / this.stats.endurance;
     const cap = Math.max(this.stats.baseSpeed, this.speedLimit * (1 - Math.min(0.15, this.fatigue)));
-    const target = Math.min(cap, this.stats.baseSpeed * (1 + this.modeGain) + this.momentum + this.temporaryBoost);
+    const conditions = this.conditions;
+    const target = Math.min(cap, (this.stats.baseSpeed * (1 + this.modeGain) + this.momentum + this.temporaryBoost) * conditions.pace);
     if (this.dipAt !== null && !this.earlyDip && this.time - this.dipAt > DIP.peak + 0.035) {
       this.earlyDip = true; this.speed *= 0.9; this.events.push("early-dip");
     }
-    const previousSpeed = this.speed, acceleration = this.stats.acceleration;
+    const previousSpeed = this.speed, acceleration = this.stats.acceleration * conditions.grip;
     this.speed = this.speed < target
       ? Math.min(target, this.speed + acceleration * (0.3 + 0.7 * (1 - this.speed / target)) * dt)
       : Math.max(target, this.speed - acceleration * 0.55 * dt);

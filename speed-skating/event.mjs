@@ -1,5 +1,5 @@
-import { SpeedSkatingRace, SKATING_COURSE, ovalPoint } from "./engine.mjs?v=zones-2";
-import { SkatingScene } from "./scene.mjs?v=zones-2";
+import { SpeedSkatingRace, SKATING_COURSE, ovalPoint } from "./engine.mjs?v=weather-1";
+import { SkatingScene } from "./scene.mjs?v=weather-1";
 export default { course: SKATING_COURSE, Race: SpeedSkatingRace, Scene: SkatingScene, speedFactor: 3.6,
   noun: "skater", event: "SKATE", action: "GLIDE", status: "SKATING", finish: "FINISH", storageKey: "dot-speed-skating-zones-v1",
   render(race, scene) {

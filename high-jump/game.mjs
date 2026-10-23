@@ -1,9 +1,9 @@
-import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=zones-2";
-import { HighJumpRace, HIGH_JUMP_COURSE, TAKEOFF_ZONE, HIGH_JUMP, normalizeBar } from "./engine.mjs?v=zones-2";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=zones-2";
-import { HighJumpScene } from "./scene.mjs?v=zones-2";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=zones-2";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=zones-2";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=weather-1";
+import { HighJumpRace, HIGH_JUMP_COURSE, TAKEOFF_ZONE, HIGH_JUMP, normalizeBar } from "./engine.mjs?v=weather-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=weather-1";
+import { HighJumpScene } from "./scene.mjs?v=weather-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=weather-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=weather-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-high-jump-zones-v1";
@@ -33,9 +33,10 @@ function clearInput() {
   const id = input.id; input.kind = null; input.id = null;
   if (id !== null && trigger.hasPointerCapture?.(id)) trigger.releasePointerCapture(id);
 }
-function reset() {
+function reset(keepWeather = false) {
+  const seed = keepWeather === true ? race?.weather.seed : undefined;
   clearInput(); paused = false; resultShown = false; $("pause-panel").hidden = true; if (dialog.open) dialog.close();
-  race = new HighJumpRace(loadout, barHeight); lastTime = performance.now();
+  race = new HighJumpRace(loadout, barHeight).setWeather(seed); lastTime = performance.now();
   const stats = getStats(loadout, HIGH_JUMP_COURSE);
   $("stat-band").textContent = stats.timingTolerance.toFixed(2) + "x edge tolerance";
   $("stat-blocks").textContent = stats.acceleration.toFixed(2) + " m/s2";
@@ -99,10 +100,10 @@ $("restart").addEventListener("click", reset);
 $("again").addEventListener("click", () => { if (race.result?.cleared) barHeight = normalizeBar(barHeight + HIGH_JUMP.barStep); attempt++; persist(); reset(); });
 $("retry").addEventListener("click", () => { attempt++; reset(); });
 dialog.addEventListener("cancel", e => { e.preventDefault(); attempt++; reset(); });
-$("bar-height").addEventListener("input", e => { if (race.phase !== "ready") return; barHeight = normalizeBar(e.target.value); persist(); race = new HighJumpRace(loadout, barHeight); $("bar-value").textContent = barHeight.toFixed(2); render(); });
+$("bar-height").addEventListener("input", e => { if (race.phase !== "ready") return; barHeight = normalizeBar(e.target.value); persist(); race = new HighJumpRace(loadout, barHeight).setWeather(race.weather.seed); $("bar-value").textContent = barHeight.toFixed(2); render(); });
 for (const key of Object.keys(GEAR)) {
   $("gear-" + key).value = String(loadout[key]);
-  $("gear-" + key).addEventListener("change", e => { if (race.phase !== "ready") return; loadout[key] = Number(e.target.value); persist(); reset(); });
+  $("gear-" + key).addEventListener("change", e => { if (race.phase !== "ready") return; loadout[key] = Number(e.target.value); persist(); reset(true); });
 }
 function pause() {
   if (paused || !race.racing && (!race.presentation || resultShown)) return;

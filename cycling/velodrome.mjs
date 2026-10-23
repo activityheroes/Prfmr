@@ -1,5 +1,5 @@
 import { Vector3 } from "../sprint/vendor/three.module.min.js";
-import { BIKE, METERS_PER_UNIT } from "./cyclist.mjs?v=zones-2";
+import { BIKE, METERS_PER_UNIT } from "./cyclist.mjs?v=weather-1";
 
 export const VELODROME = { length: 250, straight: 45, radius: 80 / Math.PI, start: 70,
   inner: -0.4, outer: 6.5, apron: -1.7, straightBank: 12, bendBank: 42 };

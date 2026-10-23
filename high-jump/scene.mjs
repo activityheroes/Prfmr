@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=zones-2";
-import { HIGH_JUMP_COURSE, HIGH_JUMP, TAKEOFF_ZONE, approachPoint } from "./course.mjs?v=zones-2";
-import { getHighJumperPose, jumperDots } from "./jumper.mjs?v=zones-2";
-import { ease } from "../sprint/finish.mjs?v=zones-2";
+import { TrackScene } from "../sprint/track-scene.mjs?v=weather-1";
+import { HIGH_JUMP_COURSE, HIGH_JUMP, TAKEOFF_ZONE, approachPoint } from "./course.mjs?v=weather-1";
+import { getHighJumperPose, jumperDots } from "./jumper.mjs?v=weather-1";
+import { ease } from "../sprint/finish.mjs?v=weather-1";
 
 const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 2.2, feedbackX: 0, shadowStart: -0.6, shadowLength: 1.1, planar: true, draw() {} };

@@ -1,5 +1,5 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { BIKE, METERS_PER_UNIT, getBikeMotion, getCyclistPose } from "./cyclist.mjs?v=zones-2";
+import { BIKE, METERS_PER_UNIT, getBikeMotion, getCyclistPose } from "./cyclist.mjs?v=weather-1";
 
 // The same pedal/limb poses as the motion lab, with depth for the oval's changing viewing angles.
 export class DotBike extends THREE.InstancedMesh {

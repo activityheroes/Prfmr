@@ -1,6 +1,6 @@
-import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=zones-2";
+import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=weather-1";
 import { World, Body, Vec3, Sphere } from "../javelin/cannon-es.mjs";
-import { landingHeels } from "./jumper.mjs?v=zones-2";
+import { landingHeels } from "./jumper.mjs?v=weather-1";
 
 export const LONG_JUMP_COURSE = {
   id: "long-jump", distance: 45, finishAt: 39.5, fatigueAt: 42, finishMove: false,
@@ -53,6 +53,7 @@ export class LongJumpRace extends RhythmRace {
   step(dt) {
     if (this.phase === "flight") {
       const before = this.athlete;
+      this.body.applyForce(new Vec3(this.conditions.wind * 0.08 * this.body.mass, 0, 0));
       this.world.step(dt);
       const { x, y } = this.body.position, landed = y <= JUMP.landingHeight && this.body.velocity.y < 0;
       const fraction = landed ? clamp((before.y - JUMP.landingHeight) / (before.y - y), 0, 1) : 1;

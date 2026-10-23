@@ -1,5 +1,5 @@
-import { HurdlesRace, HURDLES_COURSE } from "./engine.mjs?v=zones-2";
-import { HurdlesScene } from "./scene.mjs?v=zones-2";
+import { HurdlesRace, HURDLES_COURSE } from "./engine.mjs?v=weather-1";
+import { HurdlesScene } from "./scene.mjs?v=weather-1";
 
 export default { course: HURDLES_COURSE, Race: HurdlesRace, Scene: HurdlesScene,
   noun: "hurdler", event: "HURDLES", action: "RUN", status: "RUNNING", finish: "FINISH", storageKey: "dot-hurdles-zones-v1",

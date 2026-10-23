@@ -1,6 +1,6 @@
-import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=zones-2";
+import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=weather-1";
 import { World, Body, Vec3, Sphere } from "./cannon-es.mjs";
-import { getReleaseOrigin } from "./thrower.mjs?v=zones-2";
+import { getReleaseOrigin } from "./thrower.mjs?v=weather-1";
 
 export const JAVELIN_COURSE = {
   id: "javelin", distance: 45, finishAt: 39.5, fatigueAt: 41, finishMove: false,
@@ -49,6 +49,7 @@ export class JavelinRace extends RhythmRace {
   step(dt) {
     if (this.phase === "flight") {
       const previous = this.projectile;
+      this.body.applyForce(new Vec3(this.conditions.wind * 0.18 * this.body.mass, 0, 0));
       this.world.step(dt);
       const { x, y } = this.body.position;
       const fraction = y <= 0 ? previous.y / (previous.y - y) : 1;

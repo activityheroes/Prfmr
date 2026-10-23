@@ -1,5 +1,5 @@
 import * as THREE from "./vendor/three.module.min.js";
-import { releaseBands } from "./engine.mjs?v=zones-2";
+import { releaseBands } from "./engine.mjs?v=weather-1";
 
 const COLORS = { bad: "#ed667d", good: "#ffd473", perfect: "#81f6b6", entry: "#f4fff4", exit: "#ffffff" };
 const SEGMENTS = 24;

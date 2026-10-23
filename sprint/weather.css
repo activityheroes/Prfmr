@@ -1,0 +1,10 @@
+.weather-effects{position:absolute;inset:0;pointer-events:none;z-index:1;width:100%;height:100%}
+.weather-effects[hidden],.weather-alert[hidden]{display:none}
+body[data-weather] .track-top,body[data-weather] .track-bottom,body[data-weather] .race-call{z-index:2}
+body[data-weather] .track-top .live-label>i,body[data-weather] #meet-label{display:none}
+.weather-status{font-size:10px;line-height:18px;color:#f2faf6;text-shadow:0 1px 2px #112b30,0 0 4px #112b30;white-space:nowrap}
+.weather-status[data-kind=tailwind]{color:#c8ffb6}.weather-status[data-kind=storm],.weather-status[data-kind=blizzard]{color:#ffe1ad}
+.weather-alert{position:absolute;right:12px;bottom:38px;z-index:2;padding:5px 8px;border-left:2px solid #81f6b6;background:#142820e8;color:#e7faec;font:10px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;pointer-events:none;max-width:calc(100% - 24px)}
+.weather-alert[data-warning=true]{border-color:#ffd473;color:#ffd473}
+.weather-result dd{max-width:70%;font-size:11px}
+@media(max-width:650px){.weather-status{font-size:9px}.weather-alert{font-size:9px;bottom:34px}}

@@ -1,17 +1,17 @@
-import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs?v=zones-2";
-import { TrackScene } from "./track-scene.mjs?v=zones-2";
-import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs?v=zones-2";
-import { SWIMMER_ART } from "../swimming/swimmer.mjs?v=zones-2";
-import { createTimingGuide } from "./timing-guide.mjs?v=zones-2";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs?v=zones-2";
-import { readEventSave, writeEventSave } from "./save.mjs?v=zones-2";
+import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs?v=weather-1";
+import { TrackScene } from "./track-scene.mjs?v=weather-1";
+import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs?v=weather-1";
+import { SWIMMER_ART } from "../swimming/swimmer.mjs?v=weather-1";
+import { createTimingGuide } from "./timing-guide.mjs?v=weather-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs?v=weather-1";
+import { readEventSave, writeEventSave } from "./save.mjs?v=weather-1";
 
 const $ = id => document.getElementById(id);
 const sports = {
   sprint: { course: SPRINT_COURSE, Race: SprintRace, athlete: undefined, noun: "runner", event: "SPRINT", action: "RUN", status: "RUNNING", finish: "DIP", storageKey: "dot-sprint-zones-v4" },
   swimming: { course: SWIMMING_COURSE, Race: SwimmingRace, athlete: SWIMMER_ART, noun: "swimmer", event: "SWIM", action: "SWIM", status: "SWIMMING", finish: "THE WALL", storageKey: "dot-swimming-zones-v1" }
 };
-const eventModules = { cycling: "../cycling/event.mjs?v=zones-2", hurdles: "../hurdles/event.mjs?v=zones-2", "speed-skating": "../speed-skating/event.mjs?v=zones-2", biathlon: "../biathlon/event.mjs?v=zones-2" };
+const eventModules = { cycling: "../cycling/event.mjs?v=weather-1", hurdles: "../hurdles/event.mjs?v=weather-1", "speed-skating": "../speed-skating/event.mjs?v=weather-1", biathlon: "../biathlon/event.mjs?v=weather-1" };
 const sport = eventModules[document.body.dataset.sport]
   ? (await import(eventModules[document.body.dataset.sport])).default
   : sports[document.body.dataset.sport] ?? sports.sprint;
@@ -71,10 +71,11 @@ function clearInput() {
   const id = input.id; input.kind = null; input.id = null;
   if (id !== null && trigger.hasPointerCapture?.(id)) trigger.releasePointerCapture(id);
 }
-function reset() {
+function reset(keepWeather = false) {
+  const seed = keepWeather === true ? race?.weather.seed : undefined;
   clearInput(); paused = false; $("pause-panel").hidden = true;
   if (dialog.open) dialog.close();
-  race = new Race(loadout); lastTime = performance.now(); resultShown = false;
+  race = new Race(loadout).setWeather(seed); lastTime = performance.now(); resultShown = false;
   updateStats(); render(); trigger.focus({ preventScroll: true });
 }
 function updateStats() {
@@ -166,7 +167,7 @@ for (const key of Object.keys(GEAR)) {
   $("gear-" + key).value = String(loadout[key]);
   $("gear-" + key).addEventListener("change", event => {
     if (race.phase !== "ready") return;
-    loadout[key] = Number(event.target.value); persist(); reset();
+    loadout[key] = Number(event.target.value); persist(); reset(true);
   });
 }
 function pause() {

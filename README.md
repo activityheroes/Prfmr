@@ -33,6 +33,16 @@ Races now use two longer boost zones, with a marked HOLD entry and RELEASE exit.
 
 Long-zone records use each event's existing storage key with `-long-zones-v1` appended. Equipment and selected bar heights migrate, but older records remain untouched and are not compared with the new course layout.
 
+### Weather
+
+Outdoor attempts draw a fresh, seeded forecast on restart: clear skies, headwind, tailwind, heavy rain or storms. Winter sports substitute snow and blizzards for rain. Cycling's velodrome and Swimming's pool stay sheltered. The track header shows conditions and signed wind speed relative to travel; dotted rain, snow and wind trails stay behind the timing labels.
+
+Each outdoor forecast includes a passing weather front, announced 1.6 seconds before its effects ramp in over 1.2 seconds. Target pace stays within -12% to +6%; precipitation modestly reduces acceleration. Boosts, equipment caps, fixed zone boundaries and scoring windows frozen on press remain intact. There are no random slips or forced fouls. These are arcade modifiers, not a competition weather simulation.
+
+Wind also affects javelin and long-jump horizontal flight, ski-jump flight/lift, and the visible Biathlon aim drift. Default-height field attempts and all hurdles remain achievable with accurate timing in adverse conditions. Pause freezes weather, and reduced-motion mode uses stationary precipitation without flashing lightning. Results include conditions; local personal bests remain arcade records across all weather, not wind-certified marks.
+
+`sprint/weather.mjs` owns deterministic forecasts and bounded modifiers; `weather-ui.mjs` renders the shared HUD and a lightweight, capped particle overlay. Engines default to calm for reproducible tests, and browser controllers call `setWeather()` for random conditions. `setWeather(seed, kind)` supports seeded QA only before starting. No weather API, image download or additional dependency is required.
+
 Biathlon adds rolling hills and a five-target shooting stop at 200m. Hold to steady the sight and release inside the cyan circle. Misses add a forgiving two-second penalty, then skiing resumes after the fifth shot.
 
 ## Boost Modes
