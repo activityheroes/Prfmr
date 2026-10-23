@@ -7,7 +7,7 @@ A browser-local long jump event in the shared dot-matrix athletics style.
 Open `/long-jump/` on the same static server as the other events. Use the circular button or Space.
 
 1. Start the automatic 45-meter approach.
-2. Press at each blue strip's entry, hold across it, and release at the exit. Two long zones (6-16m and 24-35m) build momentum using the shared 30% entry, 30% hold-overlap and 40% release score.
+2. Press at each blue strip's entry, hold across it, and release at the exit. Two long zones (6-14m and 24-33m) build momentum using the shared 30% entry, 30% hold-overlap and 40% release score.
 3. Hold at the gold strip's 40-meter entry and release at its white end, 44.75 meters, to take off. The red foul line is fixed at 45 meters.
 4. The athlete flies, extends both legs, and lands in the sand. Distance is measured from the board to the rearmost heel imprint and rounded down to centimeters.
 

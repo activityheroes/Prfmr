@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=weather-1";
-import { HIGH_JUMP_COURSE, HIGH_JUMP, TAKEOFF_ZONE, approachPoint } from "./course.mjs?v=weather-1";
-import { getHighJumperPose, jumperDots } from "./jumper.mjs?v=weather-1";
-import { ease } from "../sprint/finish.mjs?v=weather-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=rivals-1";
+import { HIGH_JUMP_COURSE, HIGH_JUMP, TAKEOFF_ZONE, approachPoint } from "./course.mjs?v=rivals-1";
+import { getHighJumperPose, jumperDots } from "./jumper.mjs?v=rivals-1";
+import { ease } from "../sprint/finish.mjs?v=rivals-1";
 
 const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 2.2, feedbackX: 0, shadowStart: -0.6, shadowLength: 1.1, planar: true, draw() {} };
@@ -94,6 +94,10 @@ export class HighJumpScene extends TrackScene {
     this.bar.rotation.set(0, age * 0.18, Math.PI / 2 + Math.sin(age * 7) * 0.15 * (1 - ease(age / 1.2)));
     this.bar.material.color.set(race.barHit ? "#ff7f86" : "#ffd473");
     this.barSupports.forEach(s => { s.position.y = race.barHeight; });
+  }
+  bestPoint(mark, race) {
+    const origin = approachPoint(race.distance);
+    return { x: HIGH_JUMP.barX - origin.x, y: mark, z: HIGH_JUMP.barZ - origin.z, heading: Math.PI / 2, width: HIGH_JUMP.barWidth };
   }
   render(race) {
     const origin = approachPoint(race.distance); this.frameCamera(race);

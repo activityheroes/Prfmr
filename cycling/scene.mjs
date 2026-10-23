@@ -1,10 +1,11 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=weather-1";
-import { finishTravel } from "../sprint/finish.mjs?v=weather-1";
-import { CYCLING_COURSE } from "./engine.mjs?v=weather-1";
-import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=weather-1";
-import { VELODROME, trackPoint, bikeFrame } from "./velodrome.mjs?v=weather-1";
-import { DotBike } from "./dot-bike.mjs?v=weather-1";
+import { ghostMaterial } from "../sprint/rival-scene.mjs?v=rivals-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=rivals-1";
+import { finishTravel } from "../sprint/finish.mjs?v=rivals-1";
+import { CYCLING_COURSE } from "./engine.mjs?v=rivals-1";
+import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=rivals-1";
+import { VELODROME, trackPoint, bikeFrame } from "./velodrome.mjs?v=rivals-1";
+import { DotBike } from "./dot-bike.mjs?v=rivals-1";
 
 function ribbon(start, end, width, offset = 0, lift = 0.01) {
   const positions = [], uv = [], indices = [], count = Math.max(1, Math.ceil((end - start) / 0.5));
@@ -137,6 +138,20 @@ export class CyclingScene extends TrackScene {
       }
       this.sparks.geometry.attributes.position.needsUpdate = true;
     }
+  }
+  renderGhost(ghost) {
+    if (!this.ghostBike) {
+      this.ghostBike = new DotBike(); this.ghostBike.material.dispose(); this.ghostBike.material = ghostMaterial();
+      this.scene.add(this.ghostBike);
+    }
+    const frame = bikeFrame(ghost.distance, this.riderScale), view = Object.create(ghost);
+    view.distance = ghost.distance / this.riderScale; view.cadenceMultiplier = 1.45;
+    this.ghostBike.update(view); this.ghostBike.instanceColor.array.fill(1); this.ghostBike.instanceColor.needsUpdate = true;
+    const basis = new THREE.Matrix4().makeBasis(frame.forward, frame.up, frame.side);
+    this.ghostBike.quaternion.setFromRotationMatrix(basis);
+    this.ghostBike.position.copy(frame.origin).sub(this.origin).addScaledVector(frame.side, -0.85);
+    this.ghostBike.scale.set(frame.stretch * this.riderScale, this.riderScale, this.riderScale);
+    return this.ghostBike;
   }
   render(race) {
     const distance = race.distance + finishTravel(race);

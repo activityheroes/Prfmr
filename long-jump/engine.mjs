@@ -1,11 +1,11 @@
-import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=weather-1";
+import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=rivals-1";
 import { World, Body, Vec3, Sphere } from "../javelin/cannon-es.mjs";
-import { landingHeels } from "./jumper.mjs?v=weather-1";
+import { landingHeels } from "./jumper.mjs?v=rivals-1";
 
 export const LONG_JUMP_COURSE = {
   id: "long-jump", distance: 45, finishAt: 39.5, fatigueAt: 42, finishMove: false,
   baseSpeed: 6.5, acceleration: 6, maxSpeeds: [9, 9.5, 10],
-  zones: longZones([[6, 16], [24, 35]], 6.5)
+  zones: longZones([[6, 14], [24, 33]], 6.5)
 };
 // The physical board cannot grant late grace, so give the release cue extra lead time.
 export const TAKEOFF_ZONE = { start: 40, end: 44.75, edgeWindow: 1.2, perfectEdge: 0.15, releaseLead: 0.2 };

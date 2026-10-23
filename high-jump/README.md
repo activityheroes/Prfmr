@@ -4,7 +4,7 @@ Serve the repository root and open `/high-jump/`. This event shares the existing
 
 ## Attempt
 
-The athlete runs automatically through a 38 m J-shaped approach. Two longer fixed blue zones occupy 4-12m and 19-28m. HOLD marks entry; red/yellow/green bands mark bad, Good/Great and Perfect releases. Timing windows scale with approach speed. The final takeoff remains separate.
+The athlete runs automatically through a 38 m J-shaped approach. Two longer fixed blue zones occupy 4-10.5m and 19-26.5m. HOLD marks entry; red/yellow/green bands mark bad, Good/Great and Perfect releases. Timing windows scale with approach speed. The final takeoff remains separate.
 
 Hold through the gold takeoff zone (34-36.6 m), then release at the white line. Run-up speed and timing quality determine the jump impulse. The athlete turns into a back-first flop, arches over the crossbar, kicks the trailing heels clear, and lands on the mat. Holding past the approach or missing the takeoff earns no mark.
 

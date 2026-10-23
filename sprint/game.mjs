@@ -1,17 +1,18 @@
-import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs?v=weather-1";
-import { TrackScene } from "./track-scene.mjs?v=weather-1";
-import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs?v=weather-1";
-import { SWIMMER_ART } from "../swimming/swimmer.mjs?v=weather-1";
-import { createTimingGuide } from "./timing-guide.mjs?v=weather-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs?v=weather-1";
-import { readEventSave, writeEventSave } from "./save.mjs?v=weather-1";
+import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs?v=rivals-1";
+import { TrackScene } from "./track-scene.mjs?v=rivals-1";
+import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs?v=rivals-1";
+import { SWIMMER_ART } from "../swimming/swimmer.mjs?v=rivals-1";
+import { createTimingGuide } from "./timing-guide.mjs?v=rivals-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs?v=rivals-1";
+import { readEventSave, writeEventSave } from "./save.mjs?v=rivals-1";
+import { attachReplay, advanceReplay, finishReplay } from "./replay.mjs?v=rivals-1";
 
 const $ = id => document.getElementById(id);
 const sports = {
   sprint: { course: SPRINT_COURSE, Race: SprintRace, athlete: undefined, noun: "runner", event: "SPRINT", action: "RUN", status: "RUNNING", finish: "DIP", storageKey: "dot-sprint-zones-v4" },
   swimming: { course: SWIMMING_COURSE, Race: SwimmingRace, athlete: SWIMMER_ART, noun: "swimmer", event: "SWIM", action: "SWIM", status: "SWIMMING", finish: "THE WALL", storageKey: "dot-swimming-zones-v1" }
 };
-const eventModules = { cycling: "../cycling/event.mjs?v=weather-1", hurdles: "../hurdles/event.mjs?v=weather-1", "speed-skating": "../speed-skating/event.mjs?v=weather-1", biathlon: "../biathlon/event.mjs?v=weather-1" };
+const eventModules = { cycling: "../cycling/event.mjs?v=rivals-1", hurdles: "../hurdles/event.mjs?v=rivals-1", "speed-skating": "../speed-skating/event.mjs?v=rivals-1", biathlon: "../biathlon/event.mjs?v=rivals-1" };
 const sport = eventModules[document.body.dataset.sport]
   ? (await import(eventModules[document.body.dataset.sport])).default
   : sports[document.body.dataset.sport] ?? sports.sprint;
@@ -30,6 +31,7 @@ const saved = readEventSave(storageKey);
 const previousGear = saved.loadout ?? (course.id !== "sprint" ? {} : readSave("dot-sprint-charge-v3").loadout ?? readSave("dot-sprint-pace-v2").loadout ?? readSave("dot-sprint-v1").loadout);
 const loadout = Object.fromEntries(Object.keys(GEAR).map(key => [key, clamp(Math.floor(Number(previousGear?.[key]) || 0), 0, 2)]));
 let best = Number.isFinite(saved.best) && saved.best > 0 ? saved.best : null;
+let ghostRecord = saved.ghost ?? null;
 let race, paused = false, lastTime = performance.now(), resultShown = false;
 const zoneMarkers = course.zones.map(zone => {
   const marker = document.createElement("i"); marker.className = "zone-marker";
@@ -38,7 +40,7 @@ const zoneMarkers = course.zones.map(zone => {
   document.querySelector(".timeline").append(marker); return marker;
 });
 document.querySelector(".marker.finish").style.left = course.finishAt / course.distance * 100 + "%";
-const persist = () => writeEventSave(storageKey, { best, loadout });
+const persist = () => writeEventSave(storageKey, { best, loadout, ghost: ghostRecord });
 const audio = {
   context: null,
   unlock() {
@@ -65,7 +67,7 @@ function sync(now = performance.now()) {
     if (race.presentation && !resultShown) { if (advanceFinish(race, dt)) showResult(); }
     else race.advance(dt);
   }
-  handleEvents();
+  advanceReplay(race); handleEvents();
 }
 function clearInput() {
   const id = input.id; input.kind = null; input.id = null;
@@ -76,6 +78,7 @@ function reset(keepWeather = false) {
   clearInput(); paused = false; $("pause-panel").hidden = true;
   if (dialog.open) dialog.close();
   race = new Race(loadout).setWeather(seed); lastTime = performance.now(); resultShown = false;
+  attachReplay(race, gear => new Race(gear), loadout, ghostRecord); race.previousBest = best;
   updateStats(); render(); trigger.focus({ preventScroll: true });
 }
 function updateStats() {
@@ -109,7 +112,7 @@ function handleEvents() {
     if (event === "finish") {
       clearInput();
       const finish = beginFinish(race, best, matchMedia("(prefers-reduced-motion: reduce)").matches);
-      if (finish.personalBest) { best = finish.value; persist(); updateStats(); }
+      if (finish.personalBest) { best = finish.value; ghostRecord = finishReplay(race); persist(); updateStats(); }
       audio.tone(880, 0.2); announce("Finished in " + race.result.time.toFixed(3) + " seconds. " + (finish.personalBest ? "Personal best!" : "Well done!"));
     }
   }

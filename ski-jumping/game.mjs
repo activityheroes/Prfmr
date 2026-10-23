@@ -1,10 +1,10 @@
-import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=weather-1";
-import { SkiJumpRace, SKI_COURSE, TAKEOFF_ZONE, HILL } from "./engine.mjs?v=weather-1";
-import { landingPoint } from "./course.mjs?v=weather-1";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=weather-1";
-import { SkiJumpScene } from "./scene.mjs?v=weather-1";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=weather-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=weather-1";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=rivals-1";
+import { SkiJumpRace, SKI_COURSE, TAKEOFF_ZONE, HILL } from "./engine.mjs?v=rivals-1";
+import { landingPoint } from "./course.mjs?v=rivals-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=rivals-1";
+import { SkiJumpScene } from "./scene.mjs?v=rivals-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=rivals-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=rivals-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-ski-jump-zones-v1";
@@ -37,7 +37,7 @@ function clearInput() {
 function reset(keepWeather = false) {
   const seed = keepWeather === true ? race?.weather.seed : undefined;
   clearInput(); paused = false; resultShown = false; $("pause-panel").hidden = true; if (dialog.open) dialog.close();
-  race = new SkiJumpRace(loadout).setWeather(seed); lastTime = performance.now();
+  race = new SkiJumpRace(loadout).setWeather(seed); race.previousBest = best; lastTime = performance.now();
   const stats = getStats(loadout, SKI_COURSE);
   $("stat-band").textContent = stats.timingTolerance.toFixed(2) + "x edge tolerance";
   $("stat-blocks").textContent = stats.acceleration.toFixed(2) + " m/s2";

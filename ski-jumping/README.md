@@ -4,7 +4,7 @@ Serve the repository root and open `/ski-jumping/`. The second winter event shar
 
 ## Attempt Loop
 
-The skier automatically descends a 140-meter inrun. Two long fixed blue zones occupy 20-52m and 76-110m. Press at the HOLD marker, hold through the strip and release in the colored exit bands: red is bad, yellow is Good/Great and green is Perfect. The gold takeoff remains a separate action.
+The skier automatically descends a 140-meter inrun. Two long fixed blue zones occupy 20-46m and 76-103m. Press at the HOLD marker, hold through the strip and release in the colored exit bands: red is bad, yellow is Good/Great and green is Perfect. The gold takeoff remains a separate action.
 
 Entry, hold and release contribute 30%, 30% and 40% to the score. Perfect, Great and Good earn 15%, 10% and 6% temporary boosts, plus carried momentum. Speed-adjusted timing windows and advance cues match the other events.
 

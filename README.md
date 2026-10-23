@@ -29,9 +29,15 @@ Open <http://127.0.0.1:8080/>. The root page opens Sprint, and the event navigat
 
 Use the on-screen control or Space to press, hold and release. Timed zones build momentum; field events add their own takeoff or release. Each event's README describes its mechanics and equipment.
 
-Races now use two longer boost zones, with a marked HOLD entry and RELEASE exit. Red bands indicate poor releases, yellow covers Good/Great, and green covers Perfect. Both the track and HUD use the actual scoring function, including entry accuracy and equipped timing tolerance. Hurdles retains ten individually timed jumps. Final throws, takeoffs and Biathlon shooting remain separate actions.
+Races use two sustained boost zones, shortened by approximately 20% from the initial two-zone layout, with a marked HOLD entry and RELEASE exit. Timing tolerances are unchanged. Red bands indicate poor releases, yellow covers Good/Great, and green covers Perfect. Both the track and HUD use the actual scoring function, including entry accuracy and equipped timing tolerance. Hurdles retains ten individually timed jumps. Final throws, takeoffs and Biathlon shooting remain separate actions.
 
-Long-zone records use each event's existing storage key with `-long-zones-v1` appended. Equipment and selected bar heights migrate, but older records remain untouched and are not compared with the new course layout.
+Current records use each event's existing storage key with `-rivals-v1` appended. Equipment and selected bar heights migrate from `-long-zones-v1` or older saves, but older records remain untouched and are not compared with the new course layout.
+
+### Personal-Best Rivals
+
+Sprint, Cycling, Swimming, Hurdles, Speed Skating and Biathlon save the inputs from a new personal best and replay it as a translucent lavender athlete on subsequent attempts. The ghost uses the original gear and seeded weather, its own simulation and the sport's actual pose renderer. The timeline reports the physical distance gap; Biathlon's official result also includes shooting penalties. A first completed run establishes the ghost. Replays stay local, have a 512-input cap, and malformed or incompatible records are ignored. No network requests or frame recordings are needed.
+
+Field events show a lavender personal-best distance or height marker instead. New course records start fresh; equipment and archived records remain available in localStorage. Racing against a ghost does not change collisions, scoring or the live athlete's speed.
 
 ### Weather
 
@@ -53,6 +59,7 @@ Biathlon adds rolling hills and a five-target shooting stop at 200m. Hold to ste
 - Longer holds award three times the usual positive momentum increment, within the existing equipment cap, so fewer zones still produce noticeable acceleration. Penalties are unchanged.
 - Flame adds 20% of baseline speed to target pace. Racing events also gain 20% speed-limit headroom (Flow grants 5%). Technical events keep their original safe approach-speed ceiling so hurdles, takeoff collisions and landing areas remain playable.
 - The boost display reports the actual awarded burst percentage and current pace above baseline, not just the nominal reward. Pauses freeze physics and fuel. The biathlon range suspends fuel consumption. Restart clears all mode state. Reduced motion retains the HUD and a static, sparse dot trail without animated flames.
+- Successful bursts add short ground-level speed streaks and a brief speed-readout pulse. These emphasize the real speed increase without changing the camera, athlete scale, physics caps or timing windows; reduced motion suppresses both animations.
 
 Cycling now starts rolling at 36 km/h and settles at 54 km/h. Ride view follows the rider from a readable side angle; Track view retains the full banked oval.
 
@@ -65,6 +72,8 @@ Every event keeps the scene visible before opening results. Runners coast into a
 Javelin holds the landing camera on the planted spear and its measured mark before returning to the thrower. Long jump retains the landing line and heel marks in the sand; pole vault and high jump show the mat landing and any fallen crossbar. Ski jumping follows the full flight, ski contact and runout, keeping the measured landing line visible during the reaction. Sequences last 3.4-5.8 seconds after the official result is determined. The main control becomes Results after the initial landing beat, so it can be skipped with touch, click, or Space.
 
 The presentation clock is separate from race physics: official times, marks, and collisions do not change during reactions. Bests are saved immediately, even if the player restarts early. Switching away pauses the sequence; restarting cancels it. Reduced-motion settings suppress celebration particles and the long javelin camera sweep.
+
+After the landing or finish beat, a result banner shows the measured performance and difference from the previous best. Personal bests receive gold celebration sparks and a rising three-note fanfare (respecting the Sound setting). Failed attempts show no mark without celebratory particles.
 
 ## Tests
 

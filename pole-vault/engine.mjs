@@ -1,11 +1,11 @@
-import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=weather-1";
+import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=rivals-1";
 import { World, Body, Vec3, Sphere, Box } from "../javelin/cannon-es.mjs";
-import { clearancePoints } from "./vaulter.mjs?v=weather-1";
+import { clearancePoints } from "./vaulter.mjs?v=rivals-1";
 
 export const VAULT_COURSE = {
   id: "pole-vault", distance: 45, finishAt: 39, fatigueAt: 43, finishMove: false,
   baseSpeed: 6.5, acceleration: 6, maxSpeeds: [9, 9.5, 10],
-  zones: longZones([[6, 16], [24, 35]], 6.5)
+  zones: longZones([[6, 14], [24, 33]], 6.5)
 };
 export const PLANT_ZONE = { start: 39.5, end: 42, edgeWindow: 1, perfectEdge: 0.15 };
 export const VAULT = { boxX: 45, barX: 46.6, poleTime: 1, gravity: 9.81, landingY: 0.98, minBar: 2.5, maxBar: 6 };

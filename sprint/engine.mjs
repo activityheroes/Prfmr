@@ -1,11 +1,11 @@
-import { createWeather, weatherAt, randomWeatherSeed, weatherSummary } from "./weather.mjs?v=weather-1";
+import { createWeather, weatherAt, randomWeatherSeed, weatherSummary } from "./weather.mjs?v=rivals-1";
 
 export const DIP = { peak: 0.09, duration: 0.32, reach: 0.34, perfectWindow: 0.022 };
 export function longZones(ranges, speed) {
   return ranges.map(([start, end], i) => ({ id: i + 1, start, end, longHold: true,
     difficulty: i / Math.max(1, ranges.length - 1), edgeWindow: speed * 0.4, perfectEdge: speed * 0.1 }));
 }
-export const ZONES = longZones([[15, 35], [60, 82]], 8);
+export const ZONES = longZones([[15, 31], [60, 78]], 8);
 export const SPRINT_COURSE = {
   id: "sprint", distance: 100, finishAt: 98.5, fatigueAt: 90, finishMove: true,
   baseSpeed: 8, acceleration: 7.8, maxSpeeds: [11.2, 11.8, 12.4], zones: ZONES

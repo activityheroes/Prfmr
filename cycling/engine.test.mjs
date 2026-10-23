@@ -31,7 +31,7 @@ test("cycling starts rolling and automatically completes 200m at a 15m/s baselin
 });
 test("two cycling zones retain the sprint's timing rules with cycling-sized distances", () => {
   const race = started(); assert.deepEqual(race.zones.map(z => z.start), [30, 120]);
-  assert.deepEqual(race.zones.map(z => z.end - z.start), [40, 44]);
+  assert.deepEqual(race.zones.map(z => z.end - z.start), [32, 35]);
   for (const zone of race.zones) {
     const score = scoreZone(zone, zone.start, zone.end);
     assert.equal(score.grade, "Perfect"); close(score.score, 100);

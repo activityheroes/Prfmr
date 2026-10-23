@@ -1,10 +1,10 @@
-import { clamp, longZones } from "../sprint/engine.mjs?v=weather-1";
-import { ease } from "../sprint/finish.mjs?v=weather-1";
+import { clamp, longZones } from "../sprint/engine.mjs?v=rivals-1";
+import { ease } from "../sprint/finish.mjs?v=rivals-1";
 
 export const SKI_COURSE = {
   id: "ski-jumping", distance: 140, finishAt: 122, fatigueAt: 145, finishMove: false,
   baseSpeed: 17.5, acceleration: 7, maxSpeeds: [23, 24.5, 26], momentumScale: 1.5,
-  zones: longZones([[20, 52], [76, 110]], 17.5)
+  zones: longZones([[20, 46], [76, 103]], 17.5)
 };
 export const TAKEOFF_ZONE = { start: 125, end: 138, edgeWindow: 3.5, perfectEdge: 0.6, releaseLead: 0.2 };
 export const HILL = { lip: 140, gravity: 9.81, contact: 0.06, kPoint: 90, runwayWidth: 3.6 };

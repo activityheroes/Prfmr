@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=weather-1";
-import { JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=weather-1";
-import { THROWER_ART } from "./thrower.mjs?v=weather-1";
-import { ease } from "../sprint/finish.mjs?v=weather-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=rivals-1";
+import { JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=rivals-1";
+import { THROWER_ART } from "./thrower.mjs?v=rivals-1";
+import { ease } from "../sprint/finish.mjs?v=rivals-1";
 
 const environment = {
   create(track) {
@@ -75,6 +75,7 @@ export class JavelinScene extends TrackScene {
     this.camera.position.set(x+8,y+10,20);this.camera.lookAt(x,y,0);
     this.camera.left=-span/2;this.camera.right=span/2;this.camera.top=h;this.camera.bottom=-h;this.camera.updateProjectionMatrix();
   }
+  bestPoint(mark, race) { return { x: JAVELIN_COURSE.distance + mark - race.distance, y: 0.09 }; }
   render(race){
     this.frameCamera(race);
     this.javelin.visible=!!race.launch;

@@ -23,7 +23,7 @@ function finish(r, frame = 1 / 120) {
 test("automatic running and two fixed zones build approach momentum", () => {
   const r = started(); to(r, 4); assert.ok(r.speed > 5);
   assert.deepEqual(r.zones.map(z => z.start), [4, 19]);
-  r.press(); to(r, 12); r.release(); close(r.momentum, r.stats.maxSpeed - r.stats.baseSpeed); assert.equal(r.lastAttempt.grade, "Perfect");
+  r.press(); to(r, r.zones[0].end); r.release(); close(r.momentum, r.stats.maxSpeed - r.stats.baseSpeed); assert.equal(r.lastAttempt.grade, "Perfect");
   assert.ok(r.speed > r.course.baseSpeed); r.advance(0.3); assert.ok(r.momentum > 0.76);
 });
 test("J approach is continuous and maintains constant distance around the curve", () => {

@@ -1,7 +1,7 @@
-import { RhythmRace, clamp } from "../sprint/engine.mjs?v=weather-1";
+import { RhythmRace, clamp } from "../sprint/engine.mjs?v=rivals-1";
 import { World, Body, Vec3, Sphere } from "../javelin/cannon-es.mjs";
-import { HURDLES, HURDLES_COURSE } from "./course.mjs?v=weather-1";
-import { getHurdlerPose, collisionPoints } from "./hurdler.mjs?v=weather-1";
+import { HURDLES, HURDLES_COURSE } from "./course.mjs?v=rivals-1";
+import { getHurdlerPose, collisionPoints } from "./hurdler.mjs?v=rivals-1";
 export { HURDLES, HURDLES_COURSE };
 
 export class HurdlesRace extends RhythmRace {

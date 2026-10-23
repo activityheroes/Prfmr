@@ -1,10 +1,10 @@
-import { longZones } from "../sprint/engine.mjs?v=weather-1";
+import { longZones } from "../sprint/engine.mjs?v=rivals-1";
 
 export const OVAL = { length: 400, radius: 28, straight: 200 - Math.PI * 28 };
 export const SKATING_COURSE = {
   id: "speed-skating", distance: 500, finishAt: 495, fatigueAt: 450, finishMove: false,
   baseSpeed: 12, acceleration: 4.8, maxSpeeds: [15.6, 16.4, 17.2], momentumScale: 1.2,
-  zones: longZones([[55, 105], [320, 375]], 12)
+  zones: longZones([[55, 95], [320, 364]], 12)
 };
 export function ovalPoint(distance) {
   const s = ((distance % OVAL.length) + OVAL.length) % OVAL.length, r = OVAL.radius, l = OVAL.straight;

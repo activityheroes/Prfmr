@@ -1,8 +1,9 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=weather-1";
-import { finishTravel } from "../sprint/finish.mjs?v=weather-1";
-import { BIATHLON_COURSE, RANGE, trailHeight } from "./course.mjs?v=weather-1";
-import { getSkierPose, skierDots, SKIER_SCALE as SCALE } from "./skier.mjs?v=weather-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=rivals-1";
+import { finishTravel } from "../sprint/finish.mjs?v=rivals-1";
+import { BIATHLON_COURSE, RANGE, trailHeight } from "./course.mjs?v=rivals-1";
+import { getSkierPose, skierDots, SKIER_SCALE as SCALE } from "./skier.mjs?v=rivals-1";
+import { ghostDots } from "../sprint/rival-scene.mjs?v=rivals-1";
 
 const ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 2.7, feedbackX: 0, shadowStart: -0.6, shadowLength: 1.3, planar: true, draw() {} };
@@ -95,6 +96,11 @@ export class BiathlonScene extends TrackScene {
     this.finish.position.set(400 - race.distance, trailHeight(400) - height, 0); this.finish.visible = race.distance > 360;
     this.cursor.visible = race.phase !== "shooting"; this.cursor.position.set(0, 0.095, 0);
     this.targets.forEach((target, i) => target.material.color.set(race.shots[i] ? race.shots[i].hit ? "#b7fa76" : "#ee7d85" : "#163e43"));
+  }
+  renderGhost(ghost, race) {
+    return ghostDots(this, skierDots(ghost).map(p => ({ ...p, x: ghost.distance - race.distance + p.x * SCALE,
+      y: trailHeight(ghost.distance + p.x * SCALE) - trailHeight(race.distance) + p.y * SCALE,
+      z: p.z * SCALE - 0.85, radius: p.radius * SCALE })));
   }
   render(race) {
     const distance = race.distance + finishTravel(race), height = trailHeight(distance);

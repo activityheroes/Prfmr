@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=weather-1";
-import { VAULT_COURSE, VAULT, PLANT_ZONE } from "./engine.mjs?v=weather-1";
-import { vaulterDots, poleCurve, getVaulterPose } from "./vaulter.mjs?v=weather-1";
-import { ease } from "../sprint/finish.mjs?v=weather-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=rivals-1";
+import { VAULT_COURSE, VAULT, PLANT_ZONE } from "./engine.mjs?v=rivals-1";
+import { vaulterDots, poleCurve, getVaulterPose } from "./vaulter.mjs?v=rivals-1";
+import { ease } from "../sprint/finish.mjs?v=rivals-1";
 
 const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 3, feedbackX: 0, shadowStart: -1, shadowLength: 1.5, planar: true, draw() {} };
@@ -81,6 +81,7 @@ export class VaultScene extends TrackScene {
     }
     mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor.needsUpdate = true;
   }
+  bestPoint(mark, race) { return { x: VAULT.barX - race.distance, y: mark, width: 4.5 }; }
   render(race) {
     this.frameCamera(race);
     this.visibleDots = vaulterDots(race); this.instances(this.vaulter, this.visibleDots, race.distance);

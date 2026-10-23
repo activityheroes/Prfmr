@@ -5,7 +5,7 @@ Open `/javelin/` on the same local static server as sprint, cycling and swimming
 ## Controls
 
 1. Start the approach with a tap or Space. The athlete accelerates automatically.
-2. Press at each HOLD marker, hold through the blue strip and release at the colored exit bands. Two long strips occupy 6-16m and 24-35m. Red/yellow/green mark bad, Good/Great and Perfect timing. Successful timing adds speed and persistent momentum; misses do not stop the athlete.
+2. Press at each HOLD marker, hold through the blue strip and release at the colored exit bands. Two long strips occupy 6-14m and 24-33m. Red/yellow/green mark bad, Good/Great and Perfect timing. Successful timing adds speed and persistent momentum; misses do not stop the athlete.
 3. At the gold strip, press at 40m and release at the white 43.5m boundary. The red foul line is at 45m. Holding past it, or never throwing, records a foul with no mark.
 4. Watch the flight and measured landing. Higher distances improve your personal best. Throw again starts a fresh attempt.
 

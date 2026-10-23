@@ -1,10 +1,11 @@
 import * as THREE from "./vendor/three.module.min.js";
-import { SPRINT_COURSE, clamp } from "./engine.mjs?v=weather-1";
-import { drawRunner } from "./runner.mjs?v=weather-1";
-import { createPool, createPoolWall } from "../swimming/pool.mjs?v=weather-1";
-import { finishTravel, reactionAge } from "./finish.mjs?v=weather-1";
-import { BoostEffects } from "./boost-effects.mjs?v=weather-1";
-import { ZoneMarkers } from "./zone-markers.mjs?v=weather-1";
+import { SPRINT_COURSE, clamp } from "./engine.mjs?v=rivals-1";
+import { drawRunner } from "./runner.mjs?v=rivals-1";
+import { createPool, createPoolWall } from "../swimming/pool.mjs?v=rivals-1";
+import { finishTravel, reactionAge } from "./finish.mjs?v=rivals-1";
+import { BoostEffects } from "./boost-effects.mjs?v=rivals-1";
+import { ZoneMarkers } from "./zone-markers.mjs?v=rivals-1";
+import { RivalScene } from "./rival-scene.mjs?v=rivals-1";
 
 const RUNNER_ART = { width: 256, height: 256, x: 104, ground: 238, unit: 12,
   scaleX: 3.2, scaleY: 3.2, anchorX: 104 / 256, anchorY: 0.07,
@@ -78,13 +79,14 @@ export class TrackScene {
     this.shadow = this.plate(athlete.shadowStart, athlete.shadowLength, 0.8, 0, "#0b1311", 0.5, this.scene, 0.028);
     if (swimming) { this.shadow.position.y = -0.7; this.shadow.material.opacity = 0.12; }
 
-    this.sparkPositions = new Float32Array(24 * 3);
+    this.sparkPositions = new Float32Array(48 * 3);
     const sparks = new THREE.BufferGeometry();
     sparks.setAttribute("position", new THREE.BufferAttribute(this.sparkPositions, 3));
     this.sparks = new THREE.Points(sparks, new THREE.PointsMaterial({ color: "#acfbff", size: 0.095, transparent: true, depthWrite: false }));
     this.sparks.frustumCulled = false; this.scene.add(this.sparks);
     this.boostEffects = new BoostEffects(); this.scene.add(this.boostEffects);
     this.timingMarkers = new ZoneMarkers(course.zones.length); this.scene.add(this.timingMarkers);
+    this.rivalScene = new RivalScene(this);
     this.finish = new THREE.Group(); this.scene.add(this.finish);
     if (environment) environment.finish(this, this.finish);
     else if (swimming) createPoolWall(this, this.finish);
@@ -155,9 +157,12 @@ export class TrackScene {
     const celebrating = race.presentation?.success && reactionAge(race) > 0.4 && !race.presentation.reducedMotion;
     this.sparks.visible = celebrating || !race.presentation && race.lastAttempt?.grade === "Perfect" && age < 0.55;
     if (this.sparks.visible) {
+      const count = celebrating && race.presentation.personalBest ? 48 : 24;
+      this.sparks.geometry.setDrawRange(0, count);
+      this.sparks.material.color.set(celebrating && race.presentation.personalBest ? "#ffe19a" : "#acfbff");
       const t = celebrating ? (reactionAge(race) - 0.4) % 1.1 / 1.1 : clamp(age / 0.55, 0, 1);
       const origin = celebrating ? this.finishFocus ?? { x: art.feedbackX, y: 1.1 } : { x: art.feedbackX, y: 1.1 };
-      for (let i = 0; i < 24; i++) {
+      for (let i = 0; i < count; i++) {
         const angle = i * 2.399;
         this.sparkPositions[i * 3] = origin.x + Math.cos(angle) * (0.3 + t * 1.1);
         this.sparkPositions[i * 3 + 1] = origin.y + Math.sin(angle * 1.3) * 0.8 + t * 1.1;
@@ -171,6 +176,7 @@ export class TrackScene {
     this.positionCourse?.(race);
     this.timingMarkers.update(race, this);
     this.boostEffects.update(race, this);
+    this.rivalScene.update(race);
     this.renderer.render(this.scene, this.camera);
   }
 }

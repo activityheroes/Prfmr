@@ -32,28 +32,28 @@ test("one start tap is enough to complete the whole race at baseline speed", () 
 });
 test("two long world-space zones leave a recovery section between holds", () => {
   assert.deepEqual(ZONES.map(z => z.start), [15, 60]);
-  assert.deepEqual(ZONES.map(z => z.end - z.start), [20, 22]);
+  assert.deepEqual(ZONES.map(z => z.end - z.start), [16, 18]);
   assert.ok(getTimingWindow(ZONES[1], 8).perfectEdge < getTimingWindow(ZONES[0], 8).perfectEdge);
   const race = started(); race.advance(4);
   assert.deepEqual(race.zones.map(z => z.start), ZONES.map(z => z.start));
 });
 test("weighted score is exactly 30% entry + 30% coverage + 40% release", () => {
-  const s = scoreZone(ZONES[0], 14.4, 34.3);
+  const s = scoreZone(ZONES[0], 14.4, 30.3);
   close(s.score, (s.entry * 0.3 + s.hold * 0.3 + s.release * 0.4) * 100);
-  close(s.hold, 19.3 / 20);
-  const badEntry = scoreZone(ZONES[0], 16.6, 35);
-  const badRelease = scoreZone(ZONES[0], 15, 33.4);
+  close(s.hold, 15.3 / 16);
+  const badEntry = scoreZone(ZONES[0], 16.6, 31);
+  const badRelease = scoreZone(ZONES[0], 15, 29.4);
   assert.ok(badEntry.score > badRelease.score, "Release error costs more than equivalent entry error");
 });
 test("perfect, great, good, early, late, and missed outcomes are distinct", () => {
-  for (const [entry, exit, expected] of [[15, 35, "Perfect"], [15.2, 34.8, "Perfect"],
-    [16.3, 33.7, "Great"], [16.8, 33.2, "Good"], [15, 31.9, "Early"],
-    [15, 38.1, "Late"], [15, 15.2, "Miss"], [11.5, 35, "Miss"]]) {
+  for (const [entry, exit, expected] of [[15, 31, "Perfect"], [15.2, 30.8, "Perfect"],
+    [16.3, 29.7, "Great"], [16.7, 29.3, "Good"], [15, 27.9, "Early"],
+    [15, 34.1, "Late"], [15, 15.2, "Miss"], [11.5, 31, "Miss"]]) {
     assert.equal(scoreZone(ZONES[0], entry, exit).grade, expected, `${entry} / ${exit}`);
   }
 });
 test("first perfect gives 15% speed and long-hold momentum, only after release", () => {
-  const race = started(); to(race, 15); race.press(); to(race, 35);
+  const race = started(); to(race, 15); race.press(); to(race, 31);
   assert.equal(race.attempts, 0); assert.equal(race.momentum, 0); close(race.speed, 8);
   race.release(); assert.equal(race.lastAttempt.grade, "Perfect"); close(race.momentum, 2.4);
   close(race.speed, 9.2); close(race.temporaryBoost, 0); close(race.lastAttempt.score, 100, 0.001);
@@ -109,20 +109,20 @@ test("successful zones build momentum that carries between zones and decays grad
   assert.ok(race.momentum > 0); assert.ok(race.speed >= 8);
 });
 test("reward percentages and momentum increments match all success tiers", () => {
-  for (const [entry, exit, grade] of [[0, 0, "Perfect"], [1.6, -1.6, "Great"], [2.2, -2.2, "Good"], [0, -3.7, "Early"]]) {
+  for (const [entry, exit, grade] of [[0, 0, "Perfect"], [1.6, -1.6, "Great"], [2.1, -2.1, "Good"], [0, -3.7, "Early"]]) {
     const race = started(); playZone(race, 0, entry, exit);
     assert.equal(race.lastAttempt.grade, grade); close(race.momentum, REWARDS[grade].momentum * 3);
     close(race.speed, 8 * (1 + REWARDS[grade].boost));
   }
 });
 test("final-zone timing is harder for the same absolute error", () => {
-  const normal = scoreZone({ ...ZONES[0], ...getTimingWindow(ZONES[0], 8) }, 16.2, 33.8);
-  const final = scoreZone({ ...ZONES[1], ...getTimingWindow(ZONES[1], 8) }, 61.2, 80.8);
+  const normal = scoreZone({ ...ZONES[0], ...getTimingWindow(ZONES[0], 8) }, 16.2, 29.8);
+  const final = scoreZone({ ...ZONES[1], ...getTimingWindow(ZONES[1], 8) }, 61.2, 76.8);
   assert.ok(normal.score > final.score); assert.equal(normal.grade, "Perfect");
   assert.equal(final.grade, "Great");
 });
 test("timing gear widens edge tolerance without moving the track zones", () => {
-  const normal = scoreZone(ZONES[0], 16.2, 33.8), geared = scoreZone(ZONES[0], 16.2, 33.8, getStats({ band: 2 }).timingTolerance);
+  const normal = scoreZone(ZONES[0], 16.1, 29.9), geared = scoreZone(ZONES[0], 16.1, 29.9, getStats({ band: 2 }).timingTolerance);
   assert.ok(geared.score > normal.score); assert.equal(geared.grade, "Perfect");
   assert.equal(getStats({ band: -4 }).timingTolerance, 1); assert.equal(getStats({ band: 20 }).timingTolerance, 1.3);
 });

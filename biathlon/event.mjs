@@ -1,6 +1,6 @@
-import { BiathlonRace, BIATHLON_COURSE, RANGE } from "./engine.mjs?v=weather-1";
-import { BiathlonScene } from "./scene.mjs?v=weather-1";
-import { trailGrade } from "./course.mjs?v=weather-1";
+import { BiathlonRace, BIATHLON_COURSE, RANGE } from "./engine.mjs?v=rivals-1";
+import { BiathlonScene } from "./scene.mjs?v=rivals-1";
+import { trailGrade } from "./course.mjs?v=rivals-1";
 
 export default { course: BIATHLON_COURSE, Race: BiathlonRace, Scene: BiathlonScene, speedFactor: 3.6,
   noun: "skier", event: "BIATHLON", action: "SKI", status: "SKIING", finish: "FINISH", storageKey: "dot-biathlon-v1",

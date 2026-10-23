@@ -1,9 +1,9 @@
-import { longZones } from "../sprint/engine.mjs?v=weather-1";
+import { longZones } from "../sprint/engine.mjs?v=rivals-1";
 
 export const HIGH_JUMP_COURSE = {
   id: "high-jump", distance: 38, finishAt: 33, fatigueAt: 35, finishMove: false,
   baseSpeed: 6, acceleration: 6, maxSpeeds: [7.8, 8.3, 8.8],
-  zones: longZones([[4, 12], [19, 28]], 6)
+  zones: longZones([[4, 10.5], [19, 26.5]], 6)
 };
 export const TAKEOFF_ZONE = { start: 34, end: 36.6, edgeWindow: 1.05, perfectEdge: 0.15 };
 export const HIGH_JUMP = {

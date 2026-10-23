@@ -30,7 +30,7 @@ test("automatic swimming completes 50m without repeated input", () => {
 test("two fixed swim zones use the same weighted timing, with a narrower final zone", () => {
   const swim = new SwimmingRace();
   assert.deepEqual(swim.zones.map(z => z.start), [7.5, 30]);
-  assert.deepEqual(swim.zones.map(z => z.end - z.start), [8, 8.5]);
+  assert.deepEqual(swim.zones.map(z => z.end - z.start), [6.5, 7]);
   for (const [entry, exit] of [[0, 0], [0.4, -0.4], [0.7, -0.7], [0, -1.5], [0, 1]]) {
     const z = swim.zones[0], scaled = { ...z, start: z.start * 4, end: z.end * 4,
       edgeWindow: z.edgeWindow * 4, perfectEdge: z.perfectEdge * 4 };

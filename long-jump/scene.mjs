@@ -1,7 +1,7 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=weather-1";
-import { LONG_JUMP_COURSE, TAKEOFF_ZONE, JUMP } from "./engine.mjs?v=weather-1";
-import { jumperDots, getJumperPose } from "./jumper.mjs?v=weather-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=rivals-1";
+import { LONG_JUMP_COURSE, TAKEOFF_ZONE, JUMP } from "./engine.mjs?v=rivals-1";
+import { jumperDots, getJumperPose } from "./jumper.mjs?v=rivals-1";
 
 const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1, anchorX: 0, anchorY: 0,
   headHeight: 3, feedbackX: 0, shadowStart: -1, shadowLength: 1.5, planar: true, draw() {} };
@@ -57,6 +57,7 @@ export class LongJumpScene extends TrackScene {
     this.camera.position.set(x + 7, 8.5, 22); this.camera.lookAt(x, 1.5, 0);
     this.camera.left = -span / 2; this.camera.right = span / 2; this.camera.top = half; this.camera.bottom = -half; this.camera.updateProjectionMatrix();
   }
+  bestPoint(mark, race) { return { x: LONG_JUMP_COURSE.distance + mark - race.distance, y: 0.09, width: 3.5 }; }
   render(race) {
     this.frameCamera(race); this.visibleDots = jumperDots(race); this.jumper.count = this.visibleDots.length;
     const head = getJumperPose(race).head;

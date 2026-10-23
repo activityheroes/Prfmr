@@ -1,10 +1,12 @@
-import { clamp, releaseBands, scoreZone } from "./engine.mjs?v=weather-1";
-import { createBoostUI } from "./boost-ui.mjs?v=weather-1";
-import { createWeatherUI } from "./weather-ui.mjs?v=weather-1";
+import { clamp, releaseBands, scoreZone } from "./engine.mjs?v=rivals-1";
+import { createBoostUI } from "./boost-ui.mjs?v=rivals-1";
+import { createWeatherUI } from "./weather-ui.mjs?v=rivals-1";
+import { createRaceFeedback } from "./race-feedback.mjs?v=rivals-1";
 
 export function createTimingGuide({ trigger, tone, finishZone = null, holdKey = null }) {
   const boostUI = createBoostUI(tone);
   const weatherUI = createWeatherUI(tone);
+  const raceFeedback = createRaceFeedback(tone);
   const guide = document.createElement("div"); guide.className = "timing-guide";
   const label = document.createElement("span"); label.className = "timing-label";
   const track = document.createElement("span"); track.className = "timing-track"; track.setAttribute("aria-hidden", "true");
@@ -28,6 +30,7 @@ export function createTimingGuide({ trigger, tone, finishZone = null, holdKey = 
   return (race, paused) => {
     weatherUI(race, paused);
     boostUI(race, paused);
+    raceFeedback(race, paused);
     if (currentRace !== race) { currentRace = race; sounded = new Set(); }
     const finishing = race.phase === "line" && finishZone;
     const zone = finishing ? finishZone : race.nextZone;

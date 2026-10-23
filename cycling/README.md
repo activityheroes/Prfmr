@@ -6,7 +6,7 @@ The dot-matrix cycling animation from `dot-matrix-demo.html`, now on a banked ov
 
 Tap Start Race once for a rolling 10 m/s start, then the cyclist pedals automatically toward a 15 m/s baseline (54 km/h). Press on entering a blue zone, hold while riding through it, and release at the exit. Touch, mouse, and Space use the same input logic. The front edge of the front tire aligns with the ground marker that determines zone entry and exit.
 
-Two long zones occupy 30-70m and 120-164m. Both stay fixed on the oval and visible in Track view while the cyclist rides around it. Marked HOLD entries and red/yellow/green release bands agree with the weighted scoring. The control stays fixed on screen.
+Two long zones occupy 30-62m and 120-155m. Both stay fixed on the oval and visible in Track view while the cyclist rides around it. Marked HOLD entries and red/yellow/green release bands agree with the weighted scoring. The control stays fixed on screen.
 
 Entry / held overlap / release contribute 30% / 30% / 40% of the score. Perfect, great, good, and early releases reward +15%, +10%, +6%, and +2% speed respectively, subject to the equipped speed cap. Perfect, great, and good also add 2.4, 1.5, and 0.75 m/s of hidden momentum. Misses and late releases reduce momentum by 0.4 m/s. The shared sprint engine handles gradual decay, one attempt per zone, cancellation, and missed-zone penalties.
 

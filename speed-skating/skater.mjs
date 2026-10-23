@@ -1,5 +1,5 @@
-import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=weather-1";
-import { bendAmount } from "./course.mjs?v=weather-1";
+import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=rivals-1";
+import { bendAmount } from "./course.mjs?v=rivals-1";
 
 export const SKATE_CYCLE_METERS = 18;
 export const GLIDE = 0.42;

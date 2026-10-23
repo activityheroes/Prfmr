@@ -24,7 +24,7 @@ test("500m auto glide completes two stationary zones without input", () => {
   const r = started(); to(r, 50); close(r.speed, 12); to(r, 500);
   close(r.distance, 500); assert.equal(r.counts.Miss, 2); assert.ok(r.finishTime > 40);
   assert.equal(r.result.dip, null); assert.equal(r.result.torsoLead, 0);
-  assert.deepEqual(r.zones.map(z => [z.start, z.end]), [[55, 105], [320, 375]]);
+  assert.deepEqual(r.zones.map(z => [z.start, z.end]), [[55, 95], [320, 364]]);
   assert.deepEqual(r.zones.map(z => [z.start, z.end]), SKATING_COURSE.zones.map(z => [z.start, z.end]));
 });
 test("precise holds reward speed and momentum that carries between zones", () => {

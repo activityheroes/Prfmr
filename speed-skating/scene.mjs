@@ -1,8 +1,9 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=weather-1";
-import { ease, finishTravel } from "../sprint/finish.mjs?v=weather-1";
-import { SKATING_COURSE, ovalPoint } from "./course.mjs?v=weather-1";
-import { getSkaterPose, skaterDots } from "./skater.mjs?v=weather-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=rivals-1";
+import { ease, finishTravel } from "../sprint/finish.mjs?v=rivals-1";
+import { SKATING_COURSE, ovalPoint } from "./course.mjs?v=rivals-1";
+import { getSkaterPose, skaterDots } from "./skater.mjs?v=rivals-1";
+import { ghostDots } from "../sprint/rival-scene.mjs?v=rivals-1";
 
 const ATHLETE_SCALE = 1;
 const ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
@@ -82,6 +83,14 @@ export class SkatingScene extends TrackScene {
   timingPoint(distance, z, y, race) {
     const p = ovalPoint(distance), origin = ovalPoint(race.distance);
     return { x: p.x - Math.sin(p.heading) * z - origin.x, y, z: p.z + Math.cos(p.heading) * z - origin.z };
+  }
+  renderGhost(ghost, race) {
+    const p = ovalPoint(ghost.distance), c = Math.cos(p.heading), s = Math.sin(p.heading);
+    const origin = this.timingPoint(ghost.distance, -0.85, 0, race);
+    return ghostDots(this, skaterDots(ghost).map(dot => ({ ...dot,
+      x: origin.x + (c * dot.x - s * dot.z) * ATHLETE_SCALE,
+      y: dot.y * ATHLETE_SCALE, z: origin.z + (s * dot.x + c * dot.z) * ATHLETE_SCALE,
+      radius: dot.radius * ATHLETE_SCALE })));
   }
   render(race) {
     const distance = race.distance + finishTravel(race), origin = ovalPoint(distance), c = Math.cos(origin.heading), s = Math.sin(origin.heading);

@@ -6,7 +6,7 @@ The motion lab's dot-matrix front crawl, playable with the same automatic moveme
 
 Start once, then the swimmer accelerates automatically to a 1.9 m/s baseline. Press when the white timing cursor enters a blue strip, hold across it and release at the exit. Touch, mouse and Space share the same controls. The circular button stays fixed on screen; the strips occupy fixed pool distances and scroll with the following camera.
 
-Two long strips occupy 7.5-15.5m and 30-38.5m. HOLD marks entry and red/yellow/green release bands show bad, Good/Great and Perfect timing. Entry accuracy, held overlap and release accuracy contribute 30%, 30% and 40% of each score. Rewards remain +15% / +10% / +6% / +2% for perfect / great / good / early releases, subject to the speed cap.
+Two long strips occupy 7.5-14m and 30-37m. HOLD marks entry and red/yellow/green release bands show bad, Good/Great and Perfect timing. Entry accuracy, held overlap and release accuracy contribute 30%, 30% and 40% of each score. Rewards remain +15% / +10% / +6% / +2% for perfect / great / good / early releases, subject to the speed cap.
 
 The shared engine's optional `momentumScale` is 1.9 / 8 for swimming. This scales momentum rewards, losses and decay to swimming speed without changing percentage boosts or the existing sprint/cycling behavior. Perfect timing adds 0.57 m/s of momentum; misses remove 0.095 m/s, never below zero. Successful zones carry speed into the next section. Holding from the start, staying held between zones or repeated presses cannot farm rewards.
 

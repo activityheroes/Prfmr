@@ -13,7 +13,7 @@ The 50m freestyle event is at `/swimming/`, using the motion lab's front crawl a
 3. Hold while the runner travels through the strip, then release at its far edge.
 4. Run automatically between zones. Successful timing builds momentum for the next section.
 
-The two long zones occupy 15-35m and 60-82m. They are fixed world distances, scrolling past the camera-followed runner, not a charging bar or moving pace target. HOLD marks the entry; RELEASE marks the exit. Red, yellow and green bands show bad, Good/Great and Perfect release positions. The bands account for entry quality, gear and the same weighted scoring used by the engine. The second zone has slightly tighter timing.
+The two long zones occupy 15-31m and 60-78m. They are fixed world distances, scrolling past the camera-followed runner, not a charging bar or moving pace target. HOLD marks the entry; RELEASE marks the exit. Red, yellow and green bands show bad, Good/Great and Perfect release positions. The bands account for entry quality, gear and the same weighted scoring used by the engine. The second zone has slightly tighter timing.
 
 Mouse, touch, and Space support the same press/hold/release input. Each zone can be scored only once. Holding from the start, mashing, or continuing a hold into another zone cannot automatically earn boosts. A missed zone never stops baseline running.
 
