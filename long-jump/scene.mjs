@@ -1,5 +1,5 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=framing-1";
 import { LONG_JUMP_COURSE, TAKEOFF_ZONE, JUMP } from "./engine.mjs?v=boost-1";
 import { jumperDots, getJumperPose } from "./jumper.mjs?v=boost-1";
 
@@ -7,7 +7,7 @@ const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, sc
   headHeight: 3, feedbackX: 0, shadowStart: -1, shadowLength: 1.5, planar: true, draw() {} };
 const environment = {
   create(track) {
-    track.box(110, 0.1, 36, 30, -0.12, 0, "#284c39");
+    track.box(110, 0.1, 90, 30, -0.12, 0, "#284c39");
     const runway = track.plate(-46, 46, 2.6, 0, "#65434b");
     const edges = [-1.3, 1.3].map(z => track.plate(-46, 46, 0.045, z, "#d4cebf"));
     track.marks = Array.from({ length: 13 }, () => track.plate(0, 0.03, 2.6, 0, "#dec6bf", 0.18));
@@ -52,7 +52,7 @@ export class LongJumpScene extends TrackScene {
   frameCamera(race) {
     const small = this.width < 650, t = race?.launch ? Math.min(1, race.flightTime / 0.25) : 0;
     const x = (small ? 1.3 : 3) * (1 - t) + (race?.athlete ? race.athlete.x - race.distance + 1.6 : 3) * t;
-    const span = Math.max((small ? 9 : 17.2) + t * (small ? 1.5 : 2), this.width / this.height * 6.3);
+    const span = 1.3 * Math.max((small ? 9 : 17.2) + t * (small ? 1.5 : 2), this.width / this.height * 6.3);
     const half = span / (this.width / this.height) / 2;
     this.camera.position.set(x + 7, 8.5, 22); this.camera.lookAt(x, 1.5, 0);
     this.camera.left = -span / 2; this.camera.right = span / 2; this.camera.top = half; this.camera.bottom = -half; this.camera.updateProjectionMatrix();

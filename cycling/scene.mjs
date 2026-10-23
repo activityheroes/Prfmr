@@ -1,5 +1,5 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=framing-1";
 import { finishTravel } from "../sprint/finish.mjs?v=boost-1";
 import { CYCLING_COURSE } from "./engine.mjs?v=boost-1";
 import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=boost-1";
@@ -81,7 +81,7 @@ export class CyclingScene extends TrackScene {
     this.basis = new THREE.Matrix4(); this.shadow.material.opacity = 0.15; this.runner.visible = false;
     this.cyclist = new DotBike(); this.scene.add(this.cyclist);
     this.origin = new THREE.Vector3(VELODROME.straight / 2, 0, VELODROME.radius);
-    this.riderScale = 1.8; this.viewMode = "ride";
+    this.riderScale = 1.65; this.viewMode = "ride";
     this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
     this.zoneMeshes.forEach((mesh, i) => {
       const z = CYCLING_COURSE.zones[i];
@@ -94,7 +94,7 @@ export class CyclingScene extends TrackScene {
   resize(w, h) { super.resize(w, h); this.setView(this.viewMode); }
   setView(mode) {
     this.viewMode = mode === "track" ? "track" : "ride";
-    this.riderScale = this.viewMode === "ride" ? 1.8 : this.width < 650 ? 3.4 : 2.4;
+    this.riderScale = this.viewMode === "ride" ? 1.65 : this.width < 650 ? 3.4 : 2.4;
     this.boostScale = this.riderScale;
     this.bike = bikeFrame(this.lastDistance ?? 0, this.riderScale); this.frameCamera();
   }
@@ -109,7 +109,7 @@ export class CyclingScene extends TrackScene {
       this.camera.lookAt(focus);
     }
     this.camera.far = 350;
-    const span = overview ? Math.max(126, aspect * 60) : Math.max(this.width < 650 ? 21 : 32, aspect * 11.5);
+    const span = overview ? Math.max(126, aspect * 60) : 1.1 * Math.max(this.width < 650 ? 21 : 32, aspect * 11.5);
     this.camera.left = -span / 2; this.camera.right = span / 2; this.camera.top = span / aspect / 2; this.camera.bottom = -this.camera.top; this.camera.updateProjectionMatrix();
   }
   boostPoint(x, y, z) { return this.bikePoint(x - 2, y + 0.2, z); }

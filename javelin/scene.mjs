@@ -1,5 +1,5 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=framing-1";
 import { JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=boost-1";
 import { THROWER_ART } from "./thrower.mjs?v=boost-1";
 import { ease } from "../sprint/finish.mjs?v=boost-1";
@@ -70,6 +70,7 @@ export class JavelinScene extends TrackScene {
       x = tip * (1 - back) + 1.5 * back; y = 0.9 + 0.4 * back;
       span = Math.max(small ? 11 : 18, this.width / this.height * 6.5) + Math.sin(back * Math.PI) * Math.abs(tip) * 1.1;
     }
+    span *= 1.3;
     const h=span/(this.width/this.height)/2;
     this.camera.position.set(x+8,y+10,20);this.camera.lookAt(x,y,0);
     this.camera.left=-span/2;this.camera.right=span/2;this.camera.top=h;this.camera.bottom=-h;this.camera.updateProjectionMatrix();

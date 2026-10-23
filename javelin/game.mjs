@@ -1,6 +1,6 @@
 import { JavelinRace, JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=boost-1";
 import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=boost-1";
-import { JavelinScene } from "./scene.mjs?v=boost-1";
+import { JavelinScene } from "./scene.mjs?v=framing-1";
 import { createTimingGuide } from "../sprint/timing-guide.mjs?v=boost-1";
 import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=boost-1";
 

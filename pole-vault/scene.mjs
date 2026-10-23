@@ -1,5 +1,5 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=framing-1";
 import { VAULT_COURSE, VAULT, PLANT_ZONE } from "./engine.mjs?v=boost-1";
 import { vaulterDots, poleCurve, getVaulterPose } from "./vaulter.mjs?v=boost-1";
 import { ease } from "../sprint/finish.mjs?v=boost-1";
@@ -8,7 +8,7 @@ const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, sc
   anchorX: 0, anchorY: 0, headHeight: 3, feedbackX: 0, shadowStart: -1, shadowLength: 1.5, planar: true, draw() {} };
 const environment = {
   create(track) {
-    track.box(100, 0.1, 36, 25, -0.12, 0, "#284c39");
+    track.box(100, 0.1, 120, 25, -0.12, 0, "#284c39");
     const runway = track.plate(-45, 45, 2.6, 0, "#65434b", 1);
     const edges = [-1.3, 1.3].map(z => track.plate(-45, 45, 0.04, z, "#d4cebf", 1));
     const target = new THREE.Group(); track.scene.add(target);
@@ -65,6 +65,8 @@ export class VaultScene extends TrackScene {
       y += (1.7 - y) * settle;
       span += (Math.max(small ? 11 : 18, this.width / this.height * 6.5) - span) * settle;
     }
+    // Scale the view together so the grip, pole, bar and landing contacts still agree.
+    span *= 1.3;
     const half = span / (this.width / this.height) / 2;
     this.camera.position.set(x + 7, y + 7, 22); this.camera.lookAt(x, y, 0);
     this.camera.left = -span / 2; this.camera.right = span / 2; this.camera.top = half; this.camera.bottom = -half;

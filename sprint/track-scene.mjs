@@ -6,8 +6,8 @@ import { finishTravel, reactionAge } from "./finish.mjs?v=boost-1";
 import { BoostEffects } from "./boost-effects.mjs?v=boost-1";
 
 const RUNNER_ART = { width: 256, height: 256, x: 104, ground: 238, unit: 12,
-  scaleX: 3.8, scaleY: 3.8, anchorX: 104 / 256, anchorY: 0.07,
-  headHeight: 2.95, feedbackX: 0, shadowStart: -0.7, shadowLength: 1.35, draw: drawRunner };
+  scaleX: 3.2, scaleY: 3.2, anchorX: 104 / 256, anchorY: 0.07,
+  headHeight: 2.5, feedbackX: 0, shadowStart: -0.6, shadowLength: 1.15, draw: drawRunner };
 
 export class TrackScene {
   constructor(canvas, { course = SPRINT_COURSE, athlete = RUNNER_ART, environment = null } = {}) {
@@ -29,7 +29,7 @@ export class TrackScene {
     if (environment) this.updateEnvironment = environment.create(this);
     else if (swimming) this.updatePool = createPool(this);
     else {
-      this.box(60, 0.1, 24, 8, -0.12, 0, "#223c32");
+      this.box(60, 0.1, course.id === "sprint" ? 60 : 24, 8, -0.12, 0, "#223c32");
       for (let lane = -2; lane <= 2; lane++) {
         this.box(60, 0.08, 1.35, 8, -0.04, lane * 1.4, cycling ? lane === 0 ? "#4b5351" : "#373d3d" : lane === 0 ? "#653e46" : "#443038");
         this.plate(-22, 60, 0.025, lane * 1.4 - 0.7, "#bcb3a8", 0.6);
@@ -104,9 +104,11 @@ export class TrackScene {
     this.renderer.setSize(width, height, false);
     const cycling = this.course.id === "cycling";
     const swimming = this.course.id === "swimming";
+    const zoomOut = this.course.id === "sprint" ? 1.18 : swimming ? 1.25 : 1;
+    if (this.course.id === "sprint") this.camera.lookAt(width < 650 ? 2.2 : 3.8, 1, 0);
     if (cycling) this.camera.lookAt(width < 650 ? 1.5 : 2.4, 1.3, 0);
     if (swimming) this.camera.lookAt(width < 650 ? 0.35 : 1.8, 0.1, 0);
-    const span = Math.max(swimming ? width < 650 ? 7.5 : 14 : width < 650 ? cycling ? 11.5 : 11.8 : cycling ? 18.5 : 17.2, width / height * (swimming ? 4.8 : 6.2));
+    const span = zoomOut * Math.max(swimming ? width < 650 ? 7.5 : 14 : width < 650 ? cycling ? 11.5 : 11.8 : cycling ? 18.5 : 17.2, width / height * (swimming ? 4.8 : 6.2));
     const halfHeight = span / (width / height) / 2;
     this.camera.left = -span / 2; this.camera.right = span / 2;
     this.camera.top = halfHeight; this.camera.bottom = -halfHeight;

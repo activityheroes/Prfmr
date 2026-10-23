@@ -1,5 +1,5 @@
 import { CyclingRace, CYCLING_COURSE } from "./engine.mjs?v=boost-1";
-import { CyclingScene } from "./scene.mjs?v=boost-1";
+import { CyclingScene } from "./scene.mjs?v=framing-1";
 import { bankAngle } from "./velodrome.mjs?v=boost-1";
 
 export default { course: CYCLING_COURSE, Race: CyclingRace, Scene: CyclingScene, speedFactor: 3.6,

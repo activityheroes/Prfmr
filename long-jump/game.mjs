@@ -1,6 +1,6 @@
 import { LongJumpRace, LONG_JUMP_COURSE, TAKEOFF_ZONE, JUMP } from "./engine.mjs?v=boost-1";
 import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=boost-1";
-import { LongJumpScene } from "./scene.mjs?v=boost-1";
+import { LongJumpScene } from "./scene.mjs?v=framing-1";
 import { createTimingGuide } from "../sprint/timing-guide.mjs?v=boost-1";
 import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=boost-1";
 
