@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
-import { ease } from "../sprint/finish.mjs?v=boost-1";
-import { SKI_COURSE, TAKEOFF_ZONE, HILL, inrunPoint, landingPoint, distancePoint } from "./course.mjs?v=boost-1";
-import { getSkierPose, skierDots } from "./skier.mjs?v=boost-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=zones-2";
+import { ease } from "../sprint/finish.mjs?v=zones-2";
+import { SKI_COURSE, TAKEOFF_ZONE, HILL, inrunPoint, landingPoint, distancePoint } from "./course.mjs?v=zones-2";
+import { getSkierPose, skierDots } from "./skier.mjs?v=zones-2";
 
 const ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 3, feedbackX: 0, shadowStart: -0.6, shadowLength: 1.8, planar: true, draw() {} };
@@ -86,6 +86,7 @@ export class SkiJumpScene extends TrackScene {
     this.shadow.material.opacity = 0.13;
   }
   resize(w, h) { super.resize(w, h); this.frameCamera(null); }
+  timingPoint(distance, z, y) { const p = inrunPoint(distance); return { x: p.x - this.origin.x, y: p.y - this.origin.y + y, z }; }
   frameCamera(race) {
     const flying = !!race?.launch, clearance = flying ? Math.max(0, race.athlete.y - landingPoint(race.athlete.x).y) : 0;
     const airborne = flying && !race.landing;

@@ -1,18 +1,18 @@
 # Dot Athletics: 200m Track Cycling
 
-The dot-matrix cycling animation from `dot-matrix-demo.html`, now on a banked oval velodrome with automatic movement, six timing zones, and carryover momentum. Open `/cycling/` using the same static server as `/sprint/`. No additional install, build, or external assets are required. Opening `index.html` directly through `file://` will not load the JavaScript modules; run `python3 -m http.server 8082 --bind 127.0.0.1` from the repository root and visit `http://127.0.0.1:8082/cycling/` instead.
+The dot-matrix cycling animation from `dot-matrix-demo.html`, now on a banked oval velodrome with automatic movement, two long timing zones, and carryover momentum. Open `/cycling/` using the same static server as `/sprint/`. No additional install, build, or external assets are required. Opening `index.html` directly through `file://` will not load the JavaScript modules; run `python3 -m http.server 8082 --bind 127.0.0.1` from the repository root and visit `http://127.0.0.1:8082/cycling/` instead.
 
 ## Controls And Course
 
 Tap Start Race once for a rolling 10 m/s start, then the cyclist pedals automatically toward a 15 m/s baseline (54 km/h). Press on entering a blue zone, hold while riding through it, and release at the exit. Touch, mouse, and Space use the same input logic. The front edge of the front tire aligns with the ground marker that determines zone entry and exit.
 
-Six zones start at 30, 60, 90, 120, 150, and 180 meters. Normal zones are 10m long; the last is 7m with tighter timing. The wider strips leave room to react at the faster pace. All six zones stay fixed on the oval and visible in Track view while the cyclist rides around it. The control stays fixed on screen.
+Two long zones occupy 30-70m and 120-164m. Both stay fixed on the oval and visible in Track view while the cyclist rides around it. Marked HOLD entries and red/yellow/green release bands agree with the weighted scoring. The control stays fixed on screen.
 
-Entry / held overlap / release contribute 30% / 30% / 40% of the score. Perfect, great, good, and early releases reward +15%, +10%, +6%, and +2% speed respectively, subject to the equipped speed cap. Perfect, great, and good also add 0.8, 0.5, and 0.25 m/s of hidden momentum. Misses and late releases reduce momentum by 0.4 m/s. The shared sprint engine handles gradual decay, one attempt per zone, cancellation, and missed-zone penalties.
+Entry / held overlap / release contribute 30% / 30% / 40% of the score. Perfect, great, good, and early releases reward +15%, +10%, +6%, and +2% speed respectively, subject to the equipped speed cap. Perfect, great, and good also add 2.4, 1.5, and 0.75 m/s of hidden momentum. Misses and late releases reduce momentum by 0.4 m/s. The shared sprint engine handles gradual decay, one attempt per zone, cancellation, and missed-zone penalties.
 
 The finish phase begins at 197m, on the home straight. Riding continues automatically until the front tire reaches the 200m line. There is no running dip action in this event. The cyclist coasts and celebrates before results. Pause, resume, restart, race results, and per-zone scoring work as in the sprint game.
 
-Three consecutive successful zones activate Flow; three consecutive Perfects ignite six seconds of Flame Mode with a visible dot trail and increased speed ceiling. See the root README for shared mode rules. Burst feedback shows the actual speed increase, and the speed readout changes color with the active mode.
+One successful zone activates Flow; two consecutive Perfects ignite six seconds of Flame Mode with a visible dot trail and increased speed ceiling. See the root README for shared mode rules. Burst feedback shows the actual speed increase, and the speed readout changes color with the active mode.
 
 ## Velodrome
 
@@ -31,7 +31,7 @@ Ride view follows the cyclist from a lower side angle so the body, wheels and ca
 - Wheelset: raises normal maximum speed from 75.6 to 81 or 86.4 km/h, before mode bonuses.
 - Cycling kit: slower momentum decay and less late-race fatigue.
 
-Cycling equipment and personal best use `dot-cycling-zones-v1`, independently of sprint records. This is a local client-side demo, not a verified competitive leaderboard.
+Cycling equipment and personal best use `dot-cycling-zones-v1-long-zones-v1`, independently of sprint records. This is a local client-side demo, not a verified competitive leaderboard.
 
 ## Shared Files And Verification
 

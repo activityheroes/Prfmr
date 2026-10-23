@@ -1,9 +1,10 @@
 import * as THREE from "./vendor/three.module.min.js";
-import { SPRINT_COURSE, clamp } from "./engine.mjs?v=boost-1";
-import { drawRunner } from "./runner.mjs?v=boost-1";
-import { createPool, createPoolWall } from "../swimming/pool.mjs";
-import { finishTravel, reactionAge } from "./finish.mjs?v=boost-1";
-import { BoostEffects } from "./boost-effects.mjs?v=boost-1";
+import { SPRINT_COURSE, clamp } from "./engine.mjs?v=zones-2";
+import { drawRunner } from "./runner.mjs?v=zones-2";
+import { createPool, createPoolWall } from "../swimming/pool.mjs?v=zones-2";
+import { finishTravel, reactionAge } from "./finish.mjs?v=zones-2";
+import { BoostEffects } from "./boost-effects.mjs?v=zones-2";
+import { ZoneMarkers } from "./zone-markers.mjs?v=zones-2";
 
 const RUNNER_ART = { width: 256, height: 256, x: 104, ground: 238, unit: 12,
   scaleX: 3.2, scaleY: 3.2, anchorX: 104 / 256, anchorY: 0.07,
@@ -83,6 +84,7 @@ export class TrackScene {
     this.sparks = new THREE.Points(sparks, new THREE.PointsMaterial({ color: "#acfbff", size: 0.095, transparent: true, depthWrite: false }));
     this.sparks.frustumCulled = false; this.scene.add(this.sparks);
     this.boostEffects = new BoostEffects(); this.scene.add(this.boostEffects);
+    this.timingMarkers = new ZoneMarkers(course.zones.length); this.scene.add(this.timingMarkers);
     this.finish = new THREE.Group(); this.scene.add(this.finish);
     if (environment) environment.finish(this, this.finish);
     else if (swimming) createPoolWall(this, this.finish);
@@ -125,7 +127,7 @@ export class TrackScene {
     this.updatePool?.(race);
     this.marks.forEach((mark, i) => { mark.position.x = i * 5 - 15 - race.distance % 5; });
     this.zoneMeshes.forEach((mesh, i) => {
-      const zone = race.zones[i], color = zone.result ? ({ Perfect: "#c5fcff", Great: "#81f6b6", Good: "#ffd473", Early: "#e8aa62", Late: "#ed667d", Miss: "#677c87" })[zone.result.grade] : "#139ff5";
+      const zone = race.zones[i], color = zone.result ? ({ Perfect: "#81f6b6", Great: "#ffd473", Good: "#ffd473", Early: "#ed667d", Late: "#ed667d", Miss: "#ed667d" })[zone.result.grade] : "#139ff5";
       mesh.group.position.x = zone.start - race.distance;
       mesh.group.visible = zone.end - race.distance > -14 && zone.start - race.distance < 24;
       mesh.surface.material.color.set(color);
@@ -134,7 +136,7 @@ export class TrackScene {
       mesh.core.material.opacity = zone.status === "holding" ? 0.9 : 0.48;
       const window = race.timingWindow(zone), next = race.nextZone === zone;
       mesh.entryBand.scale.x = mesh.exitBand.scale.x = window.perfectEdge * 2;
-      mesh.entryBand.material.opacity = mesh.exitBand.material.opacity = zone.status === "done" ? 0.08 : 0.25;
+      mesh.entryBand.visible = mesh.exitBand.visible = false;
       mesh.entry.material.color.set(next && ["prepare", "press"].includes(race.cue) ? "#ffd473" : "#d9fcff");
       mesh.exit.material.color.set(next && race.cue === "release" ? "#ffd473" : "#d9fcff");
     });
@@ -167,6 +169,7 @@ export class TrackScene {
     this.finish.position.x = race.course.distance - race.distance;
     this.finish.visible = race.distance > race.course.distance - 13;
     this.positionCourse?.(race);
+    this.timingMarkers.update(race, this);
     this.boostEffects.update(race, this);
     this.renderer.render(this.scene, this.camera);
   }

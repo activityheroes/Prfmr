@@ -4,7 +4,7 @@ Serve the repository root and open `/ski-jumping/`. The second winter event shar
 
 ## Attempt Loop
 
-The skier automatically descends a 140-meter inrun. Six fixed blue zones begin at 20, 38, 56, 74, 92 and 110 meters. Press at entry, hold through the strip and release at its white end line. The first five strips are 8 meters long; the final strip is 6.5 meters with tighter timing.
+The skier automatically descends a 140-meter inrun. Two long fixed blue zones occupy 20-52m and 76-110m. Press at the HOLD marker, hold through the strip and release in the colored exit bands: red is bad, yellow is Good/Great and green is Perfect. The gold takeoff remains a separate action.
 
 Entry, hold and release contribute 30%, 30% and 40% to the score. Perfect, Great and Good earn 15%, 10% and 6% temporary boosts, plus carried momentum. Speed-adjusted timing windows and advance cues match the other events.
 
@@ -25,7 +25,7 @@ The hill, lift parameters, equipment effects, K90 marker and no-mark conditions 
 - Jump skis increase maximum approach speed.
 - Flight suit improves endurance and reduces flight drag.
 
-Touch, mouse and Space use the same input path. Dragging outside the button cancels a hold. Switching away pauses the attempt; restart clears it. Results can be skipped after the landing beat. Equipment and personal best persist in localStorage under `dot-ski-jump-zones-v1`. Reduced motion suppresses celebration particles and uses a settled reaction pose.
+Touch, mouse and Space use the same input path. Dragging outside the button cancels a hold. Switching away pauses the attempt; restart clears it. Results can be skipped after the landing beat. Equipment and personal best persist in localStorage under `dot-ski-jump-zones-v1-long-zones-v1`. Reduced motion suppresses celebration particles and uses a settled reaction pose.
 
 ## Files and Tests
 

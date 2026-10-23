@@ -1,8 +1,9 @@
+import { longZones } from "../sprint/engine.mjs?v=zones-2";
+
 export const HIGH_JUMP_COURSE = {
   id: "high-jump", distance: 38, finishAt: 33, fatigueAt: 35, finishMove: false,
   baseSpeed: 6, acceleration: 6, maxSpeeds: [7.8, 8.3, 8.8],
-  zones: [5, 10, 15, 20, 25, 30].map((start, i) => ({ id: i + 1, start,
-    end: start + (i === 5 ? 1.4 : 2.2), edgeWindow: i === 5 ? 0.45 : 0.75, perfectEdge: i === 5 ? 0.07 : 0.12 }))
+  zones: longZones([[4, 12], [19, 28]], 6)
 };
 export const TAKEOFF_ZONE = { start: 34, end: 36.6, edgeWindow: 1.05, perfectEdge: 0.15 };
 export const HIGH_JUMP = {

@@ -30,7 +30,8 @@ function react(Race, delay, gear = {}, finish = false) {
 for (const Race of races) {
   const name = new Race().course.id;
   test(`${name}: ordinary cue reaction is rewarded, exact timing still wins`, () => {
-    const precise = react(Race, 0.12), player = react(Race, 0.18), delayed = react(Race, 0.24);
+    const longHold = new Race().zones[0].longHold;
+    const precise = react(Race, 0.12), player = react(Race, longHold ? 0.3 : 0.18), delayed = react(Race, longHold ? 0.6 : 0.24);
     assert.equal(precise.counts.Perfect, precise.zones.length);
     assert.equal(successCount(player), player.zones.length);
     assert.ok(player.counts.Perfect < player.zones.length);
@@ -43,18 +44,18 @@ for (const Race of races) {
     assert.equal(successCount(r), r.zones.length);
     assert.deepEqual(r.zones.map(z => [z.start, z.end]), r.course.zones.map(z => [z.start, z.end]));
     const first = getTimingWindow(r.zones[0], r.stats.maxSpeed), last = getTimingWindow(r.zones.at(-1), r.stats.maxSpeed);
-    close(first.edgeWindow / r.stats.maxSpeed, 0.24);
-    close(last.edgeWindow / r.stats.maxSpeed, 0.18);
+    close(first.edgeWindow / r.stats.maxSpeed, r.zones[0].longHold ? 0.48 : 0.24);
+    close(last.edgeWindow / r.stats.maxSpeed, r.zones[0].longHold ? 0.42 : 0.18);
     assert.ok(first.perfectEdge > last.perfectEdge);
   });
 }
 
 test("a whole-zone hold is not penalized twice for a slightly late release", () => {
   const r = new SprintRace(), zone = { ...r.zones[0], ...r.timingWindow(r.zones[0]) };
-  const result = scoreZone(zone, zone.start, zone.end + 0.8);
+  const result = scoreZone(zone, zone.start, zone.end + 2);
   close(result.hold, 1); assert.equal(result.grade, "Great");
   close(result.score, 100 * (0.3 * result.entry + 0.3 * result.hold + 0.4 * result.release));
-  assert.equal(scoreZone(zone, zone.start, zone.end + 2).grade, "Late");
+  assert.equal(scoreZone(zone, zone.start, zone.end + 4).grade, "Late");
   assert.equal(scoreZone(zone, zone.start, zone.start + 0.1).grade, "Miss");
 });
 test("cue lead and prep time scale with speed, and scoring freezes on press", () => {
@@ -65,7 +66,7 @@ test("cue lead and prep time scale with speed, and scoring freezes on press", ()
   assert.deepEqual(r.activeHold.attempt.timing, timing);
   r.speed = 11.2; assert.deepEqual(r.timingWindow(r.activeHold), timing);
   r.distance = 18; assert.equal(r.cue, "hold");
-  r.distance = 19; assert.equal(r.cue, "release");
+  r.distance = 34; assert.equal(r.cue, "release");
   r.cancelInput(); assert.equal(r.lastAttempt.grade, "Miss"); assert.equal(r.lastAttempt.score, 0);
 });
 test("equipment scales the same timing bands used for scoring", () => {

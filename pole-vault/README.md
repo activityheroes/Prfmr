@@ -8,7 +8,7 @@ Open `/pole-vault/` on the same static server as the other events.
 
 - Choose a crossbar height from 2.50 to 6.00 meters, in 0.25-meter steps.
 - Start the automatic run-up with the circular button or Space.
-- Hold while crossing each blue strip, then release at its exit. Six zones build momentum using the existing 30% entry, 30% overlap, 40% release scoring.
+- Hold while crossing each blue strip, then release at its exit. Two long zones (6-16m and 24-35m) build momentum using the existing 30% entry, 30% overlap, 40% release scoring.
 - Hold through the gold strip at 39.5 meters and release at 42 meters to plant the pole.
 - Approach speed and plant accuracy determine the vault's available height. The bend, inversion, free flight and mat landing then play automatically.
 - A clearance records the selected crossbar height. Raise the bar or retry the same height. A missed plant, bar knockdown or passage below the bar awards no mark.
@@ -27,7 +27,7 @@ The pole-assisted rise is an arcade choreography scaled by approach energy and t
 
 Three.js and Cannon are reused from the sprint and javelin folders. This event adds no new library downloads or external assets. Keep those shared folders when serving the game.
 
-Personal best, selected height and equipment are stored locally under `dot-pole-vault-zones-v1`, independently of the other sports. Leaving the tab pauses the attempt and cancels any active hold.
+Personal best, selected height and equipment are stored locally under `dot-pole-vault-zones-v1-long-zones-v1`, independently of the other sports. Leaving the tab pauses the attempt and cancels any active hold.
 
 ## Tests
 

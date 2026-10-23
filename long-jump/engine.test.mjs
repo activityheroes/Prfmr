@@ -11,20 +11,20 @@ function to(r, d, frame = 1 / 120) {
 }
 function boost(r, i, frame = 1 / 120) { const z = r.zones[i]; to(r, z.start, frame); r.press(); to(r, z.end, frame); r.release(); }
 function jumped(gear = {}, zones = true, end = 44.75, frame = 1 / 120) {
-  const r = started(gear); if (zones) for (let i = 0; i < 6; i++) boost(r, i, frame);
+  const r = started(gear); if (zones) for (let i = 0; i < 2; i++) boost(r, i, frame);
   to(r, 40, frame); r.press(); to(r, end, frame); r.release(); return r;
 }
 function finish(r, frame = 1 / 120) { for (let i = 0; i < 2000 && !r.terminal; i++) r.advance(frame); assert.ok(r.terminal); return r; }
 
-test("automatic approach uses six stationary boost strips", () => {
-  const r = started(); to(r, 5); assert.ok(r.speed > 5.5); assert.deepEqual(r.zones.map(z => z.start), [6, 12, 18, 24, 30, 36]);
-  boost(r, 0); assert.equal(r.lastAttempt.grade, "Perfect"); close(r.speed, 6.5 * 1.15); close(r.momentum, 0.8);
+test("automatic approach uses two stationary boost strips", () => {
+  const r = started(); to(r, 5); assert.ok(r.speed > 5.5); assert.deepEqual(r.zones.map(z => z.start), [6, 24]);
+  boost(r, 0); assert.equal(r.lastAttempt.grade, "Perfect"); close(r.speed, 6.5 * 1.15); close(r.momentum, 2.4);
   r.advance(0.4); assert.ok(r.momentum > 0.75);
 });
 test("perfect run-up and takeoff complete a valid jump through Cannon flight and landing", () => {
   const r = jumped(); assert.equal(r.phase, "flight"); assert.equal(r.launch.timing.grade, "Perfect");
   assert.equal(r.world.gravity.y, -9.81); finish(r); assert.equal(r.result.foul, false);
-  assert.ok(r.result.mark > 7 && r.result.mark < 9); assert.equal(r.result.counts.Perfect, 6);
+  assert.ok(r.result.mark > 7 && r.result.mark < 9); assert.equal(r.result.counts.Perfect, 2);
   assert.ok(r.events.includes("land") && r.landTime >= 0.65); close(r.athlete.y, JUMP.landingHeight);
 });
 test("mark is measured from the board to the rear heel and rounded down", () => {
@@ -48,7 +48,7 @@ test("the board is a hard boundary regardless of timing equipment", () => {
 });
 test("continuous holding and no takeoff produce fouls without free boosts", () => {
   const held = new LongJumpRace(); held.press(); to(held, 45);
-  assert.equal(held.counts.Miss, 6); assert.equal(held.result.foul, true); assert.equal(held.result.mark, null);
+  assert.equal(held.counts.Miss, 2); assert.equal(held.result.foul, true); assert.equal(held.result.mark, null);
   const missing = started(); to(missing, 45); assert.equal(missing.result.reason, "Over the board");
 });
 test("canceled blue/gold input cannot award a boost or launch a jump", () => {

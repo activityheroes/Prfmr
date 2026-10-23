@@ -1,13 +1,14 @@
-import { PoleVaultRace, VAULT_COURSE, PLANT_ZONE, VAULT, normalizeBar } from "./engine.mjs?v=boost-1";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=boost-1";
-import { VaultScene } from "./scene.mjs?v=framing-1";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=boost-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=boost-1";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=zones-2";
+import { PoleVaultRace, VAULT_COURSE, PLANT_ZONE, VAULT, normalizeBar } from "./engine.mjs?v=zones-2";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=zones-2";
+import { VaultScene } from "./scene.mjs?v=zones-2";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=zones-2";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=zones-2";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-pole-vault-zones-v1";
-const colors = { Perfect: "#d9fbff", Great: "#81f6b6", Good: "#ffd473", Early: "#e8aa62", Late: "#ff7f86", Miss: "#9eabb0" };
-let saved = {}; try { saved = JSON.parse(localStorage.getItem(storageKey) || "{}") || {}; } catch {}
+const colors = { Perfect: "#81f6b6", Great: "#ffd473", Good: "#ffd473", Early: "#ed667d", Late: "#ff7f86", Miss: "#ed667d" };
+const saved = readEventSave(storageKey);
 const loadout = Object.fromEntries(Object.keys(GEAR).map(key => [key, clamp(Math.floor(Number(saved.loadout?.[key]) || 0), 0, 2)]));
 let best = Number.isFinite(saved.best) && saved.best >= VAULT.minBar && saved.best <= VAULT.maxBar ? saved.best : null;
 let barHeight = normalizeBar(saved.barHeight), scene, race, paused = false, lastTime = performance.now(), resultShown = false, attempt = 1, audioContext;
@@ -17,7 +18,7 @@ const markers = VAULT_COURSE.zones.map(z => {
   const el = document.createElement("i"); el.className = "zone-marker"; el.style.left = z.start / 45 * 100 + "%";
   el.style.width = (z.end - z.start) / 45 * 100 + "%"; document.querySelector(".timeline").append(el); return el;
 });
-const persist = () => { try { localStorage.setItem(storageKey, JSON.stringify({ best, barHeight, loadout })); } catch {} };
+const persist = () => writeEventSave(storageKey, { best, barHeight, loadout });
 const announce = text => { $("announcer").textContent = text; };
 function tone(frequency, duration = 0.12) {
   if (!$("sound").checked) return;
@@ -139,7 +140,7 @@ function render() {
   $("speed").textContent = (planted ? race.athlete.y : race.speed).toFixed(1); $("best").textContent = best === null ? "--.--" : best.toFixed(2);
   $("distance").textContent = race.distance.toFixed(1) + " M"; $("progress").style.width = clamp(race.distance / 45 * 100, 0, 100) + "%";
   document.querySelector(".timeline").setAttribute("aria-valuenow", String(Math.round(race.distance)));
-  $("zone-count").textContent = "ZONES " + race.attempts + " / 6"; $("meet-label").textContent = planted ? barHeight.toFixed(2) + " M CROSSBAR" : race.combo ? "STREAK " + race.combo : "RHYTHM VAULT";
+  $("zone-count").textContent = "ZONES " + race.attempts + " / 2"; $("meet-label").textContent = planted ? barHeight.toFixed(2) + " M CROSSBAR" : race.combo ? "STREAK " + race.combo : "RHYTHM VAULT";
   markers.forEach((m, i) => { m.style.background = colors[race.zones[i].result?.grade] ?? "#65c9ff"; });
   $("gear").disabled = $("bar-height").disabled = p !== "ready";
   trigger.disabled = !scene || planted || race.terminal; trigger.classList.toggle("is-held", race.holding && !paused);
@@ -148,7 +149,7 @@ function render() {
   $("trigger-top").textContent = p === "ready" ? "READY" : planted ? race.barFailed ? "BAR MISSED" : race.barPassed ? "CLEARED" : race.plant.timing.grade.toUpperCase()
     : planting ? cue === "release" ? "RELEASE!" : race.holding ? "LOWER POLE" : cue === "press" ? "PRESS" : "GET READY"
       : ({ run: "RUNNING", press: "PRESS", hold: "HOLD", release: "RELEASE", lift: "LET GO" })[cue] ?? "FINISHED";
-  $("trigger-bottom").textContent = planting ? "GOLD PLANT ZONE" : planted ? barHeight.toFixed(2) + " M CROSSBAR" : race.terminal ? "ATTEMPT COMPLETE" : z ? "ZONE " + z.id + " / 6" : "6 BOOST ZONES";
+  $("trigger-bottom").textContent = planting ? "GOLD PLANT ZONE" : planted ? barHeight.toFixed(2) + " M CROSSBAR" : race.terminal ? "ATTEMPT COMPLETE" : z ? "ZONE " + z.id + " / 2" : "2 BOOST ZONES";
   trigger.setAttribute("aria-label", p === "ready" ? "Start approach" : planting ? "Hold through the gold zone and release at the white line to plant the pole" : "Hold through each blue zone and release at its end. Space also controls the athlete.");
   const active = planting || planted || race.terminal ? "line" : race.activeHold || cue === "press" ? "zone" : "run";
   document.querySelectorAll(".phases li").forEach(li => li.classList.toggle("active", li.dataset.phase === active));

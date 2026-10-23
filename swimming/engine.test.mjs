@@ -18,47 +18,49 @@ function play(race, i, entry = 0, exit = 0, frame = 1 / 120) {
   to(race, zone.end + exit, frame); race.release(); return zone.result;
 }
 function completed(gear = {}, frame = 1 / 120) {
-  const race = started(gear); for (let i = 0; i < 6; i++) play(race, i, 0, 0, frame);
+  const race = started(gear); for (let i = 0; i < 2; i++) play(race, i, 0, 0, frame);
   to(race, 50, frame); return race;
 }
 test("automatic swimming completes 50m without repeated input", () => {
   const race = started(); to(race, 7); close(race.speed, 1.9);
-  to(race, 50); close(race.distance, 50); assert.equal(race.counts.Miss, 6);
+  to(race, 50); close(race.distance, 50); assert.equal(race.counts.Miss, 2);
   assert.ok(race.finishTime > 26 && race.finishTime < 29);
   assert.equal(race.result.dip, null); assert.equal(race.result.torsoLead, 0);
 });
-test("six fixed swim zones use the same weighted timing, with a narrower final zone", () => {
-  const swim = new SwimmingRace(), run = new SprintRace();
-  assert.deepEqual(swim.zones.map(z => z.start), [7.5, 15, 22.5, 30, 37.5, 45]);
-  assert.deepEqual(swim.zones.map(z => z.end - z.start), [1.25, 1.25, 1.25, 1.25, 1.25, 0.75]);
+test("two fixed swim zones use the same weighted timing, with a narrower final zone", () => {
+  const swim = new SwimmingRace();
+  assert.deepEqual(swim.zones.map(z => z.start), [7.5, 30]);
+  assert.deepEqual(swim.zones.map(z => z.end - z.start), [8, 8.5]);
   for (const [entry, exit] of [[0, 0], [0.4, -0.4], [0.7, -0.7], [0, -1.5], [0, 1]]) {
-    const a = scoreZone(run.zones[0], 15 + entry, 20 + exit);
-    const b = scoreZone(swim.zones[0], 7.5 + entry / 4, 8.75 + exit / 4);
+    const z = swim.zones[0], scaled = { ...z, start: z.start * 4, end: z.end * 4,
+      edgeWindow: z.edgeWindow * 4, perfectEdge: z.perfectEdge * 4 };
+    const a = scoreZone(scaled, scaled.start + entry, scaled.end + exit);
+    const b = scoreZone(z, z.start + entry / 4, z.end + exit / 4);
     assert.equal(a.grade, b.grade); close(a.score, b.score);
     close(b.score, 100 * (b.entry * 0.3 + b.hold * 0.3 + b.release * 0.4));
   }
 });
 test("perfect swimming gives 15% speed and scaled momentum that carries forward", () => {
   const race = started(); play(race, 0);
-  assert.equal(race.lastAttempt.grade, "Perfect"); close(race.speed, 1.9 * 1.15); close(race.momentum, 0.19);
+  assert.equal(race.lastAttempt.grade, "Perfect"); close(race.speed, 1.9 * 1.15); close(race.momentum, 0.57);
   race.advance(1); assert.ok(race.momentum > 0.16); assert.ok(race.speed > 1.9);
   play(race, 1); assert.ok(race.momentum > 0.27); assert.ok(race.speed > 2.185);
 });
-test("six successful zones beat baseline and remain under the swimming speed cap", () => {
+test("two successful zones beat baseline and remain under the swimming speed cap", () => {
   const race = completed(), baseline = started(); to(baseline, 50);
-  assert.equal(race.counts.Perfect, 6); assert.equal(race.bestCombo, 6);
+  assert.equal(race.counts.Perfect, 2); assert.equal(race.bestCombo, 2);
   assert.ok(race.rhythmScore > 99.9); assert.ok(race.peakSpeed <= 2.65 * (1 + MODES.flameGain));
   assert.ok(race.finishTime < baseline.finishTime - 2);
 });
 test("holding from the start and holding past the exit cannot farm boosts", () => {
-  const race = new SwimmingRace(); race.press(); to(race, 50); assert.equal(race.counts.Miss, 6);
+  const race = new SwimmingRace(); race.press(); to(race, 50); assert.equal(race.counts.Miss, 2);
   const over = started(); to(over, 7.5); over.press(); to(over, 17);
-  assert.equal(over.counts.Late, 1); assert.equal(over.counts.Miss, 1);
-  over.release(); assert.equal(over.attempts, 2); play(over, 2); assert.equal(over.counts.Perfect, 1);
+  assert.equal(over.counts.Late, 1); assert.equal(over.counts.Miss, 0);
+  over.release(); assert.equal(over.attempts, 1); play(over, 1); assert.equal(over.counts.Perfect, 1);
 });
 test("early, late and canceled swim attempts never award a perfect boost", () => {
-  const early = started(); play(early, 0, 0, -0.375); assert.equal(early.lastAttempt.grade, "Early"); close(early.lastAttempt.boost, 0.02);
-  const late = started(); play(late, 0, 0, 0.43); assert.equal(late.lastAttempt.grade, "Late");
+  const early = started(); play(early, 0, 0, -0.9); assert.equal(early.lastAttempt.grade, "Early"); close(early.lastAttempt.boost, 0.02);
+  const late = started(); play(late, 0, 0, 0.86); assert.equal(late.lastAttempt.grade, "Late");
   const canceled = started(); to(canceled, 7.5); canceled.press(); to(canceled, 8.75); canceled.cancelInput(); canceled.release();
   assert.equal(canceled.lastAttempt.grade, "Miss"); assert.equal(canceled.lastAttempt.score, 0); assert.equal(canceled.attempts, 1);
 });

@@ -6,11 +6,11 @@ The motion lab's dot-matrix front crawl, playable with the same automatic moveme
 
 Start once, then the swimmer accelerates automatically to a 1.9 m/s baseline. Press when the white timing cursor enters a blue strip, hold across it and release at the exit. Touch, mouse and Space share the same controls. The circular button stays fixed on screen; the strips occupy fixed pool distances and scroll with the following camera.
 
-Six strips begin at 7.5, 15, 22.5, 30, 37.5 and 45 meters. Ordinary strips are 1.25m long. The last is 0.75m with tighter tolerances. Entry accuracy, held overlap and release accuracy contribute 30%, 30% and 40% of each score. Rewards remain +15% / +10% / +6% / +2% for perfect / great / good / early releases, subject to the speed cap.
+Two long strips occupy 7.5-15.5m and 30-38.5m. HOLD marks entry and red/yellow/green release bands show bad, Good/Great and Perfect timing. Entry accuracy, held overlap and release accuracy contribute 30%, 30% and 40% of each score. Rewards remain +15% / +10% / +6% / +2% for perfect / great / good / early releases, subject to the speed cap.
 
-The shared engine's optional `momentumScale` is 1.9 / 8 for swimming. This scales momentum rewards, losses and decay to swimming speed without changing percentage boosts or the existing sprint/cycling behavior. Perfect timing adds 0.19 m/s of momentum; misses remove 0.095 m/s, never below zero. Successful zones carry speed into the next section. Holding from the start, staying held between zones or repeated presses cannot farm rewards.
+The shared engine's optional `momentumScale` is 1.9 / 8 for swimming. This scales momentum rewards, losses and decay to swimming speed without changing percentage boosts or the existing sprint/cycling behavior. Perfect timing adds 0.57 m/s of momentum; misses remove 0.095 m/s, never below zero. Successful zones carry speed into the next section. Holding from the start, staying held between zones or repeated presses cannot farm rewards.
 
-The last meter blends into a forward reach. Contact with the 50m plane ends the timer automatically; no running dip or extra tap is required. The result includes all six zone grades, score components, streak, peak speed and a local personal best. Losing focus pauses the race and invalidates an active hold; resume explicitly.
+The last meter blends into a forward reach. Contact with the 50m plane ends the timer automatically; no running dip or extra tap is required. The result includes both zone grades, score components, streak, peak speed and a local personal best. Losing focus pauses the race and invalidates an active hold; resume explicitly.
 
 ## Animation And Pool
 
@@ -25,7 +25,7 @@ The last meter blends into a forward reach. Contact with the 50m plane ends the 
 - Suits raise the maximum speed from 2.65 to 2.8 or 2.95 m/s.
 - Caps retain momentum and limit late-race fatigue.
 
-These are arcade equipment modifiers, not a physical simulation of equipment benefits. Gear and best time use `dot-swimming-zones-v1`; sprint and cycling saves remain separate. Records are client-side, not a verified leaderboard.
+These are arcade equipment modifiers, not a physical simulation of equipment benefits. Gear and best time use `dot-swimming-zones-v1-long-zones-v1`; sprint and cycling saves remain separate. Records are client-side, not a verified leaderboard.
 
 ## Verification
 

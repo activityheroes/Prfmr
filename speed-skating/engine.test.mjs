@@ -20,27 +20,27 @@ function completed(gear = {}, frame = 1 / 120) {
 }
 const gap = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 
-test("500m auto glide completes six stationary zones without input", () => {
+test("500m auto glide completes two stationary zones without input", () => {
   const r = started(); to(r, 50); close(r.speed, 12); to(r, 500);
-  close(r.distance, 500); assert.equal(r.counts.Miss, 6); assert.ok(r.finishTime > 40);
+  close(r.distance, 500); assert.equal(r.counts.Miss, 2); assert.ok(r.finishTime > 40);
   assert.equal(r.result.dip, null); assert.equal(r.result.torsoLead, 0);
-  assert.deepEqual(r.zones.map(z => [z.start, z.end]), [[55, 67], [125, 137], [205, 217], [280, 292], [355, 367], [445, 453]]);
+  assert.deepEqual(r.zones.map(z => [z.start, z.end]), [[55, 105], [320, 375]]);
   assert.deepEqual(r.zones.map(z => [z.start, z.end]), SKATING_COURSE.zones.map(z => [z.start, z.end]));
 });
 test("precise holds reward speed and momentum that carries between zones", () => {
   const r = started(); play(r, r.zones[0]); assert.equal(r.lastAttempt.grade, "Perfect"); close(r.speed, 13.8);
   assert.ok(r.momentum >= 0.8); r.advance(1); assert.ok(r.momentum > 0.69); assert.ok(r.speed > 12);
   const perfect = completed(), idle = started(); to(idle, 500);
-  assert.equal(perfect.counts.Perfect, 6); assert.equal(perfect.bestCombo, 6);
+  assert.equal(perfect.counts.Perfect, 2); assert.equal(perfect.bestCombo, 2);
   assert.ok(perfect.finishTime < idle.finishTime - 2); assert.ok(perfect.rhythmScore > 99.9);
   assert.ok(perfect.peakSpeed <= perfect.stats.maxSpeed * (1 + MODES.flameGain));
 });
 test("early, late, canceled and endless holds cannot award a perfect zone", () => {
   const early = started(); play(early, early.zones[0], 0, -3); assert.notEqual(early.lastAttempt.grade, "Perfect");
-  const late = started(); play(late, late.zones[0], 0, 4); assert.equal(late.lastAttempt.grade, "Late");
+  const late = started(); play(late, late.zones[0], 0, 5.5); assert.equal(late.lastAttempt.grade, "Late");
   const canceled = started(); to(canceled, 55); canceled.press(); to(canceled, 67); canceled.cancelInput(); canceled.release();
   assert.equal(canceled.lastAttempt.score, 0); assert.equal(canceled.lastAttempt.grade, "Miss"); assert.equal(canceled.attempts, 1);
-  const held = new SpeedSkatingRace(); held.press(); to(held, 500); assert.equal(held.counts.Miss, 6); close(held.momentum, 0);
+  const held = new SpeedSkatingRace(); held.press(); to(held, 500); assert.equal(held.counts.Miss, 2); close(held.momentum, 0);
 });
 test("skating equipment scales timing, acceleration, blade speed and endurance independently", () => {
   const club = new SpeedSkatingRace(), elite = new SpeedSkatingRace({ band: 2, blocks: 2, spikes: 2, kit: 2 });

@@ -20,10 +20,10 @@ function finish(r, frame = 1 / 120) {
   assert.equal(r.terminal, true); return r;
 }
 
-test("automatic running and six fixed zones build approach momentum", () => {
-  const r = started(); to(r, 5); assert.ok(r.speed > 5.5);
-  assert.deepEqual(r.zones.map(z => z.start), [5, 10, 15, 20, 25, 30]);
-  r.press(); to(r, 7.2); r.release(); close(r.momentum, 0.8); assert.equal(r.lastAttempt.grade, "Perfect");
+test("automatic running and two fixed zones build approach momentum", () => {
+  const r = started(); to(r, 4); assert.ok(r.speed > 5);
+  assert.deepEqual(r.zones.map(z => z.start), [4, 19]);
+  r.press(); to(r, 12); r.release(); close(r.momentum, r.stats.maxSpeed - r.stats.baseSpeed); assert.equal(r.lastAttempt.grade, "Perfect");
   assert.ok(r.speed > r.course.baseSpeed); r.advance(0.3); assert.ok(r.momentum > 0.76);
 });
 test("J approach is continuous and maintains constant distance around the curve", () => {
@@ -40,7 +40,7 @@ test("perfect run-up clears the bar, lands on the mat and waits before finishing
   while (r.phase === "flight") r.advance(1 / 120);
   assert.equal(r.phase, "landing"); assert.equal(r.result, null); close(r.athlete.y, HIGH_JUMP.landingY);
   finish(r); assert.equal(r.result.cleared, true); assert.equal(r.result.mark, 1.65);
-  assert.equal(r.counts.Perfect, 6); assert.ok(r.clearanceMargin > 0); assert.ok(r.landTime >= 0.7);
+  assert.equal(r.counts.Perfect, 2); assert.ok(r.clearanceMargin > 0); assert.ok(r.landTime >= 0.7);
   assert.ok(r.events.includes("clear") && r.events.includes("land"));
 });
 test("run-up rhythm increases jump height and can change a failed attempt to a clearance", () => {
@@ -67,11 +67,11 @@ test("missing the takeoff or holding throughout the approach cannot earn a clear
   const missed = finish(started()), held = new HighJumpRace(); held.press(); finish(held);
   for (const r of [missed, held]) {
     assert.equal(r.result.reason, "Missed takeoff"); assert.equal(r.result.mark, null); assert.equal(r.launch, null);
-    assert.equal(r.counts.Miss, 6);
+    assert.equal(r.counts.Miss, 2);
   }
 });
 test("canceled blue and gold input cannot boost or jump", () => {
-  const r = started(); to(r, 5); r.press(); to(r, 7.2); r.cancelInput(); r.release();
+  const r = started(); to(r, 4); r.press(); to(r, 12); r.cancelInput(); r.release();
   assert.equal(r.lastAttempt.grade, "Miss"); assert.equal(r.lastAttempt.score, 0);
   to(r, 34); r.press(); to(r, 35); r.cancelInput(); r.release(); assert.equal(r.launch, null);
   assert.equal(r.takeoffStart, null); assert.equal(r.holding, false); finish(r); assert.equal(r.result.cleared, false);

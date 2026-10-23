@@ -11,20 +11,20 @@ function to(r, distance, frame = 1 / 120) {
 }
 function boost(r, i, frame = 1 / 120) { const z = r.zones[i]; to(r, z.start, frame); r.press(); to(r, z.end, frame); r.release(); }
 function planted(height = 3.5, gear = {}, boosts = true, exit = PLANT_ZONE.end, frame = 1 / 120) {
-  const r = started(height, gear); if (boosts) for (let i = 0; i < 6; i++) boost(r, i, frame);
+  const r = started(height, gear); if (boosts) for (let i = 0; i < 2; i++) boost(r, i, frame);
   to(r, PLANT_ZONE.start, frame); r.press(); to(r, exit, frame); r.release(); return r;
 }
 function finish(r, frame = 1 / 120) { for (let i = 0; i < 5000 && !r.terminal; i++) r.advance(frame); assert.equal(r.terminal, true); return r; }
 
-test("six fixed zones retain automatic running and momentum rewards", () => {
-  const r = started(); to(r, 5); assert.ok(r.speed > 5.5); assert.deepEqual(r.zones.map(z => z.start), [6, 12, 18, 24, 30, 36]);
-  boost(r, 0); close(r.speed, 6.5 * 1.15); close(r.momentum, 0.8); r.advance(0.3); assert.ok(r.momentum > 0.76);
+test("two fixed zones retain automatic running and momentum rewards", () => {
+  const r = started(); to(r, 5); assert.ok(r.speed > 5.5); assert.deepEqual(r.zones.map(z => z.start), [6, 24]);
+  boost(r, 0); close(r.speed, 6.5 * 1.15); close(r.momentum, 2.4); r.advance(0.3); assert.ok(r.momentum > 0.76);
 });
 test("a perfect run-up and plant completes bend, flight, clearance and landing", () => {
   const r = planted(); assert.equal(r.phase, "vault"); assert.equal(r.plant.timing.grade, "Perfect");
   r.advance(0.5); assert.ok(r.athlete.y > r.plant.startY); assert.equal(r.phase, "vault");
   r.advance(0.51); assert.equal(r.phase, "flight"); assert.equal(r.world.gravity.y, -9.81);
-  finish(r); assert.equal(r.result.cleared, true); assert.equal(r.result.mark, 3.5); assert.equal(r.counts.Perfect, 6);
+  finish(r); assert.equal(r.result.cleared, true); assert.equal(r.result.mark, 3.5); assert.equal(r.counts.Perfect, 2);
   assert.ok(r.result.clearanceMargin > 0); close(r.athlete.y, VAULT.landingY); assert.ok(r.landTime >= 0.55);
   assert.ok(r.events.includes("clear") && r.events.includes("land"));
 });
@@ -48,7 +48,7 @@ test("early plant timing lowers the height and a badly missed plant aborts", () 
 });
 test("missing or holding through the plant box cannot award a clearance", () => {
   const held = started(); to(held, 39.5); held.press(); to(held, 45); assert.equal(held.result.reason, "Missed plant");
-  const continuous = new PoleVaultRace(); continuous.press(); to(continuous, 45); assert.equal(continuous.counts.Miss, 6); assert.equal(continuous.result.mark, null);
+  const continuous = new PoleVaultRace(); continuous.press(); to(continuous, 45); assert.equal(continuous.counts.Miss, 2); assert.equal(continuous.result.mark, null);
 });
 test("canceled blue and gold holds cannot award a boost or trigger a vault", () => {
   const r = started(); to(r, 6); r.press(); to(r, 8.4); r.cancelInput(); r.release(); assert.equal(r.lastAttempt.grade, "Miss"); assert.equal(r.lastAttempt.score, 0);

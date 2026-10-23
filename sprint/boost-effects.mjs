@@ -1,5 +1,5 @@
 import * as THREE from "./vendor/three.module.min.js";
-import { MODES } from "./engine.mjs?v=boost-1";
+import { MODES } from "./engine.mjs?v=zones-2";
 
 // One instanced draw for every sport, with no textures, lights, or post-processing.
 export class BoostEffects extends THREE.InstancedMesh {

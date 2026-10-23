@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
-import { ease, finishTravel } from "../sprint/finish.mjs?v=boost-1";
-import { SKATING_COURSE, ovalPoint } from "./course.mjs";
-import { getSkaterPose, skaterDots } from "./skater.mjs?v=boost-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=zones-2";
+import { ease, finishTravel } from "../sprint/finish.mjs?v=zones-2";
+import { SKATING_COURSE, ovalPoint } from "./course.mjs?v=zones-2";
+import { getSkaterPose, skaterDots } from "./skater.mjs?v=zones-2";
 
 const ATHLETE_SCALE = 1;
 const ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
@@ -78,6 +78,10 @@ export class SkatingScene extends TrackScene {
   boostPoint(x, y, z) {
     const a = -this.cursor.rotation.y, c = Math.cos(a), s = Math.sin(a);
     return { x: c * x - s * z, y, z: s * x + c * z };
+  }
+  timingPoint(distance, z, y, race) {
+    const p = ovalPoint(distance), origin = ovalPoint(race.distance);
+    return { x: p.x - Math.sin(p.heading) * z - origin.x, y, z: p.z + Math.cos(p.heading) * z - origin.z };
   }
   render(race) {
     const distance = race.distance + finishTravel(race), origin = ovalPoint(distance), c = Math.cos(origin.heading), s = Math.sin(origin.heading);

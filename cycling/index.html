@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#101313">
   <title>200M Track Cycling | Dot Athletics</title>
-  <link rel="stylesheet" href="./cycling.css?v=boost-1">
+  <link rel="stylesheet" href="./cycling.css?v=zones-2">
 </head>
 <body data-sport="cycling">
   <main class="game">
@@ -31,7 +31,7 @@
         <div class="track-top"><span class="lane">TRACK <b>01</b></span><span class="live-label"><i></i><span id="meet-label">VELODROME / 200 M</span></span></div>
         <div class="race-call" id="race-call">READY</div>
         <div id="scene-error" class="pause-panel" hidden><strong>3D VIEW UNAVAILABLE</strong><span>WebGL is unavailable in this browser.</span></div>
-        <div class="track-bottom"><span id="feedback">ON YOUR MARKS</span><span id="zone-count">ZONES 0 / 6</span></div>
+        <div class="track-bottom"><span id="feedback">ON YOUR MARKS</span><span id="zone-count">ZONES 0 / 2</span></div>
         <div id="pause-panel" class="pause-panel" hidden><strong>PAUSED</strong><button id="resume" type="button">Resume race</button></div>
       </div>
     </section>
@@ -49,7 +49,7 @@
         </button>
         <div class="control-stat right"><span class="eyebrow" id="right-label">TIMING SCORE</span><strong id="right-value">0<span>/ 100</span></strong></div>
       </div>
-      <div class="control-footer"><span id="phase-note">6 BOOST ZONES</span><button id="restart" class="text-button" type="button">Restart</button></div>
+      <div class="control-footer"><span id="phase-note">2 BOOST ZONES</span><button id="restart" class="text-button" type="button">Restart</button></div>
     </section>
 
     <details class="equipment">
@@ -61,7 +61,7 @@
         <label>CYCLING KIT<select id="gear-kit"><option value="0">Club jersey</option><option value="1">Aero jersey</option><option value="2">Race skinsuit</option></select><output id="stat-kit"></output></label>
       </fieldset>
     </details>
-    <footer class="page-footer"><a href="../dot-matrix-demo.html">Motion lab</a><span>200 METERS. SIX ZONES.</span></footer>
+    <footer class="page-footer"><a href="../dot-matrix-demo.html">Motion lab</a><span>200 METERS. TWO ZONES.</span></footer>
     <div id="announcer" class="sr-only" aria-live="polite"></div>
   </main>
 
@@ -74,6 +74,6 @@
     <details class="zone-breakdown"><summary>Zone breakdown</summary><ol id="zone-results"></ol></details>
     <button id="again" class="primary-button" type="button">Race again</button>
   </dialog>
-  <script type="module" src="../sprint/game.mjs?v=framing-1"></script>
+  <script type="module" src="../sprint/game.mjs?v=zones-2"></script>
 </body>
 </html>

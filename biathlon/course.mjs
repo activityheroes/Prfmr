@@ -1,10 +1,9 @@
-import { clamp } from "../sprint/engine.mjs?v=boost-1";
+import { clamp, longZones } from "../sprint/engine.mjs?v=zones-2";
 
 export const BIATHLON_COURSE = {
   id: "biathlon", distance: 400, finishAt: 395, fatigueAt: 370, finishMove: false,
   baseSpeed: 9.5, acceleration: 5.5, maxSpeeds: [13, 14, 15], momentumScale: 0.8,
-  zones: [28, 84, 140, 230, 290, 352].map((start, i) => ({ id: i + 1, start,
-    end: start + (i === 5 ? 7.5 : 10), edgeWindow: i === 5 ? 2.2 : 2.8, perfectEdge: i === 5 ? 0.65 : 0.9 }))
+  zones: longZones([[30, 65], [270, 310]], 9.5)
 };
 export const RANGE = { distance: 200, targets: 5, penalty: 2, settle: 0.8, minimumHold: 0.25, reload: 0.6, depart: 1.2, radius: 0.4 };
 export const HILLS = [{ start: 10, end: 76, height: 5.5 }, { start: 90, end: 176, height: 7 },

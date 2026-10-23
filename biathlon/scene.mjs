@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
-import { finishTravel } from "../sprint/finish.mjs?v=boost-1";
-import { BIATHLON_COURSE, RANGE, trailHeight } from "./course.mjs?v=boost-1";
-import { getSkierPose, skierDots, SKIER_SCALE as SCALE } from "./skier.mjs?v=boost-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=zones-2";
+import { finishTravel } from "../sprint/finish.mjs?v=zones-2";
+import { BIATHLON_COURSE, RANGE, trailHeight } from "./course.mjs?v=zones-2";
+import { getSkierPose, skierDots, SKIER_SCALE as SCALE } from "./skier.mjs?v=zones-2";
 
 const ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 2.7, feedbackX: 0, shadowStart: -0.6, shadowLength: 1.3, planar: true, draw() {} };
@@ -87,6 +87,7 @@ export class BiathlonScene extends TrackScene {
     this.camera.left = -span / 2; this.camera.right = span / 2; this.camera.top = half; this.camera.bottom = -half;
     this.camera.far = 180; this.camera.updateProjectionMatrix();
   }
+  timingPoint(distance, z, y, race) { return { x: distance - race.distance, y: trailHeight(distance) - trailHeight(race.distance) + y, z }; }
   positionCourse(race) {
     const height = trailHeight(race.distance);
     this.trailRoot.position.set(-race.distance, -height, 0);

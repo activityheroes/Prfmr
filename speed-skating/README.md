@@ -4,7 +4,7 @@ Serve the repository root and open `/speed-skating/`. This first winter event us
 
 ## Race Loop
 
-The skater accelerates into a baseline glide automatically. Six fixed blue strips start at 55, 125, 205, 280, 355 and 445 meters. Press on entry, hold through the zone, then release at the white exit line. The first five strips are 12 meters long; the final strip is 8 meters long with tighter timing.
+The skater accelerates into a baseline glide automatically. Two long fixed blue strips occupy 55-105m and 320-375m. Press at the HOLD marker, hold through the zone, then release at the exit. Red/yellow/green bands show bad, Good/Great and Perfect release positions, using the same scoring as the HUD.
 
 Entry, hold and release accuracy contribute 30%, 30% and 40% to the timing score. Perfect, Great and Good award the existing 15%, 10% and 6% speed boosts. Momentum carries between strips and gradually decays; misses and late holds cost momentum. Advance cues and speed-adjusted timing windows match the other events.
 

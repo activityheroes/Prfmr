@@ -1,9 +1,10 @@
+import { longZones } from "../sprint/engine.mjs?v=zones-2";
+
 export const OVAL = { length: 400, radius: 28, straight: 200 - Math.PI * 28 };
 export const SKATING_COURSE = {
   id: "speed-skating", distance: 500, finishAt: 495, fatigueAt: 450, finishMove: false,
   baseSpeed: 12, acceleration: 4.8, maxSpeeds: [15.6, 16.4, 17.2], momentumScale: 1.2,
-  zones: [55, 125, 205, 280, 355, 445].map((start, i) => ({ id: i + 1, start,
-    end: start + (i === 5 ? 8 : 12), edgeWindow: i === 5 ? 1.3 : 2.2, perfectEdge: i === 5 ? 0.2 : 0.35 }))
+  zones: longZones([[55, 105], [320, 375]], 12)
 };
 export function ovalPoint(distance) {
   const s = ((distance % OVAL.length) + OVAL.length) % OVAL.length, r = OVAL.radius, l = OVAL.straight;

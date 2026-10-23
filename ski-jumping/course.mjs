@@ -1,11 +1,10 @@
-import { clamp } from "../sprint/engine.mjs?v=boost-1";
-import { ease } from "../sprint/finish.mjs?v=boost-1";
+import { clamp, longZones } from "../sprint/engine.mjs?v=zones-2";
+import { ease } from "../sprint/finish.mjs?v=zones-2";
 
 export const SKI_COURSE = {
   id: "ski-jumping", distance: 140, finishAt: 122, fatigueAt: 145, finishMove: false,
   baseSpeed: 17.5, acceleration: 7, maxSpeeds: [23, 24.5, 26], momentumScale: 1.5,
-  zones: [20, 38, 56, 74, 92, 110].map((start, i) => ({ id: i + 1, start,
-    end: start + (i === 5 ? 6.5 : 8), edgeWindow: i === 5 ? 1.8 : 3, perfectEdge: i === 5 ? 0.3 : 0.5 }))
+  zones: longZones([[20, 52], [76, 110]], 17.5)
 };
 export const TAKEOFF_ZONE = { start: 125, end: 138, edgeWindow: 3.5, perfectEdge: 0.6, releaseLead: 0.2 };
 export const HILL = { lip: 140, gravity: 9.81, contact: 0.06, kPoint: 90, runwayWidth: 3.6 };

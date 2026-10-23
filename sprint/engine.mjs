@@ -1,8 +1,9 @@
 export const DIP = { peak: 0.09, duration: 0.32, reach: 0.34, perfectWindow: 0.022 };
-export const ZONES = [15, 30, 45, 60, 75, 90].map((start, index) => ({
-  id: index + 1, start, end: start + (index === 5 ? 3 : 5),
-  edgeWindow: index === 5 ? 0.9 : 1.6, perfectEdge: index === 5 ? 0.13 : 0.25
-}));
+export function longZones(ranges, speed) {
+  return ranges.map(([start, end], i) => ({ id: i + 1, start, end, longHold: true,
+    difficulty: i / Math.max(1, ranges.length - 1), edgeWindow: speed * 0.4, perfectEdge: speed * 0.1 }));
+}
+export const ZONES = longZones([[15, 35], [60, 82]], 8);
 export const SPRINT_COURSE = {
   id: "sprint", distance: 100, finishAt: 98.5, fatigueAt: 90, finishMove: true,
   baseSpeed: 8, acceleration: 7.8, maxSpeeds: [11.2, 11.8, 12.4], zones: ZONES
@@ -12,7 +13,7 @@ export const REWARDS = {
   Good: { boost: 0.06, momentum: 0.25 }, Early: { boost: 0.02, momentum: 0 },
   Late: { boost: 0, momentum: -0.4 }, Miss: { boost: 0, momentum: -0.4 }
 };
-export const MODES = { flowStreak: 3, perfectStreak: 3, flameDuration: 6, flowGain: 0.05, flameGain: 0.2, burstDuration: 1.25 };
+export const MODES = { flowStreak: 1, perfectStreak: 2, flameDuration: 6, flowGain: 0.05, flameGain: 0.2, burstDuration: 1.25 };
 export const GEAR = {
   band: { label: "Timing band", options: ["Club band", "Focus band", "Reflex band"] },
   blocks: { label: "Starting blocks", options: ["Club blocks", "Launch blocks", "Carbon blocks"] },
@@ -22,7 +23,11 @@ export const GEAR = {
 export const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 export const TIMING = { prepare: 0.65, cueLead: 0.12 };
 export function getTimingWindow(zone, speed, tolerance = 1) {
-  const difficulty = zone.id == null ? 0.65 : clamp((zone.id - 1) / 5, 0, 1);
+  const difficulty = zone.difficulty ?? (zone.id == null ? 0.65 : clamp((zone.id - 1) / 5, 0, 1));
+  if (zone.longHold) return {
+    edgeWindow: Math.max(zone.edgeWindow, speed * (0.48 - difficulty * 0.06)) * tolerance,
+    perfectEdge: Math.max(zone.perfectEdge, speed * (0.14 - difficulty * 0.03)) * tolerance
+  };
   return {
     edgeWindow: Math.max(zone.edgeWindow, speed * (0.24 - difficulty * 0.06)) * tolerance,
     perfectEdge: Math.max(zone.perfectEdge, speed * (0.07 - difficulty * 0.025)) * tolerance
@@ -52,6 +57,21 @@ export function scoreZone(zone, pressDistance, releaseDistance, tolerance = 1) {
   else if (score >= 65) grade = "Good";
   else grade = releaseError < -perfectEdge ? "Early" : releaseError > perfectEdge ? "Late" : "Miss";
   return { grade, score, entry, hold, release, entryError, releaseError };
+}
+
+// Use the actual scoring curve, including entry quality, for both track and HUD bands.
+export function releaseBands(zone, pressDistance = zone.start, hardEnd = Infinity) {
+  const bad = { start: zone.end - zone.edgeWindow, end: zone.end + zone.edgeWindow };
+  const range = grades => {
+    const accepts = distance => distance < hardEnd && grades.includes(scoreZone(zone, pressDistance, distance).grade);
+    if (!accepts(zone.end)) return null;
+    let lo = bad.start, hi = zone.end;
+    for (let i = 0; i < 24; i++) { const mid = (lo + hi) / 2; if (accepts(mid)) hi = mid; else lo = mid; }
+    const start = hi; lo = zone.end; hi = bad.end;
+    for (let i = 0; i < 24; i++) { const mid = (lo + hi) / 2; if (accepts(mid)) lo = mid; else hi = mid; }
+    return { start, end: lo };
+  };
+  return { bad, good: range(["Perfect", "Great", "Good"]), perfect: range(["Perfect"]) };
 }
 
 export class RhythmRace {
@@ -149,7 +169,8 @@ export class RhythmRace {
     if (!this.combo) this.flameRemaining = 0;
     const ignited = this.perfectStreak > 0 && this.perfectStreak % MODES.perfectStreak === 0;
     if (ignited) { this.flameRemaining = MODES.flameDuration; this.flameCount++; }
-    this.momentum = clamp(this.momentum + reward.momentum * (this.course.momentumScale ?? 1), 0, this.stats.maxSpeed - this.stats.baseSpeed);
+    const rewardScale = zone.longHold && reward.momentum > 0 ? 3 : 1;
+    this.momentum = clamp(this.momentum + reward.momentum * rewardScale * (this.course.momentumScale ?? 1), 0, this.stats.maxSpeed - this.stats.baseSpeed);
     if (reward.boost) {
       const ignition = ignited && previousMode !== "flame" ? this.stats.baseSpeed * MODES.flameGain : 0;
       const boostedSpeed = Math.min(this.speedLimit, this.speed * (1 + reward.boost) + ignition);

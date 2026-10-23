@@ -6,6 +6,8 @@ Serve the repository root and open `/hurdles/`. This is an arcade event using th
 
 Each hurdle has a fixed blue approach zone. Press at its entry, hold through it, then release at the white exit line to jump. Accurate timing earns the existing speed and momentum rewards. The tenth zone is narrower. Advance cues and speed-adjusted tolerance match the other events, so precise timing wins without requiring instant reactions.
 
+Unlike the other events' two long boost zones, Hurdles keeps all ten manually timed jumps. It shares the marked HOLD entries and red/yellow/green release bands, and the updated one-success Flow / two-Perfect Flame rules. The original short-zone timing windows and momentum increments remain unchanged.
+
 The athlete extends the lead leg, folds the trail leg out to the side, and resumes a running stride on landing. Mistimed, canceled or missed holds can clip a hurdle. Contact tips the hurdle forward, cuts current speed by 20%, removes 0.6 momentum, and resets the streak. The race continues; incidental contact is not treated as a disqualification.
 
 The course has ten 0.838 m barriers, with 13 m to the first, 8.5 m between barriers and 10.5 m after the last. Layout reference: [World Athletics 100 metres hurdles](https://worldathletics.org/disciplines/hurdles/100-metres-hurdles). Race speeds and jump rewards are tuned for this arcade game, not an official competition simulation.

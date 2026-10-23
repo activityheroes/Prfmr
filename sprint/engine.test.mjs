@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SprintRace, ZONES, REWARDS, DIP, MODES, getStats, scoreZone } from "./engine.mjs";
+import { SprintRace, ZONES, REWARDS, DIP, MODES, getStats, getTimingWindow, scoreZone } from "./engine.mjs";
 import { getRunnerPose, METERS_PER_UNIT } from "./runner.mjs";
 
 const close = (a, b, tolerance = 1e-8) => assert.ok(Math.abs(a - b) <= tolerance, `${a} != ${b}`);
@@ -18,7 +18,7 @@ function playZone(race, index, entry = 0, exit = 0, frame = 1 / 120) {
 }
 function completed(gear = {}, entry = 0, exit = 0, frame = 1 / 120) {
   const race = started(gear);
-  for (let i = 0; i < 6; i++) playZone(race, i, entry, exit, frame);
+  for (let i = 0; i < 2; i++) playZone(race, i, entry, exit, frame);
   until(race, r => r.terminal, frame); return race;
 }
 
@@ -27,36 +27,36 @@ test("one start tap is enough to complete the whole race at baseline speed", () 
   race.press(); race.release(); race.advance(4);
   assert.equal(race.holding, false); close(race.speed, 8); close(race.elapsed, 4);
   until(race, r => r.terminal);
-  assert.equal(race.counts.Miss, 6); assert.equal(race.attempts, 6); assert.equal(race.rhythmScore, 0);
+  assert.equal(race.counts.Miss, 2); assert.equal(race.attempts, 2); assert.equal(race.rhythmScore, 0);
   close(race.distance, 100); assert.equal(race.result.dip, "No dip");
 });
-test("six world-space zones start every 15m and the final one is narrower", () => {
-  assert.deepEqual(ZONES.map(z => z.start), [15, 30, 45, 60, 75, 90]);
-  assert.deepEqual(ZONES.map(z => z.end - z.start), [5, 5, 5, 5, 5, 3]);
-  assert.ok(ZONES[5].perfectEdge < ZONES[0].perfectEdge);
+test("two long world-space zones leave a recovery section between holds", () => {
+  assert.deepEqual(ZONES.map(z => z.start), [15, 60]);
+  assert.deepEqual(ZONES.map(z => z.end - z.start), [20, 22]);
+  assert.ok(getTimingWindow(ZONES[1], 8).perfectEdge < getTimingWindow(ZONES[0], 8).perfectEdge);
   const race = started(); race.advance(4);
   assert.deepEqual(race.zones.map(z => z.start), ZONES.map(z => z.start));
 });
 test("weighted score is exactly 30% entry + 30% coverage + 40% release", () => {
-  const s = scoreZone(ZONES[0], 14.4, 19.3);
+  const s = scoreZone(ZONES[0], 14.4, 34.3);
   close(s.score, (s.entry * 0.3 + s.hold * 0.3 + s.release * 0.4) * 100);
-  close(s.hold, 4.3 / 5);
-  const badEntry = scoreZone(ZONES[0], 15.8, 20);
-  const badRelease = scoreZone(ZONES[0], 15, 19.2);
+  close(s.hold, 19.3 / 20);
+  const badEntry = scoreZone(ZONES[0], 16.6, 35);
+  const badRelease = scoreZone(ZONES[0], 15, 33.4);
   assert.ok(badEntry.score > badRelease.score, "Release error costs more than equivalent entry error");
 });
 test("perfect, great, good, early, late, and missed outcomes are distinct", () => {
-  for (const [entry, exit, expected] of [[15, 20, "Perfect"], [15.2, 19.8, "Perfect"],
-    [15.4, 19.6, "Great"], [15.7, 19.3, "Good"], [15, 18.5, "Early"],
-    [15, 21.5, "Late"], [15, 15.2, "Miss"], [13.4, 20, "Miss"]]) {
+  for (const [entry, exit, expected] of [[15, 35, "Perfect"], [15.2, 34.8, "Perfect"],
+    [16.3, 33.7, "Great"], [16.8, 33.2, "Good"], [15, 31.9, "Early"],
+    [15, 38.1, "Late"], [15, 15.2, "Miss"], [11.5, 35, "Miss"]]) {
     assert.equal(scoreZone(ZONES[0], entry, exit).grade, expected, `${entry} / ${exit}`);
   }
 });
-test("first perfect gives 15% speed and 0.8 momentum, only after release", () => {
-  const race = started(); to(race, 15); race.press(); to(race, 20);
+test("first perfect gives 15% speed and long-hold momentum, only after release", () => {
+  const race = started(); to(race, 15); race.press(); to(race, 35);
   assert.equal(race.attempts, 0); assert.equal(race.momentum, 0); close(race.speed, 8);
-  race.release(); assert.equal(race.lastAttempt.grade, "Perfect"); close(race.momentum, 0.8);
-  close(race.speed, 9.2); close(race.temporaryBoost, 0.4); close(race.lastAttempt.score, 100, 0.001);
+  race.release(); assert.equal(race.lastAttempt.grade, "Perfect"); close(race.momentum, 2.4);
+  close(race.speed, 9.2); close(race.temporaryBoost, 0); close(race.lastAttempt.score, 100, 0.001);
 });
 test("holding alone does not change speed outside or inside a zone", () => {
   const idle = started(), held = started();
@@ -64,9 +64,9 @@ test("holding alone does not change speed outside or inside a zone", () => {
   close(held.speed, idle.speed); close(held.distance, idle.distance); assert.equal(held.attempts, 0);
 });
 test("entry precision matters even with a correct release", () => {
-  const race = started(); const result = playZone(race, 0, 1.5, 0);
+  const race = started(); const result = playZone(race, 0, 3, 0);
   assert.notEqual(result.grade, "Perfect"); assert.ok(result.entry < 0.4);
-  close(result.release, 1); assert.ok(result.hold < 0.8);
+  close(result.release, 1); assert.ok(result.hold < 0.86);
 });
 test("each zone resolves once; re-presses cannot farm boosts", () => {
   const race = started(); playZone(race, 0); const speed = race.speed, momentum = race.momentum;
@@ -74,17 +74,17 @@ test("each zone resolves once; re-presses cannot farm boosts", () => {
   assert.equal(race.attempts, 1); assert.equal(race.counts.Perfect, 1);
   assert.equal(race.speed, speed); assert.equal(race.momentum, momentum);
 });
-test("a continuous hold from the start misses all six zones", () => {
+test("a continuous hold from the start misses all two zones", () => {
   const race = new SprintRace(); race.press(); until(race, r => r.terminal);
-  assert.equal(race.counts.Miss, 6); assert.equal(race.counts.Perfect, 0);
+  assert.equal(race.counts.Miss, 2); assert.equal(race.counts.Perfect, 0);
   assert.equal(race.momentum, 0); assert.equal(race.peakSpeed, 8);
 });
 test("a hold past the zone exit fails once and does not start the next zone", () => {
-  const race = started(); to(race, 15); race.press(); to(race, 37);
-  assert.equal(race.counts.Late, 1); assert.equal(race.counts.Miss, 1);
+  const race = started(); to(race, 15); race.press(); to(race, 40);
+  assert.equal(race.counts.Late, 1); assert.equal(race.counts.Miss, 0);
   assert.equal(race.holding, true); assert.equal(race.activeHold, null);
-  race.release(); assert.equal(race.attempts, 2);
-  playZone(race, 2); assert.equal(race.counts.Perfect, 1);
+  race.release(); assert.equal(race.attempts, 1);
+  playZone(race, 1); assert.equal(race.counts.Perfect, 1);
 });
 test("cancellation cannot award a perfect result at the exit", () => {
   const race = started(); to(race, 15); race.press(); to(race, 20); race.cancelInput();
@@ -94,7 +94,7 @@ test("cancellation cannot award a perfect result at the exit", () => {
 });
 test("automatic timeout and cancellation keep the reported score components consistent", () => {
   for (const canceled of [false, true]) {
-    const race = started(); to(race, 15); race.press(); to(race, canceled ? 19 : 22);
+    const race = started(); to(race, 15); race.press(); to(race, canceled ? 34 : 40);
     if (canceled) race.cancelInput();
     const result = race.lastAttempt;
     close(result.score, (result.entry * 0.3 + result.hold * 0.3 + result.release * 0.4) * 100);
@@ -102,26 +102,27 @@ test("automatic timeout and cancellation keep the reported score components cons
 });
 test("successful zones build momentum that carries between zones and decays gradually", () => {
   const race = started(); playZone(race, 0); const first = race.speed;
-  race.advance(0.6); assert.ok(race.momentum > 0.7 && race.momentum < 0.8); assert.ok(race.speed > 8);
+  race.advance(0.6); assert.ok(race.momentum > 2.3 && race.momentum < 2.4); assert.ok(race.speed > 8);
   playZone(race, 1); assert.ok(race.speed > first); assert.ok(race.momentum > 1.3);
-  const momentum = race.momentum; to(race, 52.4);
-  assert.equal(race.lastAttempt.grade, "Miss"); assert.ok(race.momentum < momentum - 0.4);
+  const momentum = race.momentum; race.advance(1);
+  assert.ok(race.momentum < momentum);
   assert.ok(race.momentum > 0); assert.ok(race.speed >= 8);
 });
 test("reward percentages and momentum increments match all success tiers", () => {
-  for (const [entry, exit, grade] of [[0, 0, "Perfect"], [0.6, -0.6, "Great"], [0.9, -0.9, "Good"], [0, -1.5, "Early"]]) {
+  for (const [entry, exit, grade] of [[0, 0, "Perfect"], [1.6, -1.6, "Great"], [2.2, -2.2, "Good"], [0, -3.7, "Early"]]) {
     const race = started(); playZone(race, 0, entry, exit);
-    assert.equal(race.lastAttempt.grade, grade); close(race.momentum, REWARDS[grade].momentum);
+    assert.equal(race.lastAttempt.grade, grade); close(race.momentum, REWARDS[grade].momentum * 3);
     close(race.speed, 8 * (1 + REWARDS[grade].boost));
   }
 });
 test("final-zone timing is harder for the same absolute error", () => {
-  const normal = scoreZone(ZONES[0], 15.3, 19.7), final = scoreZone(ZONES[5], 90.3, 92.7);
+  const normal = scoreZone({ ...ZONES[0], ...getTimingWindow(ZONES[0], 8) }, 16.2, 33.8);
+  const final = scoreZone({ ...ZONES[1], ...getTimingWindow(ZONES[1], 8) }, 61.2, 80.8);
   assert.ok(normal.score > final.score); assert.equal(normal.grade, "Perfect");
-  assert.equal(final.grade, "Good");
+  assert.equal(final.grade, "Great");
 });
 test("timing gear widens edge tolerance without moving the track zones", () => {
-  const normal = scoreZone(ZONES[0], 15.4, 19.6), geared = scoreZone(ZONES[0], 15.4, 19.6, getStats({ band: 2 }).timingTolerance);
+  const normal = scoreZone(ZONES[0], 16.2, 33.8), geared = scoreZone(ZONES[0], 16.2, 33.8, getStats({ band: 2 }).timingTolerance);
   assert.ok(geared.score > normal.score); assert.equal(geared.grade, "Perfect");
   assert.equal(getStats({ band: -4 }).timingTolerance, 1); assert.equal(getStats({ band: 20 }).timingTolerance, 1.3);
 });
@@ -134,11 +135,11 @@ test("gear sets the base cap, Flame raises it temporarily, and endurance retains
   const normal = started(), blocks = started({ blocks: 2 }); normal.advance(1); blocks.advance(1);
   assert.ok(blocks.distance > normal.distance);
 });
-test("a well-timed six-zone race beats an unattended race", () => {
+test("a well-timed two-zone race beats an unattended race", () => {
   const skilled = completed(), unattended = started(); until(unattended, r => r.terminal);
   assert.ok(skilled.finishTime < unattended.finishTime - 1);
-  assert.equal(skilled.counts.Perfect, 6); assert.equal(skilled.attempts, 6); assert.equal(skilled.bestCombo, 6);
-  assert.ok(skilled.result.rhythmScore > 99.9); assert.equal(skilled.result.zones.length, 6);
+  assert.equal(skilled.counts.Perfect, 2); assert.equal(skilled.attempts, 2); assert.equal(skilled.bestCombo, 2);
+  assert.ok(skilled.result.rhythmScore > 99.9); assert.equal(skilled.result.zones.length, 2);
 });
 test("a timed finish dip still crosses the torso collision plane", () => {
   const race = started(); until(race, r => r.phase === "line");

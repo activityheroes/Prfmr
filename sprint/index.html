@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#101313">
   <title>100M Sprint | Dot Athletics</title>
-  <link rel="stylesheet" href="./sprint.css?v=boost-1">
+  <link rel="stylesheet" href="./sprint.css?v=zones-2">
 </head>
 <body>
   <main class="game">
@@ -31,7 +31,7 @@
         <div class="track-top"><span class="lane">LANE <b>04</b></span><span class="live-label"><i></i><span id="meet-label">RHYTHM SPRINT</span></span></div>
         <div class="race-call" id="race-call">READY</div>
         <div id="scene-error" class="pause-panel" hidden><strong>3D VIEW UNAVAILABLE</strong><span>WebGL is unavailable in this browser.</span></div>
-        <div class="track-bottom"><span id="feedback">ON YOUR MARKS</span><span id="zone-count">ZONES 0 / 6</span></div>
+        <div class="track-bottom"><span id="feedback">ON YOUR MARKS</span><span id="zone-count">ZONES 0 / 2</span></div>
         <div id="pause-panel" class="pause-panel" hidden><strong>PAUSED</strong><button id="resume" type="button">Resume race</button></div>
       </div>
     </section>
@@ -49,7 +49,7 @@
         </button>
         <div class="control-stat right"><span class="eyebrow" id="right-label">TIMING SCORE</span><strong id="right-value">0<span>/ 100</span></strong></div>
       </div>
-      <div class="control-footer"><span id="phase-note">6 BOOST ZONES</span><button id="restart" class="text-button" type="button">Restart</button></div>
+      <div class="control-footer"><span id="phase-note">2 BOOST ZONES</span><button id="restart" class="text-button" type="button">Restart</button></div>
     </section>
 
     <details class="equipment">
@@ -74,6 +74,6 @@
     <details class="zone-breakdown"><summary>Zone breakdown</summary><ol id="zone-results"></ol></details>
     <button id="again" class="primary-button" type="button">Race again</button>
   </dialog>
-  <script type="module" src="./game.mjs?v=framing-1"></script>
+  <script type="module" src="./game.mjs?v=zones-2"></script>
 </body>
 </html>

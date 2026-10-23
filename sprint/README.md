@@ -13,7 +13,7 @@ The 50m freestyle event is at `/swimming/`, using the motion lab's front crawl a
 3. Hold while the runner travels through the strip, then release at its far edge.
 4. Run automatically between zones. Successful timing builds momentum for the next section.
 
-The six zones occupy 15-20m, 30-35m, 45-50m, 60-65m, 75-80m, and 90-93m. They are fixed to world distances on the track, scrolling past the camera-followed runner. They are not a charging bar or an independent pace target. The control button and runner marker stay stationary on screen. The final zone is shorter with tighter edge tolerance.
+The two long zones occupy 15-35m and 60-82m. They are fixed world distances, scrolling past the camera-followed runner, not a charging bar or moving pace target. HOLD marks the entry; RELEASE marks the exit. Red, yellow and green bands show bad, Good/Great and Perfect release positions. The bands account for entry quality, gear and the same weighted scoring used by the engine. The second zone has slightly tighter timing.
 
 Mouse, touch, and Space support the same press/hold/release input. Each zone can be scored only once. Holding from the start, mashing, or continuing a hold into another zone cannot automatically earn boosts. A missed zone never stops baseline running.
 
@@ -27,15 +27,15 @@ Entry and release accuracy compare the player's input position against the actua
 Timing score = entry accuracy * 30 + hold accuracy * 30 + release accuracy * 40
 ```
 
-Timing windows now scale with approach speed. The first blue zone has a minimum edge allowance of 240ms and full edge accuracy within 70ms; those floors gradually tighten to 180ms and 45ms on the final zone. Existing distance allowances remain minimums. Gear widens both bands. Each attempt freezes its windows on press, so changing speed cannot retroactively change a grade. Perfect additionally requires at least 90% accuracy at both boundaries; hold coverage still matters.
+Long-hold timing windows scale with approach speed: the first zone allows 480ms at each edge and full edge accuracy within 140ms, tightening to 420ms and 110ms in the second. Existing distance allowances remain minimums. Gear widens both bands. Each attempt freezes its windows on press, so changing speed cannot retroactively change a grade. Perfect additionally requires at least 90% accuracy at both boundaries; hold coverage still matters. Hurdles and final field actions retain their original shorter windows.
 
 GET READY appears 650ms ahead. PRESS and RELEASE cues lead the boundary by 120ms, with short optional tones respecting the Sound toggle. A fixed guide near the button displays the athlete's approach to stationary entry/exit bands; its marker advances automatically, not in response to charging input. The same full-accuracy bands are projected on the track. Long jump's final release gets 200ms of warning because the physical foul board has no late grace. The track boundaries and all speed rewards are unchanged.
 
 | Outcome | Score / condition | Speed multiplier | Momentum change |
 | --- | --- | --- | --- |
-| Perfect | At least 92, with both edge accuracies at least 90% | +15% | +0.8 m/s |
-| Great | At least 80 | +10% | +0.5 m/s |
-| Good | At least 65 | +6% | +0.25 m/s |
+| Perfect | At least 92, with both edge accuracies at least 90% | +15% | +2.4 m/s |
+| Great | At least 80 | +10% | +1.5 m/s |
+| Good | At least 65 | +6% | +0.75 m/s |
 | Early | Below 65 with an early release | +2% | None |
 | Late | Excessive exit error or timed-out hold | No boost; slight slowdown | -0.4 m/s |
 | Miss | No input, invalid entry, less than 25% overlap, or cancellation | No boost | -0.4 m/s |
@@ -44,11 +44,11 @@ Late release beyond 85% of the edge-error window overrides successful score tier
 
 ## Momentum And Physics
 
-Target running speed is `baseSpeed * (1 + modeGain) + momentum + temporaryBoost`, limited by the active speed ceiling and final-10m fatigue. Momentum decays slowly at 0.1 m/s per second; temporary boost holds for 1.25 seconds, then decays at 0.32 m/s per second. Race kits reduce both decay rates. Three successful zones activate Flow (+5% baseline target pace and ceiling); three consecutive Perfects ignite six seconds of Flame (+20%). Misses, early/late releases and canceled holds end the mode. Another three Perfects refill Flame fuel.
+Target running speed is `baseSpeed * (1 + modeGain) + momentum + temporaryBoost`, limited by the active speed ceiling and final-10m fatigue. Momentum decays slowly at 0.1 m/s per second; temporary boost holds for 1.25 seconds, then decays at 0.32 m/s per second. Race kits reduce both decay rates. One successful zone activates Flow (+5% baseline target pace and ceiling); two consecutive Perfects ignite six seconds of Flame (+20%). Misses, early/late releases and canceled holds end the mode. Another two Perfects refill Flame fuel.
 
 A reward multiplies current speed by its tier percentage, subject to the speed cap. Its persistent portion is represented by the momentum increment; any remaining portion becomes temporary boost, avoiding double-counting. A perfect first zone raises 8.0 to 9.2 m/s, retaining momentum after the temporary portion wears off. Misses reduce existing momentum but never subtract it below zero.
 
-The engine uses steps no larger than 1/240s. Holding by itself does not accelerate the runner; boosts are awarded only when a zone resolves. Results report average weighted timing, all six zone grades and component scores, longest successful streak, peak speed, and finish dip. Above-runner feedback and dot trails show the latest result. The shared mode HUD shows Perfect charge, Flame fuel, actual awarded burst and pace above baseline; raw momentum remains internal.
+The engine uses steps no larger than 1/240s. Holding by itself does not accelerate the runner; boosts are awarded only when a zone resolves. Results report average weighted timing, both zone grades and component scores, longest successful streak, peak speed, and finish dip. Above-runner feedback and dot trails show the latest result. The shared mode HUD shows Perfect charge, Flame fuel, actual awarded burst and pace above baseline; raw momentum remains internal.
 
 ## Equipment And Records
 
@@ -57,7 +57,7 @@ The engine uses steps no larger than 1/240s. Holding by itself does not accelera
 - Spikes alone raise maximum speed from 11.2 to 11.8/12.4 m/s.
 - Race kits retain momentum and reduce final-10m fatigue.
 
-Gear and the personal best use the `dot-sprint-zones-v4` localStorage key. Equipment migrates from older demos; their records remain untouched and are not compared against this different mechanic. This is a client-side demo, not a verified competitive leaderboard.
+Gear and the personal best use the `dot-sprint-zones-v4-long-zones-v1` localStorage key. Equipment migrates from older demos; their records remain untouched and are not compared against this different mechanic. This is a client-side demo, not a verified competitive leaderboard.
 
 Restart resets the race. Switching tabs or losing focus pauses it; resume explicitly. An active hold canceled by pausing earns no boost.
 

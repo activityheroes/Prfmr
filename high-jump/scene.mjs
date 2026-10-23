@@ -1,8 +1,8 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=boost-1";
-import { HIGH_JUMP_COURSE, HIGH_JUMP, TAKEOFF_ZONE, approachPoint } from "./course.mjs";
-import { getHighJumperPose, jumperDots } from "./jumper.mjs?v=boost-1";
-import { ease } from "../sprint/finish.mjs?v=boost-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=zones-2";
+import { HIGH_JUMP_COURSE, HIGH_JUMP, TAKEOFF_ZONE, approachPoint } from "./course.mjs?v=zones-2";
+import { getHighJumperPose, jumperDots } from "./jumper.mjs?v=zones-2";
+import { ease } from "../sprint/finish.mjs?v=zones-2";
 
 const EMPTY_ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 2.2, feedbackX: 0, shadowStart: -0.6, shadowLength: 1.1, planar: true, draw() {} };
@@ -57,6 +57,14 @@ export class HighJumpScene extends TrackScene {
     this.dummy = new THREE.Object3D(); this.color = new THREE.Color(); this.visibleDots = [];
     this.jumper = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 8, 6), new THREE.MeshBasicMaterial(), 280);
     this.jumper.frustumCulled = false; this.scene.add(this.jumper);
+    this.zoneMeshes.forEach((mesh, i) => {
+      const z = HIGH_JUMP_COURSE.zones[i];
+      for (const [key, start, end, width, y] of [["glow", z.start - 0.08, z.end + 0.08, 1.34, 0.029], ["surface", z.start, z.end, 1.2, 0.034], ["core", z.start, z.end, 0.24, 0.039], ["entry", z.start - 0.035, z.start + 0.035, 1.28, 0.05], ["exit", z.end - 0.035, z.end + 0.035, 1.28, 0.05]]) {
+        const curved = ribbon(start, end, width, 0, "#ffffff", y);
+        mesh[key].geometry.dispose(); mesh[key].geometry = curved.geometry; curved.material.dispose();
+        mesh[key].material.side = THREE.DoubleSide; mesh[key].scale.set(1, 1, 1); mesh[key].position.set(0, 0, 0);
+      }
+    });
   }
   resize(w, h) { super.resize(w, h); this.frameCamera(null); }
   frameCamera(race) {
@@ -75,7 +83,7 @@ export class HighJumpScene extends TrackScene {
       const point = approachPoint(start), mid = approachPoint((start + end) / 2);
       group.position.set(point.x - origin.x, 0, point.z - origin.z); group.rotation.y = -mid.heading;
     };
-    this.zoneMeshes.forEach((mesh, i) => place(mesh.group, race.zones[i].start, race.zones[i].end));
+    this.zoneMeshes.forEach(mesh => mesh.group.position.set(-origin.x, 0, -origin.z));
     place(this.takeoffStrip, TAKEOFF_ZONE.start, TAKEOFF_ZONE.end);
     this.takeoffStrip.visible = race.distance > 22 && !race.launch;
     this.finish.position.set(HIGH_JUMP.barX - origin.x, 0, HIGH_JUMP.barZ - origin.z); this.finish.visible = race.distance > 18;
@@ -102,5 +110,9 @@ export class HighJumpScene extends TrackScene {
   boostPoint(x, y, z) {
     const a = -this.cursor.rotation.y, c = Math.cos(a), s = Math.sin(a);
     return { x: c * x - s * z, y, z: s * x + c * z };
+  }
+  timingPoint(distance, z, y, race) {
+    const p = approachPoint(distance), origin = approachPoint(race.distance);
+    return { x: p.x - Math.sin(p.heading) * z - origin.x, y, z: p.z + Math.cos(p.heading) * z - origin.z };
   }
 }

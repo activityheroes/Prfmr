@@ -1,16 +1,17 @@
-import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs?v=boost-1";
-import { TrackScene } from "./track-scene.mjs?v=framing-1";
-import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs?v=boost-1";
-import { SWIMMER_ART } from "../swimming/swimmer.mjs?v=boost-1";
-import { createTimingGuide } from "./timing-guide.mjs?v=boost-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs?v=boost-1";
+import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs?v=zones-2";
+import { TrackScene } from "./track-scene.mjs?v=zones-2";
+import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs?v=zones-2";
+import { SWIMMER_ART } from "../swimming/swimmer.mjs?v=zones-2";
+import { createTimingGuide } from "./timing-guide.mjs?v=zones-2";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs?v=zones-2";
+import { readEventSave, writeEventSave } from "./save.mjs?v=zones-2";
 
 const $ = id => document.getElementById(id);
 const sports = {
   sprint: { course: SPRINT_COURSE, Race: SprintRace, athlete: undefined, noun: "runner", event: "SPRINT", action: "RUN", status: "RUNNING", finish: "DIP", storageKey: "dot-sprint-zones-v4" },
   swimming: { course: SWIMMING_COURSE, Race: SwimmingRace, athlete: SWIMMER_ART, noun: "swimmer", event: "SWIM", action: "SWIM", status: "SWIMMING", finish: "THE WALL", storageKey: "dot-swimming-zones-v1" }
 };
-const eventModules = { cycling: "../cycling/event.mjs?v=framing-1", hurdles: "../hurdles/event.mjs?v=boost-1", "speed-skating": "../speed-skating/event.mjs?v=boost-1", biathlon: "../biathlon/event.mjs?v=boost-1" };
+const eventModules = { cycling: "../cycling/event.mjs?v=zones-2", hurdles: "../hurdles/event.mjs?v=zones-2", "speed-skating": "../speed-skating/event.mjs?v=zones-2", biathlon: "../biathlon/event.mjs?v=zones-2" };
 const sport = eventModules[document.body.dataset.sport]
   ? (await import(eventModules[document.body.dataset.sport])).default
   : sports[document.body.dataset.sport] ?? sports.sprint;
@@ -23,9 +24,9 @@ let scene;
 try { scene = new (sport.Scene ?? TrackScene)(canvas, { course, athlete: sport.athlete }); }
 catch (error) { $("scene-error").hidden = false; console.error("3D track could not start", error); }
 const input = { kind: null, id: null, y: 0, originY: 0 };
-const colors = { Perfect: "#d9fbff", Great: "#81f6b6", Good: "#ffd473", Early: "#e8aa62", Late: "#ff7f86", Miss: "#9eabb0" };
+const colors = { Perfect: "#81f6b6", Great: "#ffd473", Good: "#ffd473", Early: "#ed667d", Late: "#ff7f86", Miss: "#ed667d" };
 const readSave = key => { try { return JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch { return {}; } };
-const saved = readSave(storageKey);
+const saved = readEventSave(storageKey);
 const previousGear = saved.loadout ?? (course.id !== "sprint" ? {} : readSave("dot-sprint-charge-v3").loadout ?? readSave("dot-sprint-pace-v2").loadout ?? readSave("dot-sprint-v1").loadout);
 const loadout = Object.fromEntries(Object.keys(GEAR).map(key => [key, clamp(Math.floor(Number(previousGear?.[key]) || 0), 0, 2)]));
 let best = Number.isFinite(saved.best) && saved.best > 0 ? saved.best : null;
@@ -37,7 +38,7 @@ const zoneMarkers = course.zones.map(zone => {
   document.querySelector(".timeline").append(marker); return marker;
 });
 document.querySelector(".marker.finish").style.left = course.finishAt / course.distance * 100 + "%";
-const persist = () => { try { localStorage.setItem(storageKey, JSON.stringify({ best, loadout })); } catch {} };
+const persist = () => writeEventSave(storageKey, { best, loadout });
 const audio = {
   context: null,
   unlock() {

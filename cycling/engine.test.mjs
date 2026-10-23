@@ -19,19 +19,19 @@ function play(race, i, entry = 0, exit = 0, frame = 1 / 120) {
   to(race, zone.end + exit, frame); race.release(); return zone.result;
 }
 function completed(gear = {}, frame = 1 / 120) {
-  const race = started(gear); for (let i = 0; i < 6; i++) play(race, i, 0, 0, frame);
+  const race = started(gear); for (let i = 0; i < 2; i++) play(race, i, 0, 0, frame);
   to(race, 200, frame); return race;
 }
 
 test("cycling starts rolling and automatically completes 200m at a 15m/s baseline", () => {
   const race = started(); close(race.speed, 10); to(race, 60); close(race.speed, 15);
   assert.equal(race.phase, "sprint"); to(race, 100); assert.equal(race.terminal, false);
-  to(race, 200); close(race.distance, 200); assert.equal(race.counts.Miss, 6);
+  to(race, 200); close(race.distance, 200); assert.equal(race.counts.Miss, 2);
   assert.equal(race.result.dip, null); assert.equal(race.result.torsoLead, 0);
 });
-test("six cycling zones retain the sprint's timing rules with cycling-sized distances", () => {
-  const race = started(); assert.deepEqual(race.zones.map(z => z.start), [30, 60, 90, 120, 150, 180]);
-  assert.deepEqual(race.zones.map(z => z.end - z.start), [10, 10, 10, 10, 10, 7]);
+test("two cycling zones retain the sprint's timing rules with cycling-sized distances", () => {
+  const race = started(); assert.deepEqual(race.zones.map(z => z.start), [30, 120]);
+  assert.deepEqual(race.zones.map(z => z.end - z.start), [40, 44]);
   for (const zone of race.zones) {
     const score = scoreZone(zone, zone.start, zone.end);
     assert.equal(score.grade, "Perfect"); close(score.score, 100);
@@ -40,28 +40,28 @@ test("six cycling zones retain the sprint's timing rules with cycling-sized dist
 });
 test("a perfect zone gives 15% speed and momentum that survives the next section", () => {
   const race = started(); play(race, 0);
-  assert.equal(race.lastAttempt.grade, "Perfect"); close(race.speed, 17.25); close(race.momentum, 0.8);
+  assert.equal(race.lastAttempt.grade, "Perfect"); close(race.speed, 17.25); close(race.momentum, 2.4);
   race.advance(1); assert.ok(race.momentum > 0.69); assert.ok(race.speed > 17);
   play(race, 1); assert.ok(race.speed > 17.25); assert.ok(race.momentum > 1.3);
 });
-test("timing all six zones is faster than riding unattended", () => {
+test("timing all two zones is faster than riding unattended", () => {
   const perfect = completed(), unattended = started(); to(unattended, 200);
   assert.ok(perfect.finishTime < unattended.finishTime - 1);
-  assert.equal(perfect.counts.Perfect, 6); assert.equal(perfect.bestCombo, 6);
+  assert.equal(perfect.counts.Perfect, 2); assert.equal(perfect.bestCombo, 2);
   assert.ok(perfect.rhythmScore > 99.9); assert.ok(perfect.peakSpeed <= perfect.stats.maxSpeed * (1 + MODES.flameGain));
-  assert.equal(perfect.flameCount, 2); assert.ok(unattended.finishTime < 14);
+  assert.equal(perfect.flameCount, 1); assert.ok(unattended.finishTime < 14);
 });
 test("continuous holding cannot award or repeat a zone", () => {
   const race = new CyclingRace(); race.press(); to(race, 200);
-  assert.equal(race.counts.Miss, 6); assert.equal(race.momentum, 0);
-  const over = started(); to(over, 30); over.press(); to(over, 75);
-  assert.equal(over.counts.Late, 1); assert.equal(over.counts.Miss, 1);
-  over.release(); assert.equal(over.attempts, 2); play(over, 2); assert.equal(over.counts.Perfect, 1);
+  assert.equal(race.counts.Miss, 2); assert.equal(race.momentum, 0);
+  const over = started(); to(over, 30); over.press(); to(over, 80);
+  assert.equal(over.counts.Late, 1); assert.equal(over.counts.Miss, 0);
+  over.release(); assert.equal(over.attempts, 1); play(over, 1); assert.equal(over.counts.Perfect, 1);
 });
 test("early, late and canceled cycling attempts cannot award full boosts", () => {
-  const early = started(); play(early, 0, 0, -3.5); assert.equal(early.lastAttempt.grade, "Early");
+  const early = started(); play(early, 0, 0, -6.5); assert.equal(early.lastAttempt.grade, "Early");
   close(early.speed, 15 * 1.02);
-  const late = started(); play(late, 0, 0, 3.2); assert.equal(late.lastAttempt.grade, "Late");
+  const late = started(); play(late, 0, 0, 7); assert.equal(late.lastAttempt.grade, "Late");
   const canceled = started(); to(canceled, 30); canceled.press(); to(canceled, 40); canceled.cancelInput();
   assert.equal(canceled.lastAttempt.grade, "Miss"); assert.equal(canceled.lastAttempt.score, 0);
   canceled.release(); assert.equal(canceled.attempts, 1);
@@ -149,8 +149,8 @@ test("both tires stay on the banked track and the rider frame stays orthonormal"
 });
 test("the 200m timing line is on the home straight and the boost distances stay unchanged", () => {
   close(ovalPoint(200).heading, 0); close(ovalPoint(197).heading, 0);
-  assert.deepEqual(CYCLING_COURSE.zones.map(z => z.start), [30, 60, 90, 120, 150, 180]);
-  const r = completed(); close(r.distance, 200); assert.equal(r.counts.Perfect, 6);
+  assert.deepEqual(CYCLING_COURSE.zones.map(z => z.start), [30, 120]);
+  const r = completed(); close(r.distance, 200); assert.equal(r.counts.Perfect, 2);
 });
 
 test("overview rider scales keep both wheels planted through the entire lap", () => {

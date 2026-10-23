@@ -21,9 +21,9 @@ function launch(r, offset = 0, frame = 1 / 120) {
 function finish(r, frame = 1 / 120) { for (let n = 0; !r.terminal && n < 10000; n++) r.advance(frame); assert.ok(r.terminal); return r; }
 function perfect(gear = {}, frame = 1 / 120) { const r = start(gear); runup(r, frame); launch(r, 0, frame); return finish(r, frame); }
 
-test("inrun has six fixed zones and a distinct gold action at the lip", () => {
+test("inrun has two fixed zones and a distinct gold action at the lip", () => {
   const r = start(); runup(r);
-  assert.equal(r.counts.Perfect, 6); assert.equal(r.bestCombo, 6); assert.ok(r.speed > r.stats.baseSpeed);
+  assert.equal(r.counts.Perfect, 2); assert.equal(r.bestCombo, 2); assert.ok(r.speed > r.stats.baseSpeed);
   assert.deepEqual(r.zones.map(z => [z.start, z.end]), SKI_COURSE.zones.map(z => [z.start, z.end]));
   to(r, 125); assert.equal(r.phase, "line"); assert.equal(r.finishZone, TAKEOFF_ZONE);
 });
@@ -54,7 +54,7 @@ test("missing or holding the takeoff too long shows descent and landing before n
     const r = start(); if (hold) { to(r, 125); r.press(); } to(r, 140);
     assert.equal(r.phase, "flight"); assert.equal(r.launch.valid, false); assert.equal(r.result, null);
     finish(r); assert.ok(r.landing); assert.equal(r.result.foul, true); assert.equal(r.result.mark, null);
-    assert.equal(r.counts.Miss, 6); assert.equal(r.result.reason, "Missed takeoff");
+    assert.equal(r.counts.Miss, 2); assert.equal(r.result.reason, "Missed takeoff");
   }
 });
 test("canceled holds and short taps cannot farm a boost or a valid takeoff", () => {

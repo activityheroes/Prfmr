@@ -41,7 +41,7 @@ test("four smooth hills leave a level shooting range and finish", () => {
   close(trailHeight(400), 0); assert.ok(terrainFactor(30) < 1); assert.ok(terrainFactor(60) > 1);
 });
 test("baseline skiing is automatic and stops precisely at the range", () => {
-  const r = range(); close(r.distance, RANGE.distance); close(r.speed, 0); assert.ok(r.racing); assert.equal(r.attempts, 3);
+  const r = range(); close(r.distance, RANGE.distance); close(r.speed, 0); assert.ok(r.racing); assert.equal(r.attempts, 1);
   const elapsed = r.elapsed; r.advance(3); close(r.distance, 200); close(r.elapsed - elapsed, 3);
   assert.equal(r.shots.length, 0); assert.equal(r.phase, "shooting");
 });
@@ -72,9 +72,9 @@ test("holding forever does not auto-fire or farm hits", () => {
   const r = range(); r.press(); r.advance(15); assert.equal(r.shots.length, 0); close(r.distance, 200);
   r.release(); assert.equal(r.shots.length, 1);
 });
-test("six perfect boost zones build momentum and improve the total", () => {
+test("two perfect boost zones build momentum and improve the total", () => {
   const a = complete(), b = complete({ good: true });
-  assert.equal(b.counts.Perfect, 6); assert.equal(b.hits, 5); assert.ok(b.result.time < a.result.time); assert.equal(b.bestCombo, 6);
+  assert.equal(b.counts.Perfect, 2); assert.equal(b.hits, 5); assert.ok(b.result.time < a.result.time); assert.equal(b.bestCombo, 2);
   assert.ok(b.peakSpeed > BIATHLON_COURSE.baseSpeed); assert.ok(b.peakSpeed <= b.stats.maxSpeed * (1 + MODES.flameGain) + 1e-5);
 });
 test("all misses still finish, with total time and result penalties agreeing", () => {
@@ -102,7 +102,7 @@ test("the aim window is forgiving, but still requires timing after settling", ()
 });
 test("the simulation agrees at 30 and 120 FPS", () => {
   const a = complete({ good: true, dt: 1 / 30 }), b = complete({ good: true });
-  assert.equal(a.counts.Perfect, 6); assert.equal(b.counts.Perfect, 6); close(a.result.time, b.result.time, 0.3);
+  assert.equal(a.counts.Perfect, 2); assert.equal(b.counts.Perfect, 2); close(a.result.time, b.result.time, 0.3);
 });
 test("skis and poles stay attached, finite and above snow throughout a stride", () => {
   for (let i = 0; i < 100; i++) {

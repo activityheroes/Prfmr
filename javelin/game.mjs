@@ -1,19 +1,20 @@
-import { JavelinRace, JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=boost-1";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=boost-1";
-import { JavelinScene } from "./scene.mjs?v=framing-1";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=boost-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=boost-1";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=zones-2";
+import { JavelinRace, JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=zones-2";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=zones-2";
+import { JavelinScene } from "./scene.mjs?v=zones-2";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=zones-2";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=zones-2";
 
 const $=id=>document.getElementById(id),trigger=$("trigger"),dialog=$("result-dialog"),canvas=$("track");
-const storageKey="dot-javelin-zones-v1",colors={Perfect:"#d9fbff",Great:"#81f6b6",Good:"#ffd473",Early:"#e8aa62",Late:"#ff7f86",Miss:"#9eabb0"};
-let saved={};try{saved=JSON.parse(localStorage.getItem(storageKey)||"{}")||{};}catch{}
+const storageKey="dot-javelin-zones-v1",colors={Perfect:"#81f6b6",Great:"#ffd473",Good:"#ffd473",Early:"#ed667d",Late:"#ff7f86",Miss:"#ed667d"};
+const saved = readEventSave(storageKey);
 const loadout=Object.fromEntries(Object.keys(GEAR).map(key=>[key,clamp(Math.floor(Number(saved.loadout?.[key])||0),0,2)]));
 let best=Number.isFinite(saved.best)&&saved.best>0?saved.best:null;
 let scene,race,paused=false,lastTime=performance.now(),resultShown=false,attempt=1,audioContext;
 try{scene=new JavelinScene(canvas);}catch(error){$("scene-error").hidden=false;console.error(error);}
 const input={kind:null,id:null};
 const markers=JAVELIN_COURSE.zones.map(z=>{const el=document.createElement("i");el.className="zone-marker";el.style.left=z.start/45*100+"%";el.style.width=(z.end-z.start)/45*100+"%";document.querySelector(".timeline").append(el);return el;});
-const persist=()=>{try{localStorage.setItem(storageKey,JSON.stringify({best,loadout}));}catch{}};
+const persist = () => writeEventSave(storageKey, {best,loadout});
 function tone(frequency,duration=0.12){
   if(!$("sound").checked)return;
   try{audioContext||=new(window.AudioContext||window.webkitAudioContext)();audioContext.resume().catch(()=>{});
@@ -98,12 +99,12 @@ function render(){
   $("speed-label").textContent=flying?"HEIGHT":"SPEED";$("speed-unit").textContent=flying?"m":"m/s";$("speed").textContent=(flying?race.projectile.y:race.speed).toFixed(1);
   $("best").textContent=best===null?"--.--":best.toFixed(2);$("distance").textContent=race.distance.toFixed(1)+" M";
   $("progress").style.width=clamp(race.distance/45*100,0,100)+"%";document.querySelector(".timeline").setAttribute("aria-valuenow",String(Math.round(race.distance)));
-  $("zone-count").textContent="ZONES "+race.attempts+" / 6";$("meet-label").textContent=flying?"IN FLIGHT":race.combo?"STREAK "+race.combo:"RHYTHM THROW";
+  $("zone-count").textContent="ZONES "+race.attempts+" / 2";$("meet-label").textContent=flying?"IN FLIGHT":race.combo?"STREAK "+race.combo:"RHYTHM THROW";
   markers.forEach((m,i)=>m.style.background=colors[race.zones[i].result?.grade]??"#65c9ff");$("gear").disabled=p!=="ready";
   trigger.disabled=!scene||flying||race.terminal;trigger.classList.toggle("is-held",race.holding&&!paused);trigger.dataset.mode=throwing||flying?"line":"zone";trigger.dataset.tier=grade?.toLowerCase()??cue;trigger.style.setProperty("--charge","100%");
   $("trigger-main").textContent=p==="ready"?"START\nRUN":race.terminal?"DONE":flying?"IN\nFLIGHT":throwing?"HOLD &\nTHROW":"TAP &\nHOLD";
   $("trigger-top").textContent=p==="ready"?"READY":flying?race.launch.timing.grade.toUpperCase():throwing?cue==="release"?"RELEASE!":race.holding?"DRAW BACK":cue==="press"?"PRESS":"GET READY":({run:"RUNNING",press:"PRESS",hold:"HOLD",release:"RELEASE",lift:"LET GO"})[cue]??"FINISHED";
-  $("trigger-bottom").textContent=throwing?"GOLD RELEASE ZONE":flying?race.launch.angle.toFixed(1)+" DEG":race.terminal?"ATTEMPT COMPLETE":z?"ZONE "+z.id+" / 6":"6 BOOST ZONES";
+  $("trigger-bottom").textContent=throwing?"GOLD RELEASE ZONE":flying?race.launch.angle.toFixed(1)+" DEG":race.terminal?"ATTEMPT COMPLETE":z?"ZONE "+z.id+" / 2":"2 BOOST ZONES";
   trigger.setAttribute("aria-label",p==="ready"?"Start approach":throwing?"Hold at the gold zone entry, release at the white line to throw":"Hold through each blue zone and release at its end. Space also controls the athlete.");
   const active=throwing||flying||race.terminal?"line":race.activeHold||cue==="press"?"zone":"run";document.querySelectorAll(".phases li").forEach(li=>li.classList.toggle("active",li.dataset.phase===active));
   $("race-call").textContent=flying?"":p==="ready"?"READY":race.terminal?"FOUL":throwing?cue==="release"?"RELEASE!":race.holding?"DRAW BACK":cue==="press"?"PRESS":"THROW ZONE":recent?feedback:cue==="press"?"PRESS":cue==="release"?"RELEASE":"";

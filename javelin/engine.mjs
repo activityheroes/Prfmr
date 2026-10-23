@@ -1,14 +1,11 @@
-import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=boost-1";
+import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=zones-2";
 import { World, Body, Vec3, Sphere } from "./cannon-es.mjs";
-import { getReleaseOrigin } from "./thrower.mjs?v=boost-1";
+import { getReleaseOrigin } from "./thrower.mjs?v=zones-2";
 
 export const JAVELIN_COURSE = {
   id: "javelin", distance: 45, finishAt: 39.5, fatigueAt: 41, finishMove: false,
   baseSpeed: 6.5, acceleration: 6, maxSpeeds: [9, 9.5, 10],
-  zones: [6, 12, 18, 24, 30, 36].map((start, i) => ({
-    id: i + 1, start, end: start + (i === 5 ? 1.6 : 2.4),
-    edgeWindow: i === 5 ? 0.48 : 0.8, perfectEdge: i === 5 ? 0.07 : 0.12
-  }))
+  zones: longZones([[6, 16], [24, 35]], 6.5)
 };
 export const THROW_ZONE = { start: 40, end: 43.5, edgeWindow: 1.2, perfectEdge: 0.15 };
 export const GRAVITY = 9.81;
