@@ -1,4 +1,4 @@
-import { submitMeet } from "./championship.mjs?v=sports-1";
+import { submitMeet } from "./championship.mjs?v=starts-1";
 export const ease = value => {
   const t = Math.max(0, Math.min(1, value));
   return t * t * (3 - 2 * t);

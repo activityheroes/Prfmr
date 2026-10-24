@@ -1,4 +1,4 @@
-import { RhythmRace, longZones, clamp } from "../sprint/engine.mjs?v=sports-1";
+import { RhythmRace, longZones, clamp } from "../sprint/engine.mjs?v=starts-1";
 
 export const CYCLING_COURSE = {
   id: "cycling", distance: 200, finishAt: 197, fatigueAt: 180, finishMove: false,

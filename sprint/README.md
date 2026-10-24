@@ -8,7 +8,7 @@ The 50m freestyle event is at `/swimming/`, using the motion lab's front crawl a
 
 ## Race Loop
 
-1. Tap Start Race once. The runner accelerates automatically to an 8.0 m/s baseline and keeps running without input.
+1. Hold through 3, 2, 1 and Set; release on Go. The timer includes reaction delay, and a fast valid start improves initial acceleration. The runner then accelerates automatically to an 8.0 m/s baseline and keeps running without input.
 2. Press as the runner's ground marker reaches the beginning of a blue strip.
 3. Hold while the runner travels through the strip, then release at its far edge.
 4. Run automatically between zones. Successful timing builds momentum for the next section.

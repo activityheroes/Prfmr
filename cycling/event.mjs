@@ -1,6 +1,6 @@
-import { CyclingRace, CYCLING_COURSE } from "./engine.mjs?v=sports-1";
-import { CyclingScene } from "./scene.mjs?v=sports-1";
-import { bankAngle } from "./velodrome.mjs?v=sports-1";
+import { CyclingRace, CYCLING_COURSE } from "./engine.mjs?v=starts-1";
+import { CyclingScene } from "./scene.mjs?v=starts-1";
+import { bankAngle } from "./velodrome.mjs?v=starts-1";
 
 export default { course: CYCLING_COURSE, Race: CyclingRace, Scene: CyclingScene, speedFactor: 3.6,
   noun: "cyclist", event: "RIDE", action: "RIDE", status: "RIDING", finish: "FINISH", storageKey: "dot-cycling-zones-v1",

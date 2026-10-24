@@ -1,5 +1,5 @@
 import * as THREE from "./vendor/three.module.min.js";
-import { releaseBands } from "./engine.mjs?v=sports-1";
+import { releaseBands } from "./engine.mjs?v=starts-1";
 
 const COLORS = { bad: "#ed667d", good: "#ffd473", perfect: "#81f6b6", entry: "#f4fff4", exit: "#ffffff" };
 const SEGMENTS = 24;
@@ -35,7 +35,7 @@ export class ZoneMarkers extends THREE.Group {
     const point = (s, z, y) => scene.timingPoint?.(s, z, y, race) ?? { x: s - race.distance, y, z };
     const zones = [...race.zones, ...(race.finishZone ? [race.finishZone] : [])];
     this.zones.forEach((view, i) => {
-      const zone = zones[i]; view.group.visible = !!zone && zone.status !== "done";
+      const zone = zones[i]; view.group.visible = !!zone && zone.status !== "done" && (scene.isZoneVisible?.(zone, race) ?? true);
       if (!view.group.visible) return;
       const attempt = zone.id == null ? race.throwStart ?? race.plantStart ?? race.takeoffStart : zone.attempt;
       const timing = race.timingWindow(zone, attempt), press = attempt?.distance ?? zone.start;

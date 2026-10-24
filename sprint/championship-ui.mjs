@@ -1,4 +1,4 @@
-import { MEETS, EVENTS, newMeet, readMeet, saveMeet, meetURL, standings } from "./championship.mjs?v=sports-1";
+import { MEETS, EVENTS, newMeet, readMeet, saveMeet, meetURL, standings } from "./championship.mjs?v=starts-1";
 
 const el = (tag, text, cls) => { const node = document.createElement(tag); if (text) node.textContent = text; if (cls) node.className = cls; return node; };
 export function createChampionshipUI() {

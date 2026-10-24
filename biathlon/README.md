@@ -6,7 +6,7 @@ A compact 400m arcade biathlon with four snowy hills, two long rhythm zones, and
 
 Serve the repository root and open `/biathlon/`; ES modules need HTTP, not `file://`. No new libraries, downloads, build step or backend are required.
 
-Start once to ski automatically. Use touch, mouse or Space: press at the marked HOLD entry, hold through the blue zone, release in the colored exit bands. Two long zones occupy 30-58m and 270-302m, one on either side of the shooting stop. Red/yellow/green indicate bad, Good/Great and Perfect timing. The familiar 30% entry / 30% hold / 40% release scoring and carryover momentum are preserved, with broader edge windows. Perfect / Great / Good give 15% / 10% / 6% boosts.
+Hold through the countdown and release on Go, then ski automatically. Use touch, mouse or Space: press at the marked HOLD entry, hold through the blue zone, release in the colored exit bands. Two long zones occupy 30-58m and 270-302m, one on either side of the shooting stop. Red/yellow/green indicate bad, Good/Great and Perfect timing. The familiar 30% entry / 30% hold / 40% release scoring and carryover momentum are preserved, with broader edge windows. Perfect / Great / Good give 15% / 10% / 6% boosts.
 
 Hills alter the target pace, not the controls: climb speed can drop to 76% of baseline and descents reach up to 125%. The athlete skate-skis and plants poles on climbs, then tucks with parallel skis downhill. The wide camera keeps the athlete small and shows approaching terrain. Terrain and boost strips share the same height function.
 

@@ -4,7 +4,7 @@ The motion lab's dot-matrix front crawl, playable with the same automatic moveme
 
 ## Race Loop
 
-Start once, then the swimmer accelerates automatically to a 1.9 m/s baseline. Press when the white timing cursor enters a blue strip, hold across it and release at the exit. Touch, mouse and Space share the same controls. The circular button stays fixed on screen; the strips occupy fixed pool distances and scroll with the following camera.
+Hold the main control or Space while the swimmer crouches on the starting block. Hold through 3, 2, 1 and Set; release on Go. The clock starts at the signal and the result records reaction time. Early release allows a retry. The swimmer dives from the pool edge, enters the water and transitions into the crawl before the first zone. Press when the white timing cursor enters a blue strip, hold across it and release at the exit. Touch, mouse and Space share the same controls. The circular button stays fixed on screen; only the current length's zone and marker bands are visible.
 
 Two long strips occupy 7.5-14m and 30-37m. HOLD marks entry and red/yellow/green release bands show bad, Good/Great and Perfect timing. Entry accuracy, held overlap and release accuracy contribute 30%, 30% and 40% of each score. Rewards remain +15% / +10% / +6% / +2% for perfect / great / good / early releases, subject to the speed cap.
 
@@ -27,7 +27,7 @@ The last meter blends into a forward reach. Contact after 50m total travel ends 
 - Suits raise the maximum speed from 2.65 to 2.8 or 2.95 m/s.
 - Caps retain momentum and limit late-race fatigue.
 
-These are arcade equipment modifiers, not a physical simulation of equipment benefits. Gear and best time use `dot-swimming-zones-v1-manual-flame-v1-sport-v1`; equipment migrates from earlier saves, while earlier records remain archived. Records are client-side, not a verified leaderboard.
+These are arcade equipment modifiers, not a physical simulation of equipment benefits. Gear and best time use `dot-swimming-zones-v1-reaction-v1`; equipment migrates from earlier saves, while earlier records remain archived. Records are client-side, not a verified leaderboard.
 
 ## Verification
 

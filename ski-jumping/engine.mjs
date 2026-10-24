@@ -1,7 +1,7 @@
-import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=sports-1";
+import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=starts-1";
 import { World, Body, Vec3, Sphere } from "../javelin/cannon-es.mjs";
-import { SKI_COURSE, TAKEOFF_ZONE, HILL, inrunPoint, landingPoint } from "./course.mjs?v=sports-1";
-export { SKI_COURSE, TAKEOFF_ZONE, HILL } from "./course.mjs?v=sports-1";
+import { SKI_COURSE, TAKEOFF_ZONE, HILL, inrunPoint, landingPoint } from "./course.mjs?v=starts-1";
+export { SKI_COURSE, TAKEOFF_ZONE, HILL } from "./course.mjs?v=starts-1";
 
 const missed = () => ({ grade: "Miss", score: 0, entry: 0, hold: 0, release: 0 });
 export class SkiJumpRace extends RhythmRace {

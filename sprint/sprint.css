@@ -1,7 +1,7 @@
 @import url("./boost.css?v=1");
-@import url("./weather.css?v=sports-1");
-@import url("./rivals.css?v=sports-1");
-@import url("./meets.css?v=sports-1");
+@import url("./weather.css?v=starts-1");
+@import url("./rivals.css?v=starts-1");
+@import url("./meets.css?v=starts-1");
 :root{color-scheme:dark;--bg:#101313;--ink:#f0f5f1;--muted:#8d9c96;--line:#303936;--green:#b7fa76;--blue:#65c9ff;--red:#ff7f86;--gold:#ffd473}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;letter-spacing:0}
 button,select,input{font:inherit}button,select{color:inherit}button{cursor:pointer}button:disabled{cursor:default}

@@ -1,5 +1,5 @@
-import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=sports-1";
-import { bendAmount } from "./course.mjs?v=sports-1";
+import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=starts-1";
+import { bendAmount } from "./course.mjs?v=starts-1";
 
 export const SKATE_CYCLE_METERS = 18;
 export const GLIDE = 0.42;
@@ -38,7 +38,7 @@ function skate(phase, side, turn, idle) {
 }
 export function getSkaterPose(race) {
   const distance = race.distance + finishTravel(race), cycle = distance / SKATE_CYCLE_METERS;
-  const idle = race.phase === "ready", turn = idle ? 0 : bendAmount(distance);
+  const idle = (race.phase === "ready" || race.starting), turn = idle ? 0 : bendAmount(distance);
   const sway = idle ? 0 : Math.sin(cycle * Math.PI * 2) * 0.19;
   const hip = { x: 0, y: 0.96 + (idle ? 0 : Math.cos(cycle * Math.PI * 4) * 0.008), z: sway + turn * 0.07 };
   const shoulder = { x: 0.65, y: hip.y + 0.12, z: hip.z + sway * 0.2 + turn * 0.24 };

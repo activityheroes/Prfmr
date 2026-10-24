@@ -1,5 +1,5 @@
-import { WEATHER } from "./weather.mjs?v=sports-1";
-const VERSION = 2;
+import { WEATHER } from "./weather.mjs?v=starts-1";
+const VERSION = 3;
 const ACTIONS = ["press", "release", "cancelInput", "dip", "activateFlame"];
 export const courseSignature = course => JSON.stringify([VERSION, course.id, course.distance,
   course.zones.map(z => [z.start, z.end]), course.baseSpeed, course.maxSpeeds, ...(course.mechanicsVersion ? [course.mechanicsVersion] : [])]);
@@ -7,6 +7,8 @@ export const courseSignature = course => JSON.stringify([VERSION, course.id, cou
 export function validReplay(record, course) {
   if (!record || record.signature !== courseSignature(course) || !Number.isFinite(record.time) || record.time <= 0 || record.time > 600
     || !Number.isFinite(record.readyTime) || record.readyTime < 0 || record.readyTime > 86400
+    || !Number.isFinite(record.duration) || record.duration <= 0 || record.duration > 600
+    || record.startDelay !== null && (!Number.isFinite(record.startDelay) || record.startDelay < 0.6 || record.startDelay > 1.6)
     || !Array.isArray(record.inputs) || !record.inputs.length || record.inputs.length > 512
     || !Array.isArray(record.inputs[0]) || record.inputs[0][0] !== 0 || record.inputs[0][1] !== "press"
     || !record.weather || !Number.isFinite(record.weather.seed)
@@ -17,7 +19,7 @@ export function validReplay(record, course) {
   return record.inputs.every(input => {
     if (!Array.isArray(input) || input.length !== 2) return false;
     const [time, action] = input;
-    if (!Number.isFinite(time) || time < previous || time > record.time + 0.05 || !ACTIONS.includes(action)) return false;
+    if (!Number.isFinite(time) || time < previous || time > record.duration + 0.05 || !ACTIONS.includes(action)) return false;
     previous = time; return true;
   });
 }
@@ -30,9 +32,9 @@ export function attachReplay(race, factory, loadout, record = null) {
     const original = race[action];
     if (!original) continue;
     race[action] = function(...args) {
-      const capture = !nested && !this.terminal && (this.startAt !== null || action === "press");
-      const time = this.startAt === null ? 0 : this.time - this.startAt, ready = this.phase === "ready";
-      if (capture && ready) recording.readyTime = this.time;
+      const capture = !nested && !this.terminal && (recording.inputs.length > 0 || action === "press");
+      const time = recording.inputs.length ? this.time - recording.readyTime : 0;
+      if (capture && !recording.inputs.length) recording.readyTime = this.time;
       const wasNested = nested; nested = true;
       let result;
       try { result = original.apply(this, args); } finally { nested = wasNested; }
@@ -47,24 +49,26 @@ export function attachReplay(race, factory, loadout, record = null) {
   if (validReplay(record, race.course)) {
     const ghost = factory(record.loadout);
     ghost.weather = Object.freeze({ ...record.weather }); ghost.time = record.readyTime;
+    if (record.startDelay !== null) ghost.enableStart(record.startDelay);
     race.rival = { ghost, record, index: 0 };
   }
   return race;
 }
 
 export function advanceReplay(race) {
-  if (!race.rival || race.startAt === null) return;
-  const rival = race.rival, ghost = rival.ghost, target = race.time - race.startAt;
+  if (!race.rival || !race.recording?.inputs.length) return;
+  const rival = race.rival, ghost = rival.ghost, target = race.time - race.recording.readyTime;
   while (rival.index < rival.record.inputs.length && rival.record.inputs[rival.index][0] <= target + 1e-8) {
     const [at, action] = rival.record.inputs[rival.index++];
-    const elapsed = ghost.startAt === null ? 0 : ghost.time - ghost.startAt;
+    const elapsed = ghost.time - rival.record.readyTime;
     ghost.advance(Math.max(0, at - elapsed)); ghost[action]();
   }
-  ghost.advance(Math.max(0, target - (ghost.time - ghost.startAt))); ghost.events.length = 0;
+  ghost.advance(Math.max(0, target - (ghost.time - rival.record.readyTime))); ghost.events.length = 0;
 }
 
 export function finishReplay(race) {
   if (!race.terminal || !race.result || race.result.foul || !race.recording || race.recording.overflow) return null;
   const { overflow, ...record } = race.recording;
-  return { ...record, inputs: record.inputs.map(input => [...input]), weather: { ...race.weather }, time: race.result.time };
+  return { ...record, inputs: record.inputs.map(input => [...input]), weather: { ...race.weather }, time: race.result.time,
+    duration: race.time - record.readyTime, startDelay: race.startDelay };
 }

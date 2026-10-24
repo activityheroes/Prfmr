@@ -1,23 +1,23 @@
-import { createDemo, advanceDemo, demoCue, LESSONS } from "./tutorial-demo.mjs?v=sports-1";
-import { EVENTS } from "./championship.mjs?v=sports-1";
+import { createDemo, advanceDemo, demoCue, LESSONS } from "./tutorial-demo.mjs?v=starts-1";
+import { EVENTS } from "./championship.mjs?v=starts-1";
 
 export function installTutorial({ getRace, makeRace, makeScene, sync, render, isPaused }) {
-  const id = makeRace().course.id, key = "dot-tutorial-" + (["cycling", "swimming", "ski-jumping"].includes(id) ? "v2-" : "v1-") + id;
+  const id = makeRace().course.id, key = "dot-tutorial-v3-" + id;
   const button = document.createElement("button"); button.type = "button"; button.className = "nav-command"; button.textContent = "How to Play";
   document.querySelector(".event-nav").append(button);
   const dialog = document.createElement("dialog"); dialog.className = "tutorial-dialog"; dialog.setAttribute("aria-labelledby", "tutorial-title");
   dialog.innerHTML = '<div class="meet-heading"><span class="eyebrow">HOW TO PLAY</span><button type="button" class="text-button" data-close>Skip</button></div><h2 id="tutorial-title"></h2><div class="tutorial-tabs" role="tablist" aria-label="Lessons"></div><div class="tutorial-stage"><canvas aria-label="Animated sport demonstration"></canvas><strong class="tutorial-cue"></strong><span class="tutorial-touch" aria-hidden="true"></span></div><p class="tutorial-copy"></p><div class="tutorial-actions"><button type="button" class="text-button" data-motion>Pause animation</button><button type="button" class="text-button" data-next>Next</button><button type="button" class="primary-button" data-play>Play</button></div>';
   document.body.append(dialog); dialog.querySelector("h2").textContent = EVENTS[id].name;
-  let scene, demo, index = 0, frameId = null, last = 0, stopped = false;
+  let scene, demo, index = -1, frameId = null, last = 0, stopped = false;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const cue = dialog.querySelector(".tutorial-cue"), touch = dialog.querySelector(".tutorial-touch"), motion = dialog.querySelector("[data-motion]");
   const sight = document.createElement("div"), dot = document.createElement("i"); sight.className = "tutorial-aim"; sight.append(dot); sight.hidden = true;
   dialog.querySelector(".tutorial-stage").append(sight);
   const sportMeter = document.createElement("div"); sportMeter.className = "sport-action-meter tutorial-sport-meter"; sportMeter.hidden = true;
   sportMeter.innerHTML = '<i class="action-good"></i><i class="action-perfect"></i><b></b>'; dialog.querySelector(".tutorial-stage").append(sportMeter);
-  const tabs = ["Timing", "Flame", ({ cycling: "Drafting", swimming: "Turn", "ski-jumping": "Landing", biathlon: "Shooting", hurdles: "Hurdles" })[id] ?? "Finish"].map((label, i) => {
+  const tabs = ["Start", "Timing", "Flame", ({ cycling: "Drafting", swimming: "Turn", "ski-jumping": "Landing", biathlon: "Shooting", hurdles: "Hurdles" })[id] ?? "Finish"].map((label, i) => {
     const tab = document.createElement("button"); tab.type = "button"; tab.role = "tab"; tab.textContent = label;
-    tab.addEventListener("click", () => select(i)); dialog.querySelector(".tutorial-tabs").append(tab); return tab;
+    tab.addEventListener("click", () => select(i - 1)); dialog.querySelector(".tutorial-tabs").append(tab); return tab;
   });
   function draw() {
     if (!scene || !demo) return;
@@ -37,8 +37,8 @@ export function installTutorial({ getRace, makeRace, makeScene, sync, render, is
   }
   function select(i) {
     index = i; demo = createDemo(makeRace, i);
-    tabs.forEach((tab, n) => { tab.setAttribute("aria-selected", String(i === n)); tab.tabIndex = i === n ? 0 : -1; });
-    dialog.querySelector(".tutorial-copy").textContent = i === 1 ? "Two consecutive Perfect releases store one Flame charge. Tap IGNITE or press F when you choose. The burst lasts six seconds. Flame is separate from your timing control." : (i === 0 ? "Touch the main control or use Space. " : "") + LESSONS[id][i === 0 ? 0 : 1];
+    tabs.forEach((tab, n) => { tab.setAttribute("aria-selected", String(i === n - 1)); tab.tabIndex = i === n - 1 ? 0 : -1; });
+    dialog.querySelector(".tutorial-copy").textContent = i === -1 ? "Hold the main control or Space through 3, 2, 1 and Set. Release on Go, not before. The signal delay varies. Faster reactions improve your start; an early release lets you retry." : i === 1 ? "Two consecutive Perfect releases store one Flame charge. Tap IGNITE or press F when you choose. The burst lasts six seconds. Flame is separate from your timing control." : (i === 0 ? "Touch the main control or use Space. " : "") + LESSONS[id][i === 0 ? 0 : 1];
     dialog.querySelector("[data-next]").disabled = i === 2; draw();
   }
   function frame(now) {
@@ -54,7 +54,7 @@ export function installTutorial({ getRace, makeRace, makeScene, sync, render, is
   function open() {
     if (getRace()?.phase !== "ready" || dialog.open) return;
     stopped = reduced.matches; dialog.showModal();
-    try { scene = makeScene(dialog.querySelector("canvas")); select(0); last = performance.now(); frameId = requestAnimationFrame(frame); }
+    try { scene = makeScene(dialog.querySelector("canvas")); select(-1); last = performance.now(); frameId = requestAnimationFrame(frame); }
     catch { dialog.querySelector(".tutorial-copy").textContent = LESSONS[id].join(" "); cue.textContent = "PREVIEW UNAVAILABLE"; }
   }
   dialog.addEventListener("close", () => {
@@ -75,8 +75,8 @@ export function installTutorial({ getRace, makeRace, makeScene, sync, render, is
   dialog.querySelector(".tutorial-tabs").addEventListener("keydown", event => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    select(event.key === "Home" ? 0 : event.key === "End" ? 2 : (index + (event.key === "ArrowRight" ? 1 : 2)) % 3);
-    tabs[index].focus();
+    select(event.key === "Home" ? -1 : event.key === "End" ? 2 : (index + 1 + (event.key === "ArrowRight" ? 1 : 3)) % 4 - 1);
+    tabs[index + 1].focus();
   });
   const ignite = () => {
     if (dialog.open || document.querySelector(".meet-dialog")?.open || isPaused()) return;

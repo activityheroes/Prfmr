@@ -1,5 +1,5 @@
-import { clamp } from "../sprint/engine.mjs?v=sports-1";
-import { blendPose, ease, reactionAge } from "../sprint/finish.mjs?v=sports-1";
+import { clamp } from "../sprint/engine.mjs?v=starts-1";
+import { blendPose, ease, reactionAge } from "../sprint/finish.mjs?v=starts-1";
 
 const TAU = Math.PI * 2;
 export const BIKE = {

@@ -1,5 +1,5 @@
-import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=sports-1";
-import { trailGrade, RANGE } from "./course.mjs?v=sports-1";
+import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=starts-1";
+import { trailGrade, RANGE } from "./course.mjs?v=starts-1";
 
 export const STRIDE = 7.5;
 export const SKIER_SCALE = 1.35;
@@ -48,7 +48,7 @@ function posture(distance, mode = "ski") {
 }
 export function getSkierPose(race) {
   const distance = race.distance + finishTravel(race), motion = distance / SKIER_SCALE, downhill = ease((-trailGrade(distance) - 0.03) / 0.12);
-  let pose = race.phase === "ready" ? posture(motion, "ready") : blendPose(posture(motion), posture(motion, "tuck"), downhill);
+  let pose = (race.phase === "ready" || race.starting) ? posture(motion, "ready") : blendPose(posture(motion), posture(motion, "tuck"), downhill);
   if (race.phase === "shooting") pose = blendPose(pose, posture(motion, "shoot"), ease(race.rangeAge / RANGE.settle));
   else if (race.rangeDoneAt !== null && race.rangeDoneAt !== undefined) pose = blendPose(posture(motion, "shoot"), pose, ease((race.time - race.rangeDoneAt - RANGE.depart) / 0.7));
   if (race.presentation) {

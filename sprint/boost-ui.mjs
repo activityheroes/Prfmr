@@ -1,4 +1,4 @@
-import { MODES } from "./engine.mjs?v=sports-1";
+import { MODES } from "./engine.mjs?v=starts-1";
 
 export function createBoostUI(tone) {
   const hud = document.createElement("div"); hud.className = "boost-hud";

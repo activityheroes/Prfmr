@@ -1,4 +1,4 @@
-import { WEATHER, weatherSummary } from "./weather.mjs?v=sports-1";
+import { WEATHER, weatherSummary } from "./weather.mjs?v=starts-1";
 
 const wrap = (n, length) => (n % length + length) % length;
 const noise = n => { const value = Math.sin(n * 127.1 + 31.7) * 43758.5453; return value - Math.floor(value); };

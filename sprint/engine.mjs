@@ -1,4 +1,4 @@
-import { createWeather, weatherAt, randomWeatherSeed, weatherSummary } from "./weather.mjs?v=sports-1";
+import { createWeather, weatherAt, randomWeatherSeed, weatherSummary } from "./weather.mjs?v=starts-1";
 
 export const DIP = { peak: 0.09, duration: 0.32, reach: 0.34, perfectWindow: 0.022 };
 export function longZones(ranges, speed) {
@@ -90,8 +90,24 @@ export class RhythmRace {
     this.combo = 0; this.bestCombo = 0; this.peakSpeed = 0;
     this.perfectStreak = 0; this.flameReady = false; this.flameRemaining = 0; this.flameCount = 0; this.burstRemaining = 0;
     this.dipAt = null; this.earlyDip = false; this.finishTime = null; this.result = null; this.events = [];
+    this.startDelay = null; this.startGate = null; this.reaction = null;
   }
-  get racing() { return this.phase === "sprint" || this.phase === "line"; }
+  get racing() { return ["sprint", "line", "countdown"].includes(this.phase); }
+  enableStart(delay = 0.6 + ((Math.imul(this.weather.seed, 1664525) >>> 0) % 1001) / 1000) {
+    if (this.phase === "ready") this.startDelay = clamp(Number.isFinite(delay) ? delay : 1, 0.6, 1.6);
+    return this;
+  }
+  get starting() { return this.startDelay !== null && ["ready", "countdown", "false-start"].includes(this.phase); }
+  get startCue() {
+    if (this.phase === "false-start") return "FALSE START";
+    if (this.phase !== "countdown") return "READY";
+    const age = this.time - this.startGate.armedAt;
+    return this.time >= this.startGate.gunAt ? "GO!" : age < 3 ? String(3 - Math.floor(age)) : "SET";
+  }
+  beginRun() {
+    this.phase = "sprint"; this.startAt ??= this.time; this.releaseAt = this.time;
+    this.speed = this.course.rollingSpeed ?? 0; this.events.push("start");
+  }
   setWeather(seed = randomWeatherSeed(), kind = "random") {
     if (this.phase === "ready") this.weather = createWeather(this.course, seed, kind);
     return this;
@@ -148,11 +164,16 @@ export class RhythmRace {
   }
   press() {
     if (this.terminal || this.holding) return false;
+    if (this.phase === "false-start") { this.phase = "ready"; this.startGate = null; }
     if (this.phase === "ready") {
-      this.phase = "sprint"; this.startAt = this.releaseAt = this.time; this.holding = true;
-      this.speed = this.course.rollingSpeed ?? 0;
-      this.events.push("start"); return true;
+      this.holding = true;
+      if (this.startDelay !== null) {
+        this.phase = "countdown"; this.startGate = { armedAt: this.time, gunAt: this.time + 3 + this.startDelay };
+        this.events.push("countdown"); return true;
+      }
+      this.beginRun(); return true;
     }
+    if (this.phase === "countdown") return false;
     if (this.phase === "line") return this.dip();
     this.holding = true;
     const zone = this.nextZone;
@@ -164,10 +185,20 @@ export class RhythmRace {
     return true;
   }
   release() {
+    if (this.phase === "countdown") {
+      this.holding = false;
+      if (this.time < this.startGate.gunAt) {
+        this.phase = "false-start"; this.startAt = null; this.events.push("false-start"); return;
+      }
+      const seconds = Math.max(0, this.time - this.startGate.gunAt);
+      this.reaction = { seconds, grade: seconds <= 0.15 ? "Perfect" : seconds <= 0.3 ? "Good" : "Late", acceleration: seconds <= 0.15 ? 1.08 : seconds <= 0.3 ? 1.04 : 1 };
+      this.startAt = this.startGate.gunAt; this.beginRun(); return;
+    }
     if (this.activeHold) this.resolveZone(this.activeHold);
     this.holding = false;
   }
   cancelInput() {
+    if (this.phase === "countdown") { this.phase = "ready"; this.startGate = null; this.startAt = null; this.holding = false; return; }
     if (this.activeHold) this.resolveZone(this.activeHold, "Miss", true);
     this.holding = false;
   }
@@ -215,11 +246,17 @@ export class RhythmRace {
     while (remaining > 1e-10 && !this.terminal) {
       const dt = Math.min(remaining, 1 / 240); this.step(dt); remaining -= dt;
     }
-    if (this.terminal && this.result) this.result.weather = { seed: this.weather.seed, summary: weatherSummary(this.weather),
-      finish: this.conditions.key, wind: this.conditions.wind };
+    if (this.terminal && this.result) {
+      this.result.reaction = this.reaction ? { ...this.reaction } : null;
+      this.result.weather = { seed: this.weather.seed, summary: weatherSummary(this.weather), finish: this.conditions.key, wind: this.conditions.wind };
+    }
   }
   step(dt) {
     const beforeTime = this.time; this.time += dt;
+    if (this.phase === "countdown") {
+      if (beforeTime < this.startGate.gunAt && this.time >= this.startGate.gunAt) { this.startAt = this.startGate.gunAt; this.events.push("gun"); }
+      return;
+    }
     if (!this.racing) return;
     this.flameRemaining = Math.max(0, this.flameRemaining - dt);
     this.burstRemaining = Math.max(0, this.burstRemaining - dt);
@@ -233,7 +270,8 @@ export class RhythmRace {
     if (this.dipAt !== null && !this.earlyDip && this.time - this.dipAt > DIP.peak + 0.035) {
       this.earlyDip = true; this.speed *= 0.9; this.events.push("early-dip");
     }
-    const previousSpeed = this.speed, acceleration = this.stats.acceleration * conditions.grip;
+    const reactionGain = this.reaction && this.time - this.releaseAt < 2 ? this.reaction.acceleration : 1;
+    const previousSpeed = this.speed, acceleration = this.stats.acceleration * conditions.grip * reactionGain;
     this.speed = this.speed < target
       ? Math.min(target, this.speed + acceleration * (0.3 + 0.7 * (1 - this.speed / target)) * dt)
       : Math.max(target, this.speed - acceleration * 0.55 * dt);

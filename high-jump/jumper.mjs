@@ -1,6 +1,6 @@
-import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs?v=sports-1";
-import { blendPose, ease, reactionAge, reactionPose } from "../sprint/finish.mjs?v=sports-1";
-import { approachPoint } from "./course.mjs?v=sports-1";
+import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs?v=starts-1";
+import { blendPose, ease, reactionAge, reactionPose } from "../sprint/finish.mjs?v=starts-1";
+import { approachPoint } from "./course.mjs?v=starts-1";
 
 const mix = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t });
 function runningPose(race, origin, heading, standing = false, ground = 0.06) {
@@ -16,7 +16,7 @@ function runningPose(race, origin, heading, standing = false, ground = 0.06) {
 }
 export function getHighJumperPose(race) {
   const origin = approachPoint(race.distance);
-  if (!race.launch) return runningPose(race, origin, origin.heading, race.phase === "ready" || race.terminal);
+  if (!race.launch) return runningPose(race, origin, origin.heading, (race.phase === "ready" || race.starting) || race.terminal);
   const { heading, startPose } = race.launch, hip = { ...race.athlete };
   const age = race.flightTime, arch = ease((age - 0.07) / 0.25), kick = ease((age - 0.52) / 0.24);
   const at = (u, y, depth = 0) => ({ x: hip.x + u * Math.cos(heading) - depth * Math.sin(heading),

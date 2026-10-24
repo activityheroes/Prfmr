@@ -1,12 +1,12 @@
-import { prepareMeet } from "../sprint/championship.mjs?v=sports-1";
-import { installTutorial } from "../sprint/tutorial.mjs?v=sports-1";
-import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=sports-1";
-import { SkiJumpRace, SKI_COURSE, TAKEOFF_ZONE, HILL } from "./engine.mjs?v=sports-1";
-import { landingPoint } from "./course.mjs?v=sports-1";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=sports-1";
-import { SkiJumpScene } from "./scene.mjs?v=sports-1";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=sports-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=sports-1";
+import { prepareMeet } from "../sprint/championship.mjs?v=starts-1";
+import { installTutorial } from "../sprint/tutorial.mjs?v=starts-1";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=starts-1";
+import { SkiJumpRace, SKI_COURSE, TAKEOFF_ZONE, HILL } from "./engine.mjs?v=starts-1";
+import { landingPoint } from "./course.mjs?v=starts-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=starts-1";
+import { SkiJumpScene } from "./scene.mjs?v=starts-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=starts-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=starts-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-ski-jump-zones-v1";
@@ -39,7 +39,7 @@ function clearInput() {
 function reset(keepWeather = false) {
   const seed = keepWeather === true ? race?.weather.seed : undefined;
   clearInput(); paused = false; resultShown = false; $("pause-panel").hidden = true; if (dialog.open) dialog.close();
-  race = new SkiJumpRace(loadout).setWeather(seed); prepareMeet(race); race.previousBest = best; lastTime = performance.now();
+  race = new SkiJumpRace(loadout).setWeather(seed); prepareMeet(race); race.enableStart(); race.previousBest = best; lastTime = performance.now();
   const stats = getStats(loadout, SKI_COURSE);
   $("stat-band").textContent = stats.timingTolerance.toFixed(2) + "x edge tolerance";
   $("stat-blocks").textContent = stats.acceleration.toFixed(2) + " m/s2";

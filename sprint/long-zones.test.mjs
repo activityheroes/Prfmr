@@ -62,7 +62,7 @@ test("new course records preserve old saves and equipment without comparing old 
     writeEventSave("race", { ...legacy, best: 10.5 });
     assert.equal(readEventSave("race").best, 10.5);
     assert.deepEqual(JSON.parse(data.get("race")), legacy);
-    data.set("race-manual-flame-v1", "broken"); assert.equal(readEventSave("race").best, null);
+    data.set("race-reaction-v1", "broken"); assert.equal(readEventSave("race").best, null);
     data.set("race-long-zones-v1", JSON.stringify({ best: 10.1, loadout: { band: 2 }, barHeight: 3.5 }));
     assert.deepEqual(readEventSave("race"), { best: null, loadout: { band: 2 }, barHeight: 3.5 });
     assert.equal(readEventSave("unknown").best, null);

@@ -54,3 +54,12 @@
 .sport-action-meter b { position: absolute; width: 3px; height: 100%; background: white; box-shadow: 0 0 0 1px #15211c; }
 .tutorial-sport-meter { position: absolute; left: 12px; bottom: 14px; width: calc(100% - 96px); margin: 0; }
 .tutorial-sport-meter[hidden] { display: none; }
+.start-guide { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; min-height: 42px; margin: 12px 0; color: #ffd473; font: 11px/1.4 monospace; }
+.start-guide[hidden] { display: none; }
+.start-guide div { display: flex; gap: 8px; }
+.start-guide i { width: 12px; height: 12px; border: 1px solid #687b73; border-radius: 50%; }
+.start-guide i[data-lit=true] { background: #ffd473; border-color: #ffd473; }
+.start-guide[data-state=go] { color: #81f6b6; }
+.start-guide[data-state=go] i { background: #81f6b6; border-color: #81f6b6; }
+.start-guide[data-state=fault] { color: #ff7f86; }
+.race-call.start-call { left: 50% !important; top: 44px !important; font-size: 26px; line-height: 28px; }

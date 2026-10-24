@@ -1,5 +1,5 @@
-import { clamp, DIP } from "./engine.mjs?v=sports-1";
-import { blendPose, reactionAge, reactionPose } from "./finish.mjs?v=sports-1";
+import { clamp, DIP } from "./engine.mjs?v=starts-1";
+import { blendPose, reactionAge, reactionPose } from "./finish.mjs?v=starts-1";
 
 const TAU = Math.PI * 2;
 const gait = { stance: 0.3, stride: 3.2, lift: 5, arm: 1.12, elbow: 1.6, lean: 1.6 };
@@ -80,7 +80,7 @@ function blend(a, b, t) {
 export function drawRunner(ctx, x, ground, unit, race) {
   const cycle = race.distance / STRIDE_METERS;
   let pose = getRunnerPose(cycle, race.dipAmount, race.phase === "ready");
-  if (race.phase === "ready") pose = crouchPose();
+  if (race.phase === "ready" || race.starting) pose = crouchPose();
   else if (race.releaseAt !== null && race.time - race.releaseAt < 0.25) pose = blend(crouchPose(), pose, ease((race.time - race.releaseAt) / 0.25));
   if (race.presentation) {
     const idle = getRunnerPose(0, 0, true);

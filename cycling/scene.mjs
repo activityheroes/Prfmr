@@ -1,11 +1,11 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { ghostMaterial } from "../sprint/rival-scene.mjs?v=sports-1";
-import { TrackScene } from "../sprint/track-scene.mjs?v=sports-1";
-import { finishTravel } from "../sprint/finish.mjs?v=sports-1";
-import { CYCLING_COURSE } from "./engine.mjs?v=sports-1";
-import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=sports-1";
-import { VELODROME, trackPoint, bikeFrame } from "./velodrome.mjs?v=sports-1";
-import { DotBike } from "./dot-bike.mjs?v=sports-1";
+import { ghostMaterial } from "../sprint/rival-scene.mjs?v=starts-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=starts-1";
+import { finishTravel } from "../sprint/finish.mjs?v=starts-1";
+import { CYCLING_COURSE } from "./engine.mjs?v=starts-1";
+import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=starts-1";
+import { VELODROME, trackPoint, bikeFrame } from "./velodrome.mjs?v=starts-1";
+import { DotBike } from "./dot-bike.mjs?v=starts-1";
 
 function ribbon(start, end, width, offset = 0, lift = 0.01) {
   const positions = [], uv = [], indices = [], count = Math.max(1, Math.ceil((end - start) / 0.5));

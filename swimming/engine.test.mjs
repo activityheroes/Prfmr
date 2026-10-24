@@ -113,5 +113,7 @@ test("the complete stroke and final reach stay inside the dot texture", () => {
   };
   for (let i = 0; i <= 100; i++) drawSwimmer(ctx, art.x, art.ground, art.unit, { distance: i / 100 * SWIM.metersPerStroke });
   for (let i = 0; i <= 20; i++) drawSwimmer(ctx, art.x, art.ground, art.unit, { distance: 49 + i / 20 });
+  drawSwimmer(ctx, art.x, art.ground, art.unit, { distance: 0, phase: "ready" });
+  for (let i = 0; i <= 90; i++) drawSwimmer(ctx, art.x, art.ground, art.unit, { distance: i / 100 * 3.4, phase: "dive", diveTime: i / 100 });
   assert.ok(dots > 10000);
 });

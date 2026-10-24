@@ -4,7 +4,7 @@ The dot-matrix cycling animation from `dot-matrix-demo.html`, now on a banked ov
 
 ## Controls And Course
 
-Tap Start Race once for a rolling 10 m/s start, then the cyclist pedals automatically toward a 15 m/s baseline (54 km/h). Press on entering a blue zone, hold while riding through it, and release at the exit. Touch, mouse, and Space use the same input logic. The front edge of the front tire aligns with the ground marker that determines zone entry and exit.
+Hold through the countdown and release on Go for a rolling 10 m/s start, then the cyclist pedals automatically toward a 15 m/s baseline (54 km/h). Press on entering a blue zone, hold while riding through it, and release at the exit. Touch, mouse, and Space use the same input logic. The front edge of the front tire aligns with the ground marker that determines zone entry and exit.
 
 Two long zones occupy 30-62m and 120-155m. Both stay fixed on the oval and visible in Track view while the cyclist rides around it. Marked HOLD entries and red/yellow/green release bands agree with the weighted scoring. The control stays fixed on screen.
 

@@ -1,4 +1,4 @@
-import { RhythmRace, longZones } from "../sprint/engine.mjs?v=sports-1";
+import { RhythmRace, longZones } from "../sprint/engine.mjs?v=starts-1";
 
 export const SWIMMING_COURSE = {
   id: "swimming", distance: 50, finishAt: 49, fatigueAt: 45, finishMove: false,
@@ -11,8 +11,13 @@ export class SwimmingRace extends RhythmRace {
   constructor(loadout = {}) {
     super(loadout, SWIMMING_COURSE);
     this.turnTime = 0; this.turned = false; this.turnResult = null;
+    this.diveTime = 0;
   }
-  get racing() { return super.racing || this.phase === "turn"; }
+  get racing() { return super.racing || this.phase === "turn" || this.phase === "dive"; }
+  beginRun() {
+    super.beginRun();
+    if (this.startDelay !== null) { this.phase = "dive"; this.speed = 3.4; }
+  }
   get specialAction() {
     if (this.phase !== "turn" && !(this.phase === "sprint" && !this.turned && this.distance >= 22.5)) return null;
     return { title: "25 M / WALL TURN", main: this.turnResult ? "PUSH-OFF\nSET" : this.phase === "turn" ? "TAP TO\nPUSH" : "WALL\nAHEAD",
@@ -20,6 +25,7 @@ export class SwimmingRace extends RhythmRace {
       progress: this.turnTime / 1.1, good: [(0.55 - 0.32) / 1.1, (0.55 + 0.32) / 1.1], perfect: [0.35, 0.65] };
   }
   press() {
+    if (this.phase === "dive") return false;
     if (this.phase !== "turn") return super.press();
     if (this.turnResult) return false;
     const error = this.turnTime - 0.55, absolute = Math.abs(error);
@@ -27,6 +33,11 @@ export class SwimmingRace extends RhythmRace {
     this.events.push({ type: "turn-timing", result: this.turnResult }); return true;
   }
   step(dt) {
+    if (this.phase === "dive") {
+      this.time += dt; this.diveTime += dt; this.distance += this.speed * dt;
+      if (this.diveTime >= 0.9) { this.phase = "sprint"; this.speed = Math.min(this.speedLimit, 2.6); this.temporaryBoost = 0.4; this.burstRemaining = 1; this.events.push("water-entry"); }
+      this.peakSpeed = Math.max(this.peakSpeed, this.speed); return;
+    }
     if (this.phase === "turn") {
       this.time += dt; this.turnTime += dt;
       if (this.turnTime >= 1.1) {

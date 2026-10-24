@@ -1,5 +1,5 @@
-import { clamp } from "../sprint/engine.mjs?v=sports-1";
-import { blendPose, reactionAge } from "../sprint/finish.mjs?v=sports-1";
+import { clamp } from "../sprint/engine.mjs?v=starts-1";
+import { blendPose, reactionAge } from "../sprint/finish.mjs?v=starts-1";
 
 const TAU = Math.PI * 2;
 const wrap = n => ((n % 1) + 1) % 1;
@@ -43,6 +43,19 @@ export function drawSwimmer(ctx, x, waterY, unit, race) {
   const cycle = getSwimCycle(race.distance);
   const finish = clamp(race.distance - 49, 0, 1);
   let pose = getSwimPose(cycle, finish);
+  if (race.phase === "ready" || race.starting || race.phase === "dive") {
+    const crouch = structuredClone(pose);
+    crouch.hip = { x: -3, y: -8 }; crouch.shoulder = { x: -0.5, y: -9.5 }; crouch.head = { x: 1, y: -10.3, angle: 0.5 };
+    crouch.arms.forEach((arm, i) => { arm.elbow = { x: 0.6, y: -7.2 }; arm.hand = { x: 1, y: -5.4 + i * 0.2 }; });
+    crouch.legs.forEach((leg, i) => { leg.knee = { x: -0.7 - i * 0.8, y: -6.5 }; leg.ankle = { x: -2.4 - i * 1.3, y: -5.4 }; leg.toe = { x: -1.2 - i * 1.3, y: -5.4 }; });
+    if (race.phase === "dive") {
+      const t = clamp(race.diveTime / 0.9, 0, 1), streamlined = getSwimPose(0, 1);
+      streamlined.arms.forEach(arm => { arm.elbow = { x: 4.7, y: 0.2 }; arm.hand = { x: 7.1, y: 0.1 }; });
+      pose = blendPose(crouch, streamlined, ease(t / 0.35));
+      const lift = (Math.max(0, 4.8 * (1 - t / 0.8)) + Math.sin(Math.PI * t) * 2) * ease(t / 0.25);
+      for (const p of [pose.hip, pose.shoulder, pose.head, ...pose.arms.flatMap(a => [a.elbow, a.hand]), ...pose.legs.flatMap(l => [l.knee, l.ankle, l.toe])]) p.y -= lift;
+    } else pose = crouch;
+  }
   if (race.phase === "turn") {
     const tuck = structuredClone(pose);
     tuck.hip = { x: -4, y: 1 }; tuck.shoulder = { x: -1.6, y: 1 }; tuck.head = { x: -0.2, y: 0.7, angle: 0 };
@@ -63,6 +76,9 @@ export function drawSwimmer(ctx, x, waterY, unit, race) {
     pose = blendPose(pose, target, ease(age / 0.8));
   }
   ctx.save(); ctx.translate(x, waterY); ctx.scale(unit, unit);
+  if (race.phase === "dive") {
+    ctx.translate(-3, 0); ctx.rotate(Math.sin(Math.PI * clamp(race.diveTime / 0.9, 0, 1)) ** 2 * 0.35); ctx.translate(3, 0);
+  }
   if (race.phase === "turn") {
     ctx.translate(-4, 2); ctx.rotate(-TAU * ease(race.turnTime / 1.1)); ctx.translate(4, -2);
   }
@@ -98,7 +114,7 @@ export function drawSwimmer(ctx, x, waterY, unit, race) {
   // Tint only submerged dots; the high recovery elbow stays bright above the surface.
   ctx.save(); ctx.globalCompositeOperation = "source-atop";
   ctx.fillStyle = "rgba(14,100,113,0.24)"; ctx.fillRect(-15, 0, 25, 9); ctx.restore();
-  if (race.distance > 0 && !race.terminal) {
+  if (race.distance > 0 && !race.terminal && race.phase !== "dive") {
     for (const limb of pose.arms) if (limb.phase < 0.1) {
       const age = limb.phase / 0.1;
       for (let i = 0; i < 4; i++) dot(pose.shoulder.x + 4.5 - age * (0.5 + i * 0.3),
@@ -117,8 +133,8 @@ export function drawSwimmer(ctx, x, waterY, unit, race) {
 }
 
 export const SWIMMER_ART = {
-  width: 512, height: 256, x: 256, ground: 104, unit: 18,
-  scaleX: 512 / 18 * 0.14, scaleY: 256 / 18 * 0.14,
-  anchorX: (256 + SWIM.reach * 18) / 512, anchorY: 1 - 104 / 256,
+  width: 512, height: 448, x: 256, ground: 232, unit: 18,
+  scaleX: 512 / 18 * 0.14, scaleY: 448 / 18 * 0.14,
+  anchorX: (256 + SWIM.reach * 18) / 512, anchorY: 1 - 232 / 448,
   headHeight: 0.9, feedbackX: -0.85, shadowStart: -2.65, shadowLength: 2.7, draw: drawSwimmer
 };

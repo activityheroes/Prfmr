@@ -29,13 +29,21 @@ Open <http://127.0.0.1:8080/>. The root page opens Sprint, and the event navigat
 
 Use the on-screen control or Space to press, hold and release. Timed zones build momentum; field events add their own takeoff or release. Each event's README describes its mechanics and equipment.
 
+### Countdown And Reaction
+
+All eleven event pages start with the same accessible reaction control: hold the main button or Space through 3, 2, 1 and Set, then release on Go. Set lasts a seeded 0.6-1.6 seconds so the signal cannot be timed from the count alone. Colored lights, text and optional tones provide the cue. An early release gives a false-start retry without recording a result or consuming a championship round. Losing focus cancels the countdown safely; resume and hold again.
+
+The race clock begins at the signal, including the player's reaction delay. A release within 150ms earns Perfect, within 300ms earns Good, and later releases are Late. Perfect/Good starts add 8%/4% acceleration for the first two seconds after release; existing speed caps remain unchanged. Results show reaction time in milliseconds. These are forgiving arcade starts shared across events, not official false-start rules for each sport.
+
+Swimming starts on visible blocks at the pool edge and dives before the first stroke. The wall-turn animation remains at 25m. Only the active length's boost surface and release markers are displayed, so return markers no longer overlap the outbound zone.
+
 Races use two sustained boost zones, shortened by approximately 20% from the initial two-zone layout, with a marked HOLD entry and RELEASE exit. Timing tolerances are unchanged. Red bands indicate poor releases, yellow covers Good/Great, and green covers Perfect. Both the track and HUD use the actual scoring function, including entry accuracy and equipped timing tolerance. Hurdles retains ten individually timed jumps. Final throws, takeoffs and Biathlon shooting remain separate actions.
 
-Current records use each event's existing storage key with `-manual-flame-v1` appended. Equipment and selected bar heights migrate from `-rivals-v1`, `-long-zones-v1` or older saves. Older records remain untouched and are not compared with the new manual-Flame rules; replay version 2 also records ignition inputs.
+Current records use each event's existing storage key with `-reaction-v1` appended. Equipment and selected bar heights migrate from previous sport/manual-Flame/rival saves. Older records remain untouched and are not compared with the new start rules. Replay version 3 records countdown attempts, signal delay, reaction and ignition inputs, including false-start retries.
 
 ### Animated Tutorials
 
-Each sport opens its own skippable tutorial on the first visit. Timing, Flame and the event's finish action are demonstrated using the actual dot-matrix athlete and game engine, in a separate simulation that cannot change scores or records. Biathlon demonstrates aiming and shooting; Hurdles keeps individual jump timing. Use How to Play before an attempt to replay any lesson. Reduced-motion preferences start the animation paused, with an explicit play control.
+Each sport opens its own skippable tutorial on the first visit. Start, Timing, Flame and the event's special/finish action are demonstrated using the actual dot-matrix athlete and game engine, in a separate simulation that cannot change scores or records. Biathlon demonstrates aiming and shooting; Hurdles keeps individual jump timing. The new Start lesson also appears for returning players. Use How to Play before an attempt to replay any lesson. Reduced-motion preferences start the animation paused, with an explicit play control.
 
 ### Championships
 
@@ -78,7 +86,7 @@ These three events each add one action using the existing main button or Space:
 - Swimming: the 50m race is now two 25m lengths. At the wall, the swimmer flips for 1.1 seconds. Tap near the middle of that animation for a stronger return push-off: Perfect adds 0.7 m/s, Good adds 0.35 m/s. Early, late or missed taps still complete the turn. The scene reverses direction for the return length.
 - Ski jumping: during descent, tap once in the green landing-preparation window to open into a telemark stance. Perfect/Good preparation earns 20/15 arcade style points; no input gives a parallel landing and 5 points. Early/late input gives zero style points, not a foul. Distance remains the actual touchdown mark. Winter championship scoring uses 90% of distance points plus up to 80 landing-style points; distance personal bests remain unchanged.
 
-Updated tutorials demonstrate all three actions. Cycling and Swimming retain old records but start a separate `-manual-flame-v1-sport-v1` record namespace for the changed race rules, migrating equipment. Their replay signatures include the new mechanics version; the other sports' records and ghosts are unchanged.
+Updated tutorials demonstrate all three actions. Cycling and Swimming previously used the `-manual-flame-v1-sport-v1` namespace; those records remain archived when moving to the reaction-start rules. Equipment migrates and replay signatures include the mechanics version.
 
 ### Shared Boosts
 
