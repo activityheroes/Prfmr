@@ -1,9 +1,9 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=meets-1";
-import { HURDLES_COURSE, HURDLES } from "./course.mjs?v=meets-1";
-import { getHurdlerPose, hurdlerDots } from "./hurdler.mjs?v=meets-1";
-import { ease } from "../sprint/finish.mjs?v=meets-1";
-import { ghostDots } from "../sprint/rival-scene.mjs?v=meets-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=sports-1";
+import { HURDLES_COURSE, HURDLES } from "./course.mjs?v=sports-1";
+import { getHurdlerPose, hurdlerDots } from "./hurdler.mjs?v=sports-1";
+import { ease } from "../sprint/finish.mjs?v=sports-1";
+import { ghostDots } from "../sprint/rival-scene.mjs?v=sports-1";
 
 const ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 2.5, feedbackX: 0, shadowStart: -0.6, shadowLength: 1.1, planar: true, draw() {} };

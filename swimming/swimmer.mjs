@@ -1,5 +1,5 @@
-import { clamp } from "../sprint/engine.mjs?v=meets-1";
-import { blendPose, reactionAge } from "../sprint/finish.mjs?v=meets-1";
+import { clamp } from "../sprint/engine.mjs?v=sports-1";
+import { blendPose, reactionAge } from "../sprint/finish.mjs?v=sports-1";
 
 const TAU = Math.PI * 2;
 const wrap = n => ((n % 1) + 1) % 1;
@@ -43,6 +43,13 @@ export function drawSwimmer(ctx, x, waterY, unit, race) {
   const cycle = getSwimCycle(race.distance);
   const finish = clamp(race.distance - 49, 0, 1);
   let pose = getSwimPose(cycle, finish);
+  if (race.phase === "turn") {
+    const tuck = structuredClone(pose);
+    tuck.hip = { x: -4, y: 1 }; tuck.shoulder = { x: -1.6, y: 1 }; tuck.head = { x: -0.2, y: 0.7, angle: 0 };
+    tuck.arms.forEach((arm, i) => { arm.elbow = { x: -2, y: 2 + i * 0.3 }; arm.hand = { x: -4.2, y: 2.6 }; });
+    tuck.legs.forEach((leg, i) => { leg.knee = { x: -2.5, y: 3 + i * 0.3 }; leg.ankle = { x: -5.3, y: 3.4 }; leg.toe = { x: -6, y: 3.2 }; });
+    pose = blendPose(pose, tuck, Math.sin(Math.PI * clamp(race.turnTime / 1.1, 0, 1)));
+  }
   if (race.presentation) {
     const age = reactionAge(race), target = structuredClone(pose);
     target.hip = { x: 3.7, y: 3.6 }; target.shoulder = { x: 4.6, y: -0.15 };
@@ -56,6 +63,9 @@ export function drawSwimmer(ctx, x, waterY, unit, race) {
     pose = blendPose(pose, target, ease(age / 0.8));
   }
   ctx.save(); ctx.translate(x, waterY); ctx.scale(unit, unit);
+  if (race.phase === "turn") {
+    ctx.translate(-4, 2); ctx.rotate(-TAU * ease(race.turnTime / 1.1)); ctx.translate(4, -2);
+  }
   const dot = (x, y, color, radius = 0.265) => {
     ctx.beginPath(); ctx.fillStyle = color; ctx.arc(x, y, radius, 0, TAU); ctx.fill();
   };

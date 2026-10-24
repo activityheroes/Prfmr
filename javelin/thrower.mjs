@@ -1,6 +1,6 @@
-import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs?v=meets-1";
-import { clamp } from "../sprint/engine.mjs?v=meets-1";
-import { blendPose, ease, reactionAge, reactionPose } from "../sprint/finish.mjs?v=meets-1";
+import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs?v=sports-1";
+import { clamp } from "../sprint/engine.mjs?v=sports-1";
+import { blendPose, ease, reactionAge, reactionPose } from "../sprint/finish.mjs?v=sports-1";
 
 const TAU = Math.PI * 2;
 export function getThrowerPose(race) {

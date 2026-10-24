@@ -1,7 +1,7 @@
-import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=meets-1";
+import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=sports-1";
 import { World, Body, Vec3, Sphere } from "../javelin/cannon-es.mjs";
-import { SKI_COURSE, TAKEOFF_ZONE, HILL, inrunPoint, landingPoint } from "./course.mjs?v=meets-1";
-export { SKI_COURSE, TAKEOFF_ZONE, HILL } from "./course.mjs?v=meets-1";
+import { SKI_COURSE, TAKEOFF_ZONE, HILL, inrunPoint, landingPoint } from "./course.mjs?v=sports-1";
+export { SKI_COURSE, TAKEOFF_ZONE, HILL } from "./course.mjs?v=sports-1";
 
 const missed = () => ({ grade: "Miss", score: 0, entry: 0, hold: 0, release: 0 });
 export class SkiJumpRace extends RhythmRace {
@@ -10,11 +10,30 @@ export class SkiJumpRace extends RhythmRace {
     this.takeoffStart = null; this.takeoffTiming = null; this.takeoffAt = null;
     this.launch = null; this.athlete = null; this.landing = null;
     this.flightTime = 0; this.landTime = 0; this.peakHeight = 0;
+    this.landingPrep = null;
   }
   get racing() { return super.racing || this.phase === "flight" || this.phase === "landing"; }
   get finishZone() { return TAKEOFF_ZONE; }
   get cue() { return this.phase === "line" ? this.takeoffTiming ? "armed" : this.zoneCue(TAKEOFF_ZONE, this.takeoffStart) : super.cue; }
+  get landingETA() {
+    if (this.phase !== "flight") return Infinity;
+    const ground = landingPoint(this.athlete.x), gap = this.athlete.y - ground.y - HILL.contact;
+    const closing = Math.tan(ground.angle) * this.body.velocity.x - this.body.velocity.y;
+    return closing > 0.1 ? Math.max(0, gap / closing) : Infinity;
+  }
+  get specialAction() {
+    if (this.phase !== "flight") return null;
+    return { title: "LANDING PREPARATION", main: this.landingPrep ? "LANDING\nSET" : this.landingETA <= 1.4 ? "TAP TO\nPREPARE" : "IN\nFLIGHT",
+      status: this.landingPrep ? this.landingPrep.grade.toUpperCase() + " PREPARATION" : this.landingETA <= 1.4 ? "TAP IN GREEN / TELEMARK" : "WAIT FOR DESCENT",
+      progress: 1 - clamp(this.landingETA / 1.4, 0, 1), good: [1 - 1.1 / 1.4, 1 - 0.1 / 1.4], perfect: [1 - 0.65 / 1.4, 1 - 0.25 / 1.4] };
+  }
   press() {
+    if (this.phase === "flight") {
+      if (this.landingPrep) return false;
+      const eta = this.landingETA;
+      this.landingPrep = { grade: eta >= 0.25 && eta <= 0.65 ? "Perfect" : eta >= 0.1 && eta <= 1.1 ? "Good" : eta > 0.65 ? "Early" : "Late", eta, time: this.flightTime };
+      this.events.push("landing-prep"); return true;
+    }
     if (this.launch || this.takeoffTiming) return false;
     if (this.phase !== "line") return super.press();
     if (this.holding) return false;
@@ -59,7 +78,7 @@ export class SkiJumpRace extends RhythmRace {
       this.peakHeight = Math.max(this.peakHeight, this.athlete.y - ground.y);
       if (landed) {
         this.landing = { x, y: this.athlete.y, mark: Math.floor(ground.distance * 2) / 2,
-          speed: Math.max(0, velocity.x), telemark: this.launch.valid && this.launch.quality >= 0.65 };
+          speed: Math.max(0, velocity.x), telemark: this.launch.valid && ["Perfect", "Good"].includes(this.landingPrep?.grade) };
         this.phase = "landing"; this.events.push("land");
       } else if (this.flightTime > 15 || x > 240) this.finishAttempt("Outside the landing hill");
       return;
@@ -86,6 +105,7 @@ export class SkiJumpRace extends RhythmRace {
       takeoffGrade: this.launch.timing.grade, takeoffScore: this.launch.timing.score,
       boardGap: this.launch.boardGap, angle: this.launch.angle, runupSpeed: this.launch.runupSpeed,
       flightTime: this.flightTime, peakHeight: this.peakHeight, landingStyle: this.landing?.telemark ? "Telemark" : "Parallel",
+      landingGrade: this.landingPrep?.grade ?? "Miss", stylePoints: reason ? 0 : this.landingPrep?.grade === "Perfect" ? 20 : this.landingPrep?.grade === "Good" ? 15 : this.landingPrep ? 0 : 5,
       time: this.finishTime, rhythmScore: this.rhythmScore, counts: { ...this.counts }, bestCombo: this.bestCombo,
       zones: this.zones.map(z => ({ ...z.result })) };
     this.events.push("finish");

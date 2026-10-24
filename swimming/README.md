@@ -10,7 +10,9 @@ Two long strips occupy 7.5-14m and 30-37m. HOLD marks entry and red/yellow/green
 
 The shared engine's optional `momentumScale` is 1.9 / 8 for swimming. This scales momentum rewards, losses and decay to swimming speed without changing percentage boosts or the existing sprint/cycling behavior. Perfect timing adds 0.57 m/s of momentum; misses remove 0.095 m/s, never below zero. Successful zones carry speed into the next section. Holding from the start, staying held between zones or repeated presses cannot farm rewards.
 
-The last meter blends into a forward reach. Contact with the 50m plane ends the timer automatically; no running dip or extra tap is required. The result includes both zone grades, score components, streak, peak speed and a local personal best. Losing focus pauses the race and invalidates an active hold; resume explicitly.
+At 25m the swimmer flips at the wall for 1.1 seconds. Tap the main button or Space when the timing marker reaches green, centered at 0.55 seconds. Perfect push-offs add 0.7 m/s, Good adds 0.35 m/s; early, late and missed taps still complete the turn. Only one push-off input counts. The scene faces the opposite direction on the return length; total race progress remains 0-50m. Pause freezes the turn and its timer.
+
+The last meter blends into a forward reach. Contact after 50m total travel ends the timer automatically; no running dip or extra finish tap is required. Results include wall timing alongside both boost-zone grades, streak and peak speed. Losing focus pauses the race and invalidates an active hold; resume explicitly.
 
 ## Animation And Pool
 
@@ -25,7 +27,7 @@ The last meter blends into a forward reach. Contact with the 50m plane ends the 
 - Suits raise the maximum speed from 2.65 to 2.8 or 2.95 m/s.
 - Caps retain momentum and limit late-race fatigue.
 
-These are arcade equipment modifiers, not a physical simulation of equipment benefits. Gear and best time use `dot-swimming-zones-v1-long-zones-v1`; sprint and cycling saves remain separate. Records are client-side, not a verified leaderboard.
+These are arcade equipment modifiers, not a physical simulation of equipment benefits. Gear and best time use `dot-swimming-zones-v1-manual-flame-v1-sport-v1`; equipment migrates from earlier saves, while earlier records remain archived. Records are client-side, not a verified leaderboard.
 
 ## Verification
 

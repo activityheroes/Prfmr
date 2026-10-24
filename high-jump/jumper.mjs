@@ -1,6 +1,6 @@
-import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs?v=meets-1";
-import { blendPose, ease, reactionAge, reactionPose } from "../sprint/finish.mjs?v=meets-1";
-import { approachPoint } from "./course.mjs?v=meets-1";
+import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs?v=sports-1";
+import { blendPose, ease, reactionAge, reactionPose } from "../sprint/finish.mjs?v=sports-1";
+import { approachPoint } from "./course.mjs?v=sports-1";
 
 const mix = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t });
 function runningPose(race, origin, heading, standing = false, ground = 0.06) {

@@ -1,4 +1,4 @@
-@import url("../sprint/sprint.css?v=meets-1");
+@import url("../sprint/sprint.css?v=sports-1");
 .track-top{color:#f0f5f1;text-shadow:0 1px 3px #173b40}
 .race-call{background:#193d42e8;padding:3px 7px;border-radius:3px;min-height:24px;width:max-content;max-width:154px;font-size:12px;line-height:18px}
 .race-call:empty{display:none}

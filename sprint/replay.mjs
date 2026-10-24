@@ -1,8 +1,8 @@
-import { WEATHER } from "./weather.mjs?v=meets-1";
+import { WEATHER } from "./weather.mjs?v=sports-1";
 const VERSION = 2;
 const ACTIONS = ["press", "release", "cancelInput", "dip", "activateFlame"];
 export const courseSignature = course => JSON.stringify([VERSION, course.id, course.distance,
-  course.zones.map(z => [z.start, z.end]), course.baseSpeed, course.maxSpeeds]);
+  course.zones.map(z => [z.start, z.end]), course.baseSpeed, course.maxSpeeds, ...(course.mechanicsVersion ? [course.mechanicsVersion] : [])]);
 
 export function validReplay(record, course) {
   if (!record || record.signature !== courseSignature(course) || !Number.isFinite(record.time) || record.time <= 0 || record.time > 600

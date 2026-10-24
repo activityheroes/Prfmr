@@ -1,5 +1,5 @@
-import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs?v=meets-1";
-import { blendPose, ease, finishTravel, reactionAge, reactionPose } from "../sprint/finish.mjs?v=meets-1";
+import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs?v=sports-1";
+import { blendPose, ease, finishTravel, reactionAge, reactionPose } from "../sprint/finish.mjs?v=sports-1";
 
 function runningPose(race, idle = false) {
   let raw = getRunnerPose((race.distance + finishTravel(race)) / (STRIDE_METERS * 0.75), 0, idle);

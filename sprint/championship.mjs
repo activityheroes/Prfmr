@@ -16,7 +16,10 @@ const KEY = "dot-championship-v1";
 export function eventPoints(id, result) {
   const event = EVENTS[id], value = event?.field ? result?.mark : result?.time;
   if (!event || !result || result.foul || result.cleared === false || !Number.isFinite(value) || value <= 0) return 0;
-  return Math.min(1000, Math.max(0, Math.round(800 * (event.field ? value / event.target : event.target / value))));
+  const base = 800 * (event.field ? value / event.target : event.target / value);
+  const points = id === "ski-jumping" && Number.isFinite(result.stylePoints)
+    ? base * 0.9 + Math.max(0, Math.min(20, result.stylePoints)) * 4 : base;
+  return Math.min(1000, Math.max(0, Math.round(points)));
 }
 export function newMeet(key, seed = Date.now() >>> 0) {
   if (!Object.hasOwn(MEETS, key)) throw new Error("Unknown championship");

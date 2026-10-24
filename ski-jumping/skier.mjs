@@ -1,5 +1,5 @@
-import { blendPose, ease, reactionAge } from "../sprint/finish.mjs?v=meets-1";
-import { inrunPoint, landingPoint } from "./course.mjs?v=meets-1";
+import { blendPose, ease, reactionAge } from "../sprint/finish.mjs?v=sports-1";
+import { inrunPoint, landingPoint } from "./course.mjs?v=sports-1";
 
 export const SKIER_SCALE = 1.5;
 const mix = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t });
@@ -29,12 +29,15 @@ export function getSkierPose(race) {
     const extension = shape(race.launch.valid ? "extension" : "tuck");
     pose = blendPose(extension, shape("flight"), ease(race.flightTime / 0.5));
     const clearance = race.athlete.y - landingPoint(race.athlete.x).y;
-    const approach = race.flightTime > 0.5 && race.body.velocity.y < 0 ? ease((4 - clearance) / 3.7) : 0;
-    const landing = shape("tuck", race.launch.valid ? 0.32 : 0);
+    const prepared = ["Perfect", "Good"].includes(race.landingPrep?.grade);
+    const approach = race.landingPrep ? ease((race.flightTime - race.landingPrep.time) / 0.22)
+      : race.flightTime > 0.5 && race.body.velocity.y < 0 ? ease((1.3 - clearance) / 1.2) : 0;
+    const landing = shape("tuck", prepared && race.launch.valid ? 0.32 : 0);
     landing.hip.y = 0.8; landing.shoulder = { x: 0.28, y: 1.3, z: 0 }; landing.head = { x: 0.5, y: 1.57, z: 0 };
     landing.limbs.forEach((l, i) => { const sign = i ? -1 : 1; l.elbow = { x: 0.3, y: 1.15, z: sign * 0.42 }; l.hand = { x: 0.5, y: 1.15, z: sign * 0.7 }; });
     const landed = !!race.landing, settle = landed ? ease(race.landTime / 0.7) : 0;
     const landPose = blendPose(landing, shape("standing", 0.1), settle);
+    if (landed && !prepared) landPose.shoulder.z += Math.sin(race.landTime * 12) * 0.14 * (1 - settle);
     pose = blendPose(pose, landPose, landed ? 1 : approach);
     angle = angle + (landingPoint(origin.x).angle - angle) * (landed ? 1 : approach);
     if (race.presentation) {

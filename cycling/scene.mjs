@@ -1,11 +1,11 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { ghostMaterial } from "../sprint/rival-scene.mjs?v=meets-1";
-import { TrackScene } from "../sprint/track-scene.mjs?v=meets-1";
-import { finishTravel } from "../sprint/finish.mjs?v=meets-1";
-import { CYCLING_COURSE } from "./engine.mjs?v=meets-1";
-import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=meets-1";
-import { VELODROME, trackPoint, bikeFrame } from "./velodrome.mjs?v=meets-1";
-import { DotBike } from "./dot-bike.mjs?v=meets-1";
+import { ghostMaterial } from "../sprint/rival-scene.mjs?v=sports-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=sports-1";
+import { finishTravel } from "../sprint/finish.mjs?v=sports-1";
+import { CYCLING_COURSE } from "./engine.mjs?v=sports-1";
+import { CYCLIST_ART, METERS_PER_UNIT, BIKE, getBikeMotion, getBikePose } from "./cyclist.mjs?v=sports-1";
+import { VELODROME, trackPoint, bikeFrame } from "./velodrome.mjs?v=sports-1";
+import { DotBike } from "./dot-bike.mjs?v=sports-1";
 
 function ribbon(start, end, width, offset = 0, lift = 0.01) {
   const positions = [], uv = [], indices = [], count = Math.max(1, Math.ceil((end - start) / 0.5));
@@ -81,6 +81,10 @@ export class CyclingScene extends TrackScene {
     super(canvas, { course: CYCLING_COURSE, athlete: CYCLIST_ART, environment });
     this.basis = new THREE.Matrix4(); this.shadow.material.opacity = 0.15; this.runner.visible = false;
     this.cyclist = new DotBike(); this.scene.add(this.cyclist);
+    this.pacerBike = new DotBike(); this.scene.add(this.pacerBike); this.pacerBike.visible = false;
+    this.draftTrail = new THREE.Points(new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(new Float32Array(72), 3)),
+      new THREE.PointsMaterial({ color: "#fff0a8", size: 0.12, transparent: true, opacity: 0.75 }));
+    this.draftTrail.frustumCulled = false; this.scene.add(this.draftTrail);
     this.origin = new THREE.Vector3(VELODROME.straight / 2, 0, VELODROME.radius);
     this.riderScale = 1.65; this.viewMode = "ride";
     this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
@@ -129,6 +133,27 @@ export class CyclingScene extends TrackScene {
     const riderRace = Object.create(race); riderRace.distance = race.distance / this.riderScale; riderRace.cadenceMultiplier = 1.45;
     this.cyclist.update(riderRace); this.cyclist.quaternion.copy(this.runner.quaternion); this.cyclist.position.copy(this.runner.position);
     this.cyclist.scale.set(this.bike.stretch * this.riderScale, this.riderScale, this.riderScale);
+    this.pacerBike.visible = !!race.pacer && race.distance < 123 && !race.terminal;
+    this.draftTrail.visible = this.pacerBike.visible && race.draftWindow && race.inSlipstream;
+    if (this.pacerBike.visible) {
+      const frame = bikeFrame(race.pacer.distance, this.riderScale), view = Object.create(race);
+      view.distance = race.pacer.distance / this.riderScale; view.drafting = false;
+      this.pacerBike.update(view);
+      const tint = new THREE.Color("#f5cbe3");
+      for (let i = 0; i < this.pacerBike.count; i++) this.pacerBike.setColorAt(i, tint);
+      this.pacerBike.instanceColor.needsUpdate = true;
+      this.pacerBike.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(frame.forward, frame.up, frame.side));
+      this.pacerBike.position.copy(frame.origin).sub(this.origin).addScaledVector(frame.side, race.draftResult ? Math.min(3, (race.distance - 90) * 0.2) : 0);
+      this.pacerBike.scale.set(frame.stretch * this.riderScale, this.riderScale, this.riderScale);
+      if (this.draftTrail.visible) {
+        const points = this.draftTrail.geometry.attributes.position;
+        for (let i = 0; i < points.count; i++) {
+          const p = trackPoint(race.distance + (race.draftGap - 3) * i / points.count, (i % 2 ? 1 : -1) * 0.4, 0.12);
+          points.setXYZ(i, p.x - this.origin.x, p.y, p.z - this.origin.z);
+        }
+        points.needsUpdate = true;
+      }
+    }
     this.cursor.quaternion.copy(this.runner.quaternion); this.cursor.position.copy(this.bikePoint(0, 0.045));
     this.shadow.quaternion.copy(this.runner.quaternion); this.shadow.position.copy(this.bikePoint(-1.5, -0.015));
     if (this.sparks.visible && !race.presentation) {

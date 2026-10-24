@@ -70,6 +70,18 @@ Biathlon adds rolling hills and a five-target shooting stop at 200m. Hold to ste
 
 ## Boost Modes
 
+### Sport-Specific Actions
+
+These three events each add one action using the existing main button or Space:
+
+- Cycling: between 72m and 110m, hold behind the pink pacer to store a drafting charge. The moving pacer's gap must remain 2-14m. Release once the meter is green to slingshot; full charge takes 1.2 seconds and adds up to 12% of baseline speed, subject to the normal cap. Overholding past 110m gives no bonus. This is a scripted drafting opportunity, not an online opponent.
+- Swimming: the 50m race is now two 25m lengths. At the wall, the swimmer flips for 1.1 seconds. Tap near the middle of that animation for a stronger return push-off: Perfect adds 0.7 m/s, Good adds 0.35 m/s. Early, late or missed taps still complete the turn. The scene reverses direction for the return length.
+- Ski jumping: during descent, tap once in the green landing-preparation window to open into a telemark stance. Perfect/Good preparation earns 20/15 arcade style points; no input gives a parallel landing and 5 points. Early/late input gives zero style points, not a foul. Distance remains the actual touchdown mark. Winter championship scoring uses 90% of distance points plus up to 80 landing-style points; distance personal bests remain unchanged.
+
+Updated tutorials demonstrate all three actions. Cycling and Swimming retain old records but start a separate `-manual-flame-v1-sport-v1` record namespace for the changed race rules, migrating equipment. Their replay signatures include the new mechanics version; the other sports' records and ghosts are unchanged.
+
+### Shared Boosts
+
 - Good, Great and Perfect release bursts add 6%, 10% and 15% speed, up to the active speed limit. The temporary component is held for 1.25 seconds before gradually fading; momentum carries into later zones.
 - One successful zone activates cyan Flow, adding 5% of baseline speed to the target pace.
 - Two consecutive Perfects bank one Flame charge. Tap IGNITE in the boost display or press F to activate a six-second burst when you choose. A dot-flame trail, ignition tone, two-segment charge indicator and fuel timer accompany the acceleration. Another two Perfects can bank the next charge, but only one can be stored and it cannot be used until the active burst ends. Early, late, missed and canceled zones break the streak and extinguish active Flame without removing a banked charge.

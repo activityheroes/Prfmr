@@ -1,4 +1,4 @@
-import { clamp, longZones } from "../sprint/engine.mjs?v=meets-1";
+import { clamp, longZones } from "../sprint/engine.mjs?v=sports-1";
 
 export const BIATHLON_COURSE = {
   id: "biathlon", distance: 400, finishAt: 395, fatigueAt: 370, finishMove: false,

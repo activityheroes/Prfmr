@@ -42,3 +42,15 @@
 .tutorial-aim i{position:absolute;width:7px;height:7px;background:#fff;border-radius:50%;transform:translate(-50%,-50%)}
 .tutorial-aim[hidden]{display:none}
 @media(max-width:650px){.meet-dialog,.tutorial-dialog{padding:16px}.meet-choices{grid-template-columns:1fr}.meet-table{font-size:10px}.meet-table td,.meet-table th{padding:8px 3px}.tutorial-copy{font-size:12px;min-height:96px}.tutorial-actions{gap:10px}.boost-hud{height:42px}.boost-charge{padding:3px 5px;min-width:94px}}
+.sport-action { margin: 12px 0; padding: 8px 0; }
+.sport-action[hidden] { display: none; }
+.timing-guide[hidden], .timing-legend[hidden] { display: none; }
+.sport-action-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 14px; font: 11px/1.4 monospace; color: #ffd473; }
+.sport-action-heading span { color: #e0eee6; }
+.sport-action-meter { position: relative; height: 14px; margin: 10px 0 4px; background: #a9485c; overflow: hidden; }
+.sport-action-meter i { position: absolute; top: 0; height: 100%; }
+.sport-action-meter .action-good { background: #ffd473; }
+.sport-action-meter .action-perfect { background: #81f6b6; }
+.sport-action-meter b { position: absolute; width: 3px; height: 100%; background: white; box-shadow: 0 0 0 1px #15211c; }
+.tutorial-sport-meter { position: absolute; left: 12px; bottom: 14px; width: calc(100% - 96px); margin: 0; }
+.tutorial-sport-meter[hidden] { display: none; }

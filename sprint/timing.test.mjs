@@ -17,7 +17,7 @@ const close = (a, b, epsilon = 1e-8) => assert.ok(Math.abs(a - b) < epsilon, `${
 function react(Race, delay, gear = {}, finish = false) {
   const r = new Race(gear); r.press(); r.release();
   let pressAt = null, releaseAt = null;
-  for (let i = 0; i < 20000 && (r.phase === "sprint" || finish && r.phase === "line"); i++) {
+  for (let i = 0; i < 20000 && (r.phase === "sprint" || r.phase === "turn" || finish && r.phase === "line"); i++) {
     if (r.cue === "press" && !r.holding && pressAt === null) pressAt = r.time + delay;
     if (pressAt !== null && r.time >= pressAt) { r.press(); pressAt = null; }
     if (r.cue === "release" && r.holding && releaseAt === null) releaseAt = r.time + delay;

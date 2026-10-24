@@ -1,8 +1,8 @@
-import { createDemo, advanceDemo, demoCue, LESSONS } from "./tutorial-demo.mjs?v=meets-1";
-import { EVENTS } from "./championship.mjs?v=meets-1";
+import { createDemo, advanceDemo, demoCue, LESSONS } from "./tutorial-demo.mjs?v=sports-1";
+import { EVENTS } from "./championship.mjs?v=sports-1";
 
 export function installTutorial({ getRace, makeRace, makeScene, sync, render, isPaused }) {
-  const id = makeRace().course.id, key = "dot-tutorial-v1-" + id;
+  const id = makeRace().course.id, key = "dot-tutorial-" + (["cycling", "swimming", "ski-jumping"].includes(id) ? "v2-" : "v1-") + id;
   const button = document.createElement("button"); button.type = "button"; button.className = "nav-command"; button.textContent = "How to Play";
   document.querySelector(".event-nav").append(button);
   const dialog = document.createElement("dialog"); dialog.className = "tutorial-dialog"; dialog.setAttribute("aria-labelledby", "tutorial-title");
@@ -13,7 +13,9 @@ export function installTutorial({ getRace, makeRace, makeScene, sync, render, is
   const cue = dialog.querySelector(".tutorial-cue"), touch = dialog.querySelector(".tutorial-touch"), motion = dialog.querySelector("[data-motion]");
   const sight = document.createElement("div"), dot = document.createElement("i"); sight.className = "tutorial-aim"; sight.append(dot); sight.hidden = true;
   dialog.querySelector(".tutorial-stage").append(sight);
-  const tabs = ["Timing", "Flame", id === "biathlon" ? "Shooting" : id === "hurdles" ? "Hurdles" : "Finish"].map((label, i) => {
+  const sportMeter = document.createElement("div"); sportMeter.className = "sport-action-meter tutorial-sport-meter"; sportMeter.hidden = true;
+  sportMeter.innerHTML = '<i class="action-good"></i><i class="action-perfect"></i><b></b>'; dialog.querySelector(".tutorial-stage").append(sportMeter);
+  const tabs = ["Timing", "Flame", ({ cycling: "Drafting", swimming: "Turn", "ski-jumping": "Landing", biathlon: "Shooting", hurdles: "Hurdles" })[id] ?? "Finish"].map((label, i) => {
     const tab = document.createElement("button"); tab.type = "button"; tab.role = "tab"; tab.textContent = label;
     tab.addEventListener("click", () => select(i)); dialog.querySelector(".tutorial-tabs").append(tab); return tab;
   });
@@ -22,10 +24,15 @@ export function installTutorial({ getRace, makeRace, makeScene, sync, render, is
     const canvas = dialog.querySelector("canvas"), rect = canvas.getBoundingClientRect();
     if (rect.width && rect.height && (scene.width !== rect.width || scene.height !== rect.height)) scene.resize(rect.width, rect.height);
     scene.render(demo.race); cue.textContent = demoCue(demo);
+    const action = demo.race.specialAction; sportMeter.hidden = !action;
+    if (action) {
+      sportMeter.querySelector("b").style.left = Math.max(1, Math.min(99, action.progress * 100)) + "%";
+      for (const name of ["good", "perfect"]) { const band = sportMeter.querySelector(".action-" + name); band.style.left = action[name][0] * 100 + "%"; band.style.width = (action[name][1] - action[name][0]) * 100 + "%"; }
+    }
     sight.hidden = demo.race.phase !== "shooting";
     if (!sight.hidden) { const aim = demo.race.aim; dot.style.left = (50 + aim.x * 35) + "%"; dot.style.top = (50 + aim.y * 35) + "%"; cue.textContent += " / " + demo.race.hits + " OF 5"; }
     touch.dataset.held = String(demo.race.holding || demo.lesson === 1 && demo.age >= 1);
-    touch.textContent = demo.race.holding ? "HOLD" : demo.lesson === 1 ? "F" : "PRESS";
+    touch.textContent = demo.race.holding ? "HOLD" : demo.lesson === 1 ? "F" : action ? "TAP" : "PRESS";
     motion.textContent = stopped ? "Play animation" : "Pause animation";
   }
   function select(i) {

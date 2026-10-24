@@ -44,6 +44,7 @@ export class RivalScene {
         const art = track.art;
         this.context.clearRect(0, 0, art.width, art.height); art.draw(this.context, art.x, art.ground, art.unit, ghost); this.texture.needsUpdate = true;
         this.athlete.position.set(ghost.distance - race.distance, 0.08, -0.85);
+        track.positionGhost?.(this.athlete, ghost, race);
       }
     }
     if (this.athlete) this.athlete.visible = visible;

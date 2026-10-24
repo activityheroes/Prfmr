@@ -1,6 +1,6 @@
-import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=meets-1";
+import { RhythmRace, scoreZone, clamp, longZones } from "../sprint/engine.mjs?v=sports-1";
 import { World, Body, Vec3, Sphere } from "../javelin/cannon-es.mjs";
-import { landingHeels } from "./jumper.mjs?v=meets-1";
+import { landingHeels } from "./jumper.mjs?v=sports-1";
 
 export const LONG_JUMP_COURSE = {
   id: "long-jump", distance: 45, finishAt: 39.5, fatigueAt: 42, finishMove: false,

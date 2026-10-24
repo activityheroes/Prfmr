@@ -1,7 +1,7 @@
-import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs?v=meets-1";
-import { clamp } from "../sprint/engine.mjs?v=meets-1";
-import { poseDots, worldStandingPose } from "../pole-vault/vaulter.mjs?v=meets-1";
-import { blendPose, reactionAge } from "../sprint/finish.mjs?v=meets-1";
+import { getRunnerPose, STRIDE_METERS } from "../sprint/runner.mjs?v=sports-1";
+import { clamp } from "../sprint/engine.mjs?v=sports-1";
+import { poseDots, worldStandingPose } from "../pole-vault/vaulter.mjs?v=sports-1";
+import { blendPose, reactionAge } from "../sprint/finish.mjs?v=sports-1";
 
 const ease = value => { const t = clamp(value, 0, 1); return t * t * (3 - 2 * t); };
 const mix = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });

@@ -1,4 +1,4 @@
-import { createWeather, weatherAt, randomWeatherSeed, weatherSummary } from "./weather.mjs?v=meets-1";
+import { createWeather, weatherAt, randomWeatherSeed, weatherSummary } from "./weather.mjs?v=sports-1";
 
 export const DIP = { peak: 0.09, duration: 0.32, reach: 0.34, perfectWindow: 0.022 };
 export function longZones(ranges, speed) {

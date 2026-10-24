@@ -18,7 +18,7 @@ function runup(r, frame = 1 / 120) {
 function launch(r, offset = 0, frame = 1 / 120) {
   to(r, TAKEOFF_ZONE.start, frame); r.press(); to(r, TAKEOFF_ZONE.end + offset, frame); r.release(); to(r, HILL.lip, frame);
 }
-function finish(r, frame = 1 / 120) { for (let n = 0; !r.terminal && n < 10000; n++) r.advance(frame); assert.ok(r.terminal); return r; }
+function finish(r, frame = 1 / 120) { for (let n = 0; !r.terminal && n < 10000; n++) { if (r.phase === "flight" && !r.landingPrep && r.landingETA <= 0.5) { r.press(); r.release(); } r.advance(frame); } assert.ok(r.terminal); return r; }
 function perfect(gear = {}, frame = 1 / 120) { const r = start(gear); runup(r, frame); launch(r, 0, frame); return finish(r, frame); }
 
 test("inrun has two fixed zones and a distinct gold action at the lip", () => {
@@ -66,7 +66,7 @@ test("canceled holds and short taps cannot farm a boost or a valid takeoff", () 
 test("early release yields a shorter jump, and a miss cannot be repaired mid-flight", () => {
   const early = start(); runup(early); launch(early, -4); const grade = early.launch.timing.grade; finish(early);
   assert.equal(grade, "Early"); assert.ok(early.result.mark < perfect().result.mark);
-  const r = start(); to(r, 140); assert.equal(r.press(), false); r.release(); r.cancelInput(); finish(r); assert.equal(r.result.mark, null);
+  const r = start(); to(r, 140); assert.equal(r.press(), true); r.release(); r.cancelInput(); finish(r); assert.equal(r.result.mark, null);
 });
 test("30 and 120 FPS agree on measured landing and grading", () => {
   const a = perfect({}, 1 / 30), b = perfect({}, 1 / 120);
@@ -98,7 +98,7 @@ test("inrun skis stay parallel and the tuck stays low; takeoff extends before V 
   assert.ok(p.head.x > p.hip.x); assert.ok(p.limbs.every(l => l.hand.x < p.shoulder.x));
 });
 test("landing closes the V and staggers the skis before the finish reaction", () => {
-  const r = start(); runup(r); launch(r); while (!r.landing) r.advance(1 / 240);
+  const r = start(); runup(r); launch(r); while (!r.landing) { if (!r.landingPrep && r.landingETA <= 0.5) { r.press(); r.release(); } r.advance(1 / 240); }
   const p = getSkierPose(r); assert.ok(Math.abs(p.limbs[0].ankle.x - p.limbs[1].ankle.x) > 0.8);
   close(p.skis[0][0].z - p.skis[1][0].z, p.skis[0].at(-1).z - p.skis[1].at(-1).z);
   finish(r); beginFinish(r); advanceFinish(r, 2); const happy = getSkierPose(r);

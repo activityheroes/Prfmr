@@ -1,5 +1,5 @@
-import { RhythmRace } from "../sprint/engine.mjs?v=meets-1";
-import { BIATHLON_COURSE, RANGE, aimAt, terrainFactor } from "./course.mjs?v=meets-1";
+import { RhythmRace } from "../sprint/engine.mjs?v=sports-1";
+import { BIATHLON_COURSE, RANGE, aimAt, terrainFactor } from "./course.mjs?v=sports-1";
 export { BIATHLON_COURSE, RANGE };
 
 export class BiathlonRace extends RhythmRace {

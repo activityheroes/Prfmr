@@ -1,11 +1,11 @@
-import { prepareMeet } from "../sprint/championship.mjs?v=meets-1";
-import { installTutorial } from "../sprint/tutorial.mjs?v=meets-1";
-import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=meets-1";
-import { HighJumpRace, HIGH_JUMP_COURSE, TAKEOFF_ZONE, HIGH_JUMP, normalizeBar } from "./engine.mjs?v=meets-1";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=meets-1";
-import { HighJumpScene } from "./scene.mjs?v=meets-1";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=meets-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=meets-1";
+import { prepareMeet } from "../sprint/championship.mjs?v=sports-1";
+import { installTutorial } from "../sprint/tutorial.mjs?v=sports-1";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=sports-1";
+import { HighJumpRace, HIGH_JUMP_COURSE, TAKEOFF_ZONE, HIGH_JUMP, normalizeBar } from "./engine.mjs?v=sports-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=sports-1";
+import { HighJumpScene } from "./scene.mjs?v=sports-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=sports-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=sports-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-high-jump-zones-v1";

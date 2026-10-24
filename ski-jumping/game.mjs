@@ -1,12 +1,12 @@
-import { prepareMeet } from "../sprint/championship.mjs?v=meets-1";
-import { installTutorial } from "../sprint/tutorial.mjs?v=meets-1";
-import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=meets-1";
-import { SkiJumpRace, SKI_COURSE, TAKEOFF_ZONE, HILL } from "./engine.mjs?v=meets-1";
-import { landingPoint } from "./course.mjs?v=meets-1";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=meets-1";
-import { SkiJumpScene } from "./scene.mjs?v=meets-1";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=meets-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=meets-1";
+import { prepareMeet } from "../sprint/championship.mjs?v=sports-1";
+import { installTutorial } from "../sprint/tutorial.mjs?v=sports-1";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=sports-1";
+import { SkiJumpRace, SKI_COURSE, TAKEOFF_ZONE, HILL } from "./engine.mjs?v=sports-1";
+import { landingPoint } from "./course.mjs?v=sports-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=sports-1";
+import { SkiJumpScene } from "./scene.mjs?v=sports-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=sports-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=sports-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-ski-jump-zones-v1";
@@ -62,6 +62,7 @@ function events() {
     if (event === "line") { clearInput(); tone(1100); announce("Gold takeoff zone. Hold at entry, then release at the white line to set your takeoff."); }
     if (event === "takeoff-set") { clearInput(); tone(1000); announce("Takeoff set. Approaching the lip."); }
     if (event === "takeoff") { clearInput(); tone(1350, 0.2); announce(race.launch.timing.grade + " takeoff. In flight."); }
+    if (event === "landing-prep") { tone(race.landingPrep.grade === "Perfect" ? 1200 : 600); announce(race.landingPrep.grade + " landing preparation."); }
     if (event === "land") { tone(400, 0.1); announce("Skis down. Landing distance "+race.landing.mark.toFixed(1)+" meters."); }
     if (event === "finish") {
       clearInput();
@@ -118,7 +119,7 @@ function showResult() {
   $("result-mark").textContent = r.foul ? "--" : r.mark.toFixed(1); $("result-unit").hidden = r.foul;
   $("result-detail").textContent = r.foul ? r.reason + ". No distance recorded." : old === null ? "Your first measured jump." : improved ? (r.mark - old).toFixed(2) + " m beyond your previous best." : (old - r.mark).toFixed(2) + " m short of your personal best.";
   $("result-stats").replaceChildren();
-  for (const [name, value] of [["Takeoff timing", r.takeoffGrade], ["Landing", r.landingStyle],
+  for (const [name, value] of [["Takeoff timing", r.takeoffGrade], ["Landing", r.landingStyle], ["Landing timing", r.landingGrade], ["Style points", r.stylePoints + " / 20"],
     ["Takeoff speed", (r.runupSpeed * 3.6).toFixed(1) + " km/h"], ["Air time", r.flightTime.toFixed(2) + " s"], ["Inrun timing", Math.round(r.rhythmScore) + " / 100"], ["Best zone streak", String(r.bestCombo)]]) {
     const row = document.createElement("div"), dt = document.createElement("dt"), dd = document.createElement("dd");
     dt.textContent = name; dd.textContent = value; row.append(dt, dd); $("result-stats").append(row);
@@ -144,7 +145,7 @@ function render() {
   $("zone-count").textContent = "ZONES " + race.attempts + " / 2";
   $("meet-label").textContent = flying ? race.landing ? "LANDED" : "IN FLIGHT" : race.combo ? "STREAK " + race.combo : "WINTER / K90";
   markers.forEach((m, i) => { m.style.background = colors[race.zones[i].result?.grade] ?? "#65c9ff"; }); $("gear").disabled = p !== "ready";
-  trigger.disabled = !scene || flying || race.terminal || !!race.takeoffTiming; trigger.classList.toggle("is-held", race.holding && !paused);
+  trigger.disabled = !scene || race.terminal || p === "landing" || p === "flight" && !!race.landingPrep || !flying && !!race.takeoffTiming; trigger.classList.toggle("is-held", race.holding && !paused);
   trigger.dataset.mode = takeoff || flying ? "line" : "zone"; trigger.dataset.tier = grade?.toLowerCase() ?? cue; trigger.style.setProperty("--charge", "100%");
   $("trigger-main").textContent = p === "ready" ? "START\nRUN" : race.terminal ? "DONE" : p === "landing" ? "LANDED" : flying ? "IN\nFLIGHT" : takeoff ? race.takeoffTiming ? "TAKEOFF\nSET" : "HOLD &\nJUMP" : "TAP &\nHOLD";
   $("trigger-top").textContent = p === "ready" ? "READY" : flying ? race.launch.timing.grade.toUpperCase()

@@ -12,7 +12,9 @@ Entry / held overlap / release contribute 30% / 30% / 40% of the score. Perfect,
 
 The finish phase begins at 197m, on the home straight. Riding continues automatically until the front tire reaches the 200m line. There is no running dip action in this event. The cyclist coasts and celebrates before results. Pause, resume, restart, race results, and per-zone scoring work as in the sprint game.
 
-One successful zone activates Flow; two consecutive Perfects ignite six seconds of Flame Mode with a visible dot trail and increased speed ceiling. See the root README for shared mode rules. Burst feedback shows the actual speed increase, and the speed readout changes color with the active mode.
+Between 72m and 110m, hold behind the pink pacer to store a drafting charge. The gap must stay between 2m and 14m; charge fills over 1.2 seconds. Release in green to slingshot past, adding up to 12% of baseline speed within the speed cap. Overholding beyond 110m awards no burst, and cancellation clears the charge. The pacer is a scripted opportunity, separate from the personal-best ghost.
+
+One successful zone activates Flow; two consecutive Perfects bank a Flame charge. Tap IGNITE or press F to use its six-second burst. See the root README for shared mode rules. Burst feedback shows the actual speed increase, and the speed readout changes color with the active mode.
 
 ## Velodrome
 
@@ -31,7 +33,7 @@ Ride view follows the cyclist from a lower side angle so the body, wheels and ca
 - Wheelset: raises normal maximum speed from 75.6 to 81 or 86.4 km/h, before mode bonuses.
 - Cycling kit: slower momentum decay and less late-race fatigue.
 
-Cycling equipment and personal best use `dot-cycling-zones-v1-long-zones-v1`, independently of sprint records. This is a local client-side demo, not a verified competitive leaderboard.
+Cycling equipment and personal best use `dot-cycling-zones-v1-manual-flame-v1-sport-v1`, independently of sprint records. Old equipment migrates; old records stay archived. This is a local client-side demo, not a verified competitive leaderboard.
 
 ## Shared Files And Verification
 
