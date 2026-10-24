@@ -31,7 +31,24 @@ Use the on-screen control or Space to press, hold and release. Timed zones build
 
 Races use two sustained boost zones, shortened by approximately 20% from the initial two-zone layout, with a marked HOLD entry and RELEASE exit. Timing tolerances are unchanged. Red bands indicate poor releases, yellow covers Good/Great, and green covers Perfect. Both the track and HUD use the actual scoring function, including entry accuracy and equipped timing tolerance. Hurdles retains ten individually timed jumps. Final throws, takeoffs and Biathlon shooting remain separate actions.
 
-Current records use each event's existing storage key with `-rivals-v1` appended. Equipment and selected bar heights migrate from `-long-zones-v1` or older saves, but older records remain untouched and are not compared with the new course layout.
+Current records use each event's existing storage key with `-manual-flame-v1` appended. Equipment and selected bar heights migrate from `-rivals-v1`, `-long-zones-v1` or older saves. Older records remain untouched and are not compared with the new manual-Flame rules; replay version 2 also records ignition inputs.
+
+### Animated Tutorials
+
+Each sport opens its own skippable tutorial on the first visit. Timing, Flame and the event's finish action are demonstrated using the actual dot-matrix athlete and game engine, in a separate simulation that cannot change scores or records. Biathlon demonstrates aiming and shooting; Hurdles keeps individual jump timing. Use How to Play before an attempt to replay any lesson. Reduced-motion preferences start the animation paused, with an explicit play control.
+
+### Championships
+
+Open Championships in the event navigation to start a three-event local meet:
+
+- Summer Circuit: Sprint, Long Jump, Hurdles.
+- Winter Circuit: Speed Skating, Ski Jumping, Biathlon.
+- Power Circuit: Javelin, Pole Vault, High Jump.
+- Speed Circuit: Sprint, Cycling, Swimming.
+
+Each completed attempt awards 0-1000 points; 800 represents the event benchmark. Times score inversely and distances/heights proportionally. Fouls and failed clearances score zero. The three scores determine the final podium against three explicitly simulated rivals, not online players. The result screen advances to the next event after the normal finish sequence.
+
+Progress persists on this browser and can be resumed from Championships. Each round accepts one completed result; duplicate finish callbacks and stale tabs cannot score it again. Restarting an unfinished round retains its seeded weather. These are casual local meets with the player's equipment, not cheat-resistant competition.
 
 ### Personal-Best Rivals
 
@@ -55,10 +72,10 @@ Biathlon adds rolling hills and a five-target shooting stop at 200m. Hold to ste
 
 - Good, Great and Perfect release bursts add 6%, 10% and 15% speed, up to the active speed limit. The temporary component is held for 1.25 seconds before gradually fading; momentum carries into later zones.
 - One successful zone activates cyan Flow, adding 5% of baseline speed to the target pace.
-- Two consecutive Perfects ignite Flame Mode for six seconds. A dot-flame trail, ignition tone, two-segment charge indicator and fuel timer accompany a real acceleration burst. Another two Perfects refill the timer; early, late, missed and canceled zones break the streak and extinguish Flame.
+- Two consecutive Perfects bank one Flame charge. Tap IGNITE in the boost display or press F to activate a six-second burst when you choose. A dot-flame trail, ignition tone, two-segment charge indicator and fuel timer accompany the acceleration. Another two Perfects can bank the next charge, but only one can be stored and it cannot be used until the active burst ends. Early, late, missed and canceled zones break the streak and extinguish active Flame without removing a banked charge.
 - Longer holds award three times the usual positive momentum increment, within the existing equipment cap, so fewer zones still produce noticeable acceleration. Penalties are unchanged.
 - Flame adds 20% of baseline speed to target pace. Racing events also gain 20% speed-limit headroom (Flow grants 5%). Technical events keep their original safe approach-speed ceiling so hurdles, takeoff collisions and landing areas remain playable.
-- The boost display reports the actual awarded burst percentage and current pace above baseline, not just the nominal reward. Pauses freeze physics and fuel. The biathlon range suspends fuel consumption. Restart clears all mode state. Reduced motion retains the HUD and a static, sparse dot trail without animated flames.
+- The boost display reports the actual awarded burst percentage and current pace above baseline, not just the nominal reward. Pauses freeze physics and fuel. The biathlon range suspends fuel consumption. Ignition is unavailable while paused, shooting, airborne or finished. Restart clears all mode state. Reduced motion retains the HUD and a static, sparse dot trail without animated flames.
 - Successful bursts add short ground-level speed streaks and a brief speed-readout pulse. These emphasize the real speed increase without changing the camera, athlete scale, physics caps or timing windows; reduced motion suppresses both animations.
 
 Cycling now starts rolling at 36 km/h and settles at 54 km/h. Ride view follows the rider from a readable side angle; Track view retains the full banked oval.

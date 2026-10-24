@@ -1,18 +1,20 @@
-import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs?v=rivals-1";
-import { TrackScene } from "./track-scene.mjs?v=rivals-1";
-import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs?v=rivals-1";
-import { SWIMMER_ART } from "../swimming/swimmer.mjs?v=rivals-1";
-import { createTimingGuide } from "./timing-guide.mjs?v=rivals-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs?v=rivals-1";
-import { readEventSave, writeEventSave } from "./save.mjs?v=rivals-1";
-import { attachReplay, advanceReplay, finishReplay } from "./replay.mjs?v=rivals-1";
+import { prepareMeet } from "./championship.mjs?v=meets-1";
+import { installTutorial } from "./tutorial.mjs?v=meets-1";
+import { SprintRace, SPRINT_COURSE, getStats, GEAR, clamp } from "./engine.mjs?v=meets-1";
+import { TrackScene } from "./track-scene.mjs?v=meets-1";
+import { SwimmingRace, SWIMMING_COURSE } from "../swimming/engine.mjs?v=meets-1";
+import { SWIMMER_ART } from "../swimming/swimmer.mjs?v=meets-1";
+import { createTimingGuide } from "./timing-guide.mjs?v=meets-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "./finish.mjs?v=meets-1";
+import { readEventSave, writeEventSave } from "./save.mjs?v=meets-1";
+import { attachReplay, advanceReplay, finishReplay } from "./replay.mjs?v=meets-1";
 
 const $ = id => document.getElementById(id);
 const sports = {
   sprint: { course: SPRINT_COURSE, Race: SprintRace, athlete: undefined, noun: "runner", event: "SPRINT", action: "RUN", status: "RUNNING", finish: "DIP", storageKey: "dot-sprint-zones-v4" },
   swimming: { course: SWIMMING_COURSE, Race: SwimmingRace, athlete: SWIMMER_ART, noun: "swimmer", event: "SWIM", action: "SWIM", status: "SWIMMING", finish: "THE WALL", storageKey: "dot-swimming-zones-v1" }
 };
-const eventModules = { cycling: "../cycling/event.mjs?v=rivals-1", hurdles: "../hurdles/event.mjs?v=rivals-1", "speed-skating": "../speed-skating/event.mjs?v=rivals-1", biathlon: "../biathlon/event.mjs?v=rivals-1" };
+const eventModules = { cycling: "../cycling/event.mjs?v=meets-1", hurdles: "../hurdles/event.mjs?v=meets-1", "speed-skating": "../speed-skating/event.mjs?v=meets-1", biathlon: "../biathlon/event.mjs?v=meets-1" };
 const sport = eventModules[document.body.dataset.sport]
   ? (await import(eventModules[document.body.dataset.sport])).default
   : sports[document.body.dataset.sport] ?? sports.sprint;
@@ -77,7 +79,7 @@ function reset(keepWeather = false) {
   const seed = keepWeather === true ? race?.weather.seed : undefined;
   clearInput(); paused = false; $("pause-panel").hidden = true;
   if (dialog.open) dialog.close();
-  race = new Race(loadout).setWeather(seed); lastTime = performance.now(); resultShown = false;
+  race = new Race(loadout).setWeather(seed); prepareMeet(race); lastTime = performance.now(); resultShown = false;
   attachReplay(race, gear => new Race(gear), loadout, ghostRecord); race.previousBest = best;
   updateStats(); render(); trigger.focus({ preventScroll: true });
 }
@@ -271,7 +273,8 @@ function render() {
   sport.render?.(race, scene, paused);
   renderFinish(race, scene, trigger);
 }
+const tutorial = installTutorial({ getRace: () => race, isPaused: () => paused, sync, render, makeRace: () => new Race(), makeScene: canvas => new (sport.Scene ?? TrackScene)(canvas, { course, athlete: sport.athlete }) });
 new ResizeObserver(() => { fit(); render(); }).observe(canvas);
 fit(); reset();
-function frame(now) { sync(now); render(); requestAnimationFrame(frame); }
+function frame(now) { sync(now); if (!tutorial.dialog.open) render(); tutorial.update(); requestAnimationFrame(frame); }
 requestAnimationFrame(frame);

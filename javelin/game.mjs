@@ -1,9 +1,11 @@
-import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=rivals-1";
-import { JavelinRace, JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=rivals-1";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=rivals-1";
-import { JavelinScene } from "./scene.mjs?v=rivals-1";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=rivals-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=rivals-1";
+import { prepareMeet } from "../sprint/championship.mjs?v=meets-1";
+import { installTutorial } from "../sprint/tutorial.mjs?v=meets-1";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=meets-1";
+import { JavelinRace, JAVELIN_COURSE, THROW_ZONE } from "./engine.mjs?v=meets-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=meets-1";
+import { JavelinScene } from "./scene.mjs?v=meets-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=meets-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=meets-1";
 
 const $=id=>document.getElementById(id),trigger=$("trigger"),dialog=$("result-dialog"),canvas=$("track");
 const storageKey="dot-javelin-zones-v1",colors={Perfect:"#81f6b6",Great:"#ffd473",Good:"#ffd473",Early:"#ed667d",Late:"#ff7f86",Miss:"#ed667d"};
@@ -26,7 +28,7 @@ function clearInput(){const id=input.id;input.kind=null;input.id=null;if(id!==nu
 function reset(keepWeather = false) {
   const seed = keepWeather === true ? race?.weather.seed : undefined;
   clearInput();paused=false;resultShown=false;$("pause-panel").hidden=true;if(dialog.open)dialog.close();
-  race=new JavelinRace(loadout).setWeather(seed); race.previousBest = best;lastTime=performance.now();
+  race=new JavelinRace(loadout).setWeather(seed); prepareMeet(race); race.previousBest = best;lastTime=performance.now();
   const stats=getStats(loadout,JAVELIN_COURSE);
   $("stat-band").textContent=stats.timingTolerance.toFixed(2)+"x edge tolerance";$("stat-blocks").textContent=stats.acceleration.toFixed(2)+" m/s2";
   $("stat-spikes").textContent=stats.maxSpeed.toFixed(1)+" m/s maximum";$("stat-kit").textContent=stats.endurance.toFixed(2)+"x endurance";
@@ -122,5 +124,6 @@ function render(){
   renderFinish(race, scene, trigger);
 }
 function fit(){const r=canvas.getBoundingClientRect();scene?.resize(r.width,r.height);}
+const tutorial = installTutorial({ getRace: () => race, isPaused: () => paused, sync, render, makeRace: () => new JavelinRace(), makeScene: canvas => new JavelinScene(canvas) });
 new ResizeObserver(()=>{fit();render();}).observe(canvas);fit();reset();
-function frame(now){sync(now);render();requestAnimationFrame(frame);}requestAnimationFrame(frame);
+function frame(now) { sync(now); if (!tutorial.dialog.open) render(); tutorial.update();requestAnimationFrame(frame);}requestAnimationFrame(frame);

@@ -48,29 +48,32 @@ test("one successful zone enters Flow without awarding Flame", () => {
   assert.equal(r.mode, "flow"); assert.equal(r.flameCount, 0); assert.equal(r.perfectStreak, 0);
   close(r.speedLimit, r.stats.maxSpeed * (1 + MODES.flowGain));
 });
-test("Flame requires two consecutive Perfects, refills on four and cannot be farmed", () => {
+test("two Perfects bank one Flame charge; only activation consumes it and adds speed", () => {
   const r = extended(); zone(r); assert.equal(r.mode, "flow");
-  const second = zone(r); assert.equal(r.mode, "flame"); assert.equal(second.ignited, true);
-  close(r.flameRemaining, MODES.flameDuration); assert.ok(second.speedGain / second.speedBefore > 0.15);
+  const second = zone(r); assert.equal(r.mode, "flow"); assert.equal(second.charged, true); assert.equal(second.ignited, false);
+  const before = r.speed; r.advance(0.2); assert.equal(r.flameReady, true); assert.equal(r.flameRemaining, 0);
+  assert.equal(r.activateFlame(), true); assert.ok(r.speed > before); assert.equal(r.activateFlame(), false);
+  close(r.flameRemaining, MODES.flameDuration); assert.equal(r.flameReady, false);
   for (let i = 0; i < 10; i++) { r.press(); r.release(); }
   assert.equal(r.flameCount, 1); assert.equal(r.attempts, 2);
-  zone(r); zone(r); assert.equal(r.flameCount, 2); close(r.flameRemaining, MODES.flameDuration);
+  zone(r); zone(r); assert.equal(r.flameCount, 1); assert.equal(r.flameReady, true);
+  r.advance(6); assert.equal(r.activateFlame(), true); assert.equal(r.flameCount, 2); close(r.flameRemaining, MODES.flameDuration);
 });
 test("Good interrupts the Perfect charge but preserves the successful streak", () => {
   const r = extended(); zone(r); zone(r, "Good");
   assert.equal(r.mode, "flow"); assert.equal(r.perfectStreak, 0);
-  zone(r); assert.equal(r.flameCount, 0); zone(r); assert.equal(r.flameCount, 1);
+  zone(r); assert.equal(r.flameReady, false); zone(r); assert.equal(r.flameReady, true); assert.equal(r.flameCount, 0);
 });
 test("misses, early/late releases and canceled holds extinguish Flame", () => {
   for (const grade of ["Miss", "Early", "Late", "cancel"]) {
-    const r = extended(); zone(r); zone(r);
+    const r = extended(); zone(r); zone(r); r.activateFlame();
     if (grade === "cancel") { to(r, r.nextZone.start); r.press(); r.cancelInput(); } else zone(r, grade);
     assert.equal(r.mode, "normal"); assert.equal(r.perfectStreak, 0); assert.equal(r.flameRemaining, 0);
   }
 });
 test("Flame expires in simulation time, then returns smoothly to Flow's ceiling", () => {
   const r = new RhythmRace({}, { ...SPRINT_COURSE, distance: 1000, finishAt: 999, fatigueAt: 990, zones: SPRINT_COURSE.zones.slice(0, 3) });
-  r.press(); r.release(); zone(r); zone(r); r.advance(6.01);
+  r.press(); r.release(); zone(r); zone(r); r.activateFlame(); r.advance(6.01);
   assert.equal(r.mode, "flow"); assert.equal(r.flameRemaining, 0); r.advance(2);
   assert.ok(r.speed <= r.speedLimit); assert.ok(r.speed > r.stats.baseSpeed);
 });
@@ -86,7 +89,8 @@ test("restart begins with no mode, charge, fuel or temporary burst", () => {
 for (const Race of [SprintRace, CyclingRace, SwimmingRace, SpeedSkatingRace, BiathlonRace, HurdlesRace, JavelinRace, PoleVaultRace, LongJumpRace, HighJumpRace, SkiJumpRace]) {
   test(`${Race.name}: real timed zones unlock Flame while respecting the event's speed envelope`, () => {
     const r = start(Race); zone(r); zone(r);
-    assert.equal(r.counts.Perfect, 2); assert.equal(r.flameCount, 1); assert.equal(r.mode, "flame");
+    assert.equal(r.counts.Perfect, 2); assert.equal(r.flameReady, true); assert.equal(r.flameCount, 0);
+    assert.equal(r.activateFlame(), true); assert.equal(r.flameCount, 1); assert.equal(r.mode, "flame");
     assert.ok(r.speed > r.course.baseSpeed); assert.ok(r.speed <= r.speedLimit);
     if (r.finishZone || r.course.id === "hurdles") close(r.speedLimit, r.stats.maxSpeed);
   });

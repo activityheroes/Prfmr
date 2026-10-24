@@ -1,9 +1,9 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=rivals-1";
-import { ease, finishTravel } from "../sprint/finish.mjs?v=rivals-1";
-import { SKATING_COURSE, ovalPoint } from "./course.mjs?v=rivals-1";
-import { getSkaterPose, skaterDots } from "./skater.mjs?v=rivals-1";
-import { ghostDots } from "../sprint/rival-scene.mjs?v=rivals-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=meets-1";
+import { ease, finishTravel } from "../sprint/finish.mjs?v=meets-1";
+import { SKATING_COURSE, ovalPoint } from "./course.mjs?v=meets-1";
+import { getSkaterPose, skaterDots } from "./skater.mjs?v=meets-1";
+import { ghostDots } from "../sprint/rival-scene.mjs?v=meets-1";
 
 const ATHLETE_SCALE = 1;
 const ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,

@@ -1,9 +1,9 @@
 import * as THREE from "../sprint/vendor/three.module.min.js";
-import { TrackScene } from "../sprint/track-scene.mjs?v=rivals-1";
-import { finishTravel } from "../sprint/finish.mjs?v=rivals-1";
-import { BIATHLON_COURSE, RANGE, trailHeight } from "./course.mjs?v=rivals-1";
-import { getSkierPose, skierDots, SKIER_SCALE as SCALE } from "./skier.mjs?v=rivals-1";
-import { ghostDots } from "../sprint/rival-scene.mjs?v=rivals-1";
+import { TrackScene } from "../sprint/track-scene.mjs?v=meets-1";
+import { finishTravel } from "../sprint/finish.mjs?v=meets-1";
+import { BIATHLON_COURSE, RANGE, trailHeight } from "./course.mjs?v=meets-1";
+import { getSkierPose, skierDots, SKIER_SCALE as SCALE } from "./skier.mjs?v=meets-1";
+import { ghostDots } from "../sprint/rival-scene.mjs?v=meets-1";
 
 const ART = { width: 2, height: 2, x: 0, ground: 0, unit: 1, scaleX: 1, scaleY: 1,
   anchorX: 0, anchorY: 0, headHeight: 2.7, feedbackX: 0, shadowStart: -0.6, shadowLength: 1.3, planar: true, draw() {} };

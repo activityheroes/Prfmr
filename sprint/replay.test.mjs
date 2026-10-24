@@ -23,7 +23,7 @@ function record(Race) {
   const loadout = { band: 1, blocks: 1, spikes: 2, kit: 1 };
   const r = new Race(loadout).setWeather(42);
   attachReplay(r, gear => new Race(gear), loadout); r.advance(2.75); r.press(); r.release();
-  for (const z of r.zones) { to(r, z.start); r.press(); to(r, z.end); r.release(); }
+  for (const z of r.zones) { to(r, z.start); r.press(); to(r, z.end); r.release(); if (r.canActivateFlame) r.activateFlame(); }
   to(r, r.course.distance);
   assert.ok(r.terminal); return { race: r, record: finishReplay(r) };
 }

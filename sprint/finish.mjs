@@ -1,3 +1,4 @@
+import { submitMeet } from "./championship.mjs?v=meets-1";
 export const ease = value => {
   const t = Math.max(0, Math.min(1, value));
   return t * t * (3 - 2 * t);
@@ -13,6 +14,7 @@ export function blendPose(a, b, t) {
 // Presentation has its own clock. Official time, collisions and marks stay frozen.
 export function beginFinish(race, previousBest = null, reducedMotion = false) {
   if (race.presentation || !race.terminal || !race.result) return race.presentation;
+  submitMeet(race);
   const id = race.course.id, result = race.result;
   const success = !result.foul && result.cleared !== false;
   const field = ["javelin", "long-jump", "pole-vault", "high-jump", "ski-jumping"].includes(id);

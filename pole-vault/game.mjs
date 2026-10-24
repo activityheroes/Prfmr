@@ -1,9 +1,11 @@
-import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=rivals-1";
-import { PoleVaultRace, VAULT_COURSE, PLANT_ZONE, VAULT, normalizeBar } from "./engine.mjs?v=rivals-1";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=rivals-1";
-import { VaultScene } from "./scene.mjs?v=rivals-1";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=rivals-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=rivals-1";
+import { prepareMeet } from "../sprint/championship.mjs?v=meets-1";
+import { installTutorial } from "../sprint/tutorial.mjs?v=meets-1";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=meets-1";
+import { PoleVaultRace, VAULT_COURSE, PLANT_ZONE, VAULT, normalizeBar } from "./engine.mjs?v=meets-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=meets-1";
+import { VaultScene } from "./scene.mjs?v=meets-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=meets-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=meets-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-pole-vault-zones-v1";
@@ -36,7 +38,7 @@ function clearInput() {
 function reset(keepWeather = false) {
   const seed = keepWeather === true ? race?.weather.seed : undefined;
   clearInput(); paused = false; resultShown = false; $("pause-panel").hidden = true; if (dialog.open) dialog.close();
-  race = new PoleVaultRace(loadout, barHeight).setWeather(seed); race.previousBest = best; lastTime = performance.now();
+  race = new PoleVaultRace(loadout, barHeight).setWeather(seed); prepareMeet(race); race.previousBest = best; lastTime = performance.now();
   const stats = getStats(loadout, VAULT_COURSE);
   $("stat-band").textContent = stats.timingTolerance.toFixed(2) + "x edge tolerance";
   $("stat-blocks").textContent = stats.acceleration.toFixed(2) + " m/s2";
@@ -99,7 +101,7 @@ $("restart").addEventListener("click", reset);
 $("again").addEventListener("click", () => { if (race.result?.cleared) barHeight = Math.min(VAULT.maxBar, barHeight + 0.25); attempt++; persist(); reset(); });
 $("retry").addEventListener("click", () => { attempt++; reset(); });
 dialog.addEventListener("cancel", e => { e.preventDefault(); attempt++; reset(); });
-$("bar-height").addEventListener("input", e => { if (race.phase !== "ready") return; barHeight = normalizeBar(e.target.value); persist(); race = new PoleVaultRace(loadout, barHeight).setWeather(race.weather.seed); race.previousBest = best; $("bar-value").textContent = barHeight.toFixed(2); render(); });
+$("bar-height").addEventListener("input", e => { if (race.phase !== "ready") return; barHeight = normalizeBar(e.target.value); persist(); race = new PoleVaultRace(loadout, barHeight).setWeather(race.weather.seed); prepareMeet(race); race.previousBest = best; $("bar-value").textContent = barHeight.toFixed(2); render(); });
 for (const key of Object.keys(GEAR)) {
   $("gear-" + key).value = String(loadout[key]);
   $("gear-" + key).addEventListener("change", e => { if (race.phase !== "ready") return; loadout[key] = Number(e.target.value); persist(); reset(true); });
@@ -171,5 +173,6 @@ function render() {
   renderFinish(race, scene, trigger);
 }
 function fit() { const r = canvas.getBoundingClientRect(); scene?.resize(r.width, r.height); }
+const tutorial = installTutorial({ getRace: () => race, isPaused: () => paused, sync, render, makeRace: () => new PoleVaultRace(), makeScene: canvas => new VaultScene(canvas) });
 new ResizeObserver(() => { fit(); render(); }).observe(canvas); fit(); reset();
-function frame(now) { sync(now); render(); requestAnimationFrame(frame); } requestAnimationFrame(frame);
+function frame(now) { sync(now); if (!tutorial.dialog.open) render(); tutorial.update(); requestAnimationFrame(frame); } requestAnimationFrame(frame);

@@ -1,11 +1,11 @@
 import * as THREE from "./vendor/three.module.min.js";
-import { SPRINT_COURSE, clamp } from "./engine.mjs?v=rivals-1";
-import { drawRunner } from "./runner.mjs?v=rivals-1";
-import { createPool, createPoolWall } from "../swimming/pool.mjs?v=rivals-1";
-import { finishTravel, reactionAge } from "./finish.mjs?v=rivals-1";
-import { BoostEffects } from "./boost-effects.mjs?v=rivals-1";
-import { ZoneMarkers } from "./zone-markers.mjs?v=rivals-1";
-import { RivalScene } from "./rival-scene.mjs?v=rivals-1";
+import { SPRINT_COURSE, clamp } from "./engine.mjs?v=meets-1";
+import { drawRunner } from "./runner.mjs?v=meets-1";
+import { createPool, createPoolWall } from "../swimming/pool.mjs?v=meets-1";
+import { finishTravel, reactionAge } from "./finish.mjs?v=meets-1";
+import { BoostEffects } from "./boost-effects.mjs?v=meets-1";
+import { ZoneMarkers } from "./zone-markers.mjs?v=meets-1";
+import { RivalScene } from "./rival-scene.mjs?v=meets-1";
 
 const RUNNER_ART = { width: 256, height: 256, x: 104, ground: 238, unit: 12,
   scaleX: 3.2, scaleY: 3.2, anchorX: 104 / 256, anchorY: 0.07,

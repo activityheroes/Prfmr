@@ -1,8 +1,10 @@
-import { MODES } from "./engine.mjs?v=rivals-1";
+import { MODES } from "./engine.mjs?v=meets-1";
 
 export function createBoostUI(tone) {
   const hud = document.createElement("div"); hud.className = "boost-hud";
-  const mode = document.createElement("strong"), charge = document.createElement("span"), gain = document.createElement("output");
+  const mode = document.createElement("strong"), charge = document.createElement("button"), gain = document.createElement("output");
+  charge.type = "button"; charge.id = "ignite"; charge.title = "Activate stored Flame (F)";
+  charge.addEventListener("click", () => document.getElementById("trigger").dispatchEvent(new Event("ignite")));
   gain.setAttribute("aria-live", "off");
   charge.className = "boost-charge";
   const caption = document.createElement("span"); charge.append(caption);
@@ -17,9 +19,10 @@ export function createBoostUI(tone) {
     const state = active ? race.mode === "normal" && recent ? "boost" : race.mode : "normal";
     hud.dataset.mode = state; trigger.dataset.boost = state; speed.dataset.boost = state;
     mode.textContent = paused ? "PAUSED" : state === "flame" ? "FLAME MODE" : state === "flow" ? "FLOW" : recent ? race.lastAttempt.grade.toUpperCase() : "MOMENTUM";
-    const charged = race.mode === "flame" ? MODES.perfectStreak : race.perfectStreak % MODES.perfectStreak;
-    caption.textContent = race.mode === "flame" && moving ? race.flameRemaining.toFixed(1) + "s" : "PERFECT " + charged + "/" + MODES.perfectStreak;
-    charge.setAttribute("aria-label", race.mode === "flame" && moving ? "Flame mode: " + race.flameRemaining.toFixed(1) + " seconds remaining" : charged + " of " + MODES.perfectStreak + " consecutive perfect zones");
+    const charged = race.flameReady ? MODES.perfectStreak : race.perfectStreak % MODES.perfectStreak;
+    charge.disabled = paused || !race.canActivateFlame; charge.dataset.ready = String(race.canActivateFlame && !paused);
+    caption.textContent = race.mode === "flame" && moving ? race.flameRemaining.toFixed(1) + "s" : race.flameReady ? "IGNITE" : "PERFECT " + charged + "/" + MODES.perfectStreak;
+    charge.setAttribute("aria-label", race.mode === "flame" && moving ? "Flame mode: " + race.flameRemaining.toFixed(1) + " seconds remaining" : race.flameReady ? "Activate Flame. Shortcut F." : charged + " of " + MODES.perfectStreak + " consecutive perfect zones");
     pips.forEach((pip, i) => pip.classList.toggle("lit", i < charged));
     const pace = Math.max(0, race.speed / race.stats.baseSpeed - 1);
     const burst = recent ? Math.round(race.lastAttempt.speedGain / Math.max(0.01, race.lastAttempt.speedBefore) * 100) : 0;
@@ -31,7 +34,7 @@ export function createBoostUI(tone) {
     hud.style.setProperty("--fuel", (active && race.mode === "flame" ? race.flameRemaining / MODES.flameDuration : active && race.mode === "flow" ? 1 : recent ? race.burstRemaining / MODES.burstDuration : 0) * 100 + "%");
     if (active && race.flameCount > ignitions) {
       tone(1320, 0.28);
-      document.getElementById("announcer").textContent = "Flame mode! Two consecutive perfect zones. Six second speed burst.";
+      document.getElementById("announcer").textContent = "Flame activated! Six second speed burst.";
     } else if (active && state === "flow" && lastMode !== "flow" && lastMode !== "flame") tone(1100, 0.18);
     ignitions = race.flameCount; lastMode = state;
   };

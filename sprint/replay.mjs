@@ -1,6 +1,6 @@
-import { WEATHER } from "./weather.mjs?v=rivals-1";
-const VERSION = 1;
-const ACTIONS = ["press", "release", "cancelInput", "dip"];
+import { WEATHER } from "./weather.mjs?v=meets-1";
+const VERSION = 2;
+const ACTIONS = ["press", "release", "cancelInput", "dip", "activateFlame"];
 export const courseSignature = course => JSON.stringify([VERSION, course.id, course.distance,
   course.zones.map(z => [z.start, z.end]), course.baseSpeed, course.maxSpeeds]);
 

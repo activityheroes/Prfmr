@@ -1,5 +1,5 @@
-import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=rivals-1";
-import { trailGrade, RANGE } from "./course.mjs?v=rivals-1";
+import { blendPose, ease, finishTravel, reactionAge } from "../sprint/finish.mjs?v=meets-1";
+import { trailGrade, RANGE } from "./course.mjs?v=meets-1";
 
 export const STRIDE = 7.5;
 export const SKIER_SCALE = 1.35;

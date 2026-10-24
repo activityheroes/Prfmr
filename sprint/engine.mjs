@@ -1,4 +1,4 @@
-import { createWeather, weatherAt, randomWeatherSeed, weatherSummary } from "./weather.mjs?v=rivals-1";
+import { createWeather, weatherAt, randomWeatherSeed, weatherSummary } from "./weather.mjs?v=meets-1";
 
 export const DIP = { peak: 0.09, duration: 0.32, reach: 0.34, perfectWindow: 0.022 };
 export function longZones(ranges, speed) {
@@ -88,7 +88,7 @@ export class RhythmRace {
     this.lastAttempt = null; this.offZoneAt = -100;
     this.counts = { Perfect: 0, Great: 0, Good: 0, Early: 0, Late: 0, Miss: 0 };
     this.combo = 0; this.bestCombo = 0; this.peakSpeed = 0;
-    this.perfectStreak = 0; this.flameRemaining = 0; this.flameCount = 0; this.burstRemaining = 0;
+    this.perfectStreak = 0; this.flameReady = false; this.flameRemaining = 0; this.flameCount = 0; this.burstRemaining = 0;
     this.dipAt = null; this.earlyDip = false; this.finishTime = null; this.result = null; this.events = [];
   }
   get racing() { return this.phase === "sprint" || this.phase === "line"; }
@@ -99,6 +99,17 @@ export class RhythmRace {
   get conditions() { return weatherAt(this.weather, this.startAt === null ? 0 : this.time - this.startAt); }
   get terminal() { return this.phase === "finished"; }
   get mode() { return this.flameRemaining > 0 ? "flame" : this.combo >= MODES.flowStreak ? "flow" : "normal"; }
+  get canActivateFlame() {
+    return this.flameReady && this.flameRemaining === 0 && ["sprint", "line"].includes(this.phase)
+      && !this.terminal && !this.launch && !this.plant;
+  }
+  activateFlame() {
+    if (!this.canActivateFlame) return false;
+    this.flameReady = false; this.flameRemaining = MODES.flameDuration; this.flameCount++;
+    this.speed = Math.min(this.speedLimit, this.speed + this.stats.baseSpeed * MODES.flameGain);
+    this.peakSpeed = Math.max(this.peakSpeed, this.speed);
+    this.events.push("ignite"); return true;
+  }
   get modeGain() { return this.mode === "flame" ? MODES.flameGain : this.mode === "flow" ? MODES.flowGain : 0; }
   get speedLimit() {
     // Technical events retain their tested launch envelope; modes build speed up to it faster.
@@ -166,7 +177,7 @@ export class RhythmRace {
       : { grade: "Miss", score: 0, entry: 0, hold: 0, release: 0, entryError: null, releaseError: null };
     if (forcedGrade) metrics.grade = forcedGrade;
     if (canceled) metrics.score = metrics.entry = metrics.hold = metrics.release = 0;
-    const { grade } = metrics, reward = REWARDS[grade], beforeSpeed = this.speed, previousMode = this.mode;
+    const { grade } = metrics, reward = REWARDS[grade], beforeSpeed = this.speed;
     zone.status = "done";
     zone.result = { ...metrics, zoneId: zone.id, time: this.time, canceled,
       duration: zone.attempt ? this.time - zone.attempt.time : 0, boost: reward.boost };
@@ -175,13 +186,12 @@ export class RhythmRace {
     this.bestCombo = Math.max(this.bestCombo, this.combo);
     this.perfectStreak = grade === "Perfect" ? this.perfectStreak + 1 : 0;
     if (!this.combo) this.flameRemaining = 0;
-    const ignited = this.perfectStreak > 0 && this.perfectStreak % MODES.perfectStreak === 0;
-    if (ignited) { this.flameRemaining = MODES.flameDuration; this.flameCount++; }
+    const charged = this.perfectStreak > 0 && this.perfectStreak % MODES.perfectStreak === 0;
+    if (charged) this.flameReady = true;
     const rewardScale = zone.longHold && reward.momentum > 0 ? 3 : 1;
     this.momentum = clamp(this.momentum + reward.momentum * rewardScale * (this.course.momentumScale ?? 1), 0, this.stats.maxSpeed - this.stats.baseSpeed);
     if (reward.boost) {
-      const ignition = ignited && previousMode !== "flame" ? this.stats.baseSpeed * MODES.flameGain : 0;
-      const boostedSpeed = Math.min(this.speedLimit, this.speed * (1 + reward.boost) + ignition);
+      const boostedSpeed = Math.min(this.speedLimit, this.speed * (1 + reward.boost));
       this.temporaryBoost = Math.max(this.temporaryBoost, boostedSpeed - this.stats.baseSpeed * (1 + this.modeGain) - this.momentum, 0);
       this.burstRemaining = MODES.burstDuration;
       this.speed = boostedSpeed;
@@ -189,7 +199,7 @@ export class RhythmRace {
       this.temporaryBoost *= 0.4; this.speed = Math.max(this.stats.baseSpeed * this.conditions.pace, this.speed * 0.97);
     }
     Object.assign(zone.result, { speedBefore: beforeSpeed, speedAfter: this.speed,
-      speedGain: Math.max(0, this.speed - beforeSpeed), mode: this.mode, ignited });
+      speedGain: Math.max(0, this.speed - beforeSpeed), mode: this.mode, charged, ignited: false });
     this.peakSpeed = Math.max(this.peakSpeed, this.speed);
     if (this.activeHold === zone) this.activeHold = null;
     this.events.push({ type: "zone", result: zone.result });

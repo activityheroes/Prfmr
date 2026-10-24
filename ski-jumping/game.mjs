@@ -1,10 +1,12 @@
-import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=rivals-1";
-import { SkiJumpRace, SKI_COURSE, TAKEOFF_ZONE, HILL } from "./engine.mjs?v=rivals-1";
-import { landingPoint } from "./course.mjs?v=rivals-1";
-import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=rivals-1";
-import { SkiJumpScene } from "./scene.mjs?v=rivals-1";
-import { createTimingGuide } from "../sprint/timing-guide.mjs?v=rivals-1";
-import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=rivals-1";
+import { prepareMeet } from "../sprint/championship.mjs?v=meets-1";
+import { installTutorial } from "../sprint/tutorial.mjs?v=meets-1";
+import { readEventSave, writeEventSave } from "../sprint/save.mjs?v=meets-1";
+import { SkiJumpRace, SKI_COURSE, TAKEOFF_ZONE, HILL } from "./engine.mjs?v=meets-1";
+import { landingPoint } from "./course.mjs?v=meets-1";
+import { getStats, GEAR, clamp } from "../sprint/engine.mjs?v=meets-1";
+import { SkiJumpScene } from "./scene.mjs?v=meets-1";
+import { createTimingGuide } from "../sprint/timing-guide.mjs?v=meets-1";
+import { beginFinish, advanceFinish, canShowResult, renderFinish } from "../sprint/finish.mjs?v=meets-1";
 
 const $ = id => document.getElementById(id), trigger = $("trigger"), dialog = $("result-dialog"), canvas = $("track");
 const storageKey = "dot-ski-jump-zones-v1";
@@ -37,7 +39,7 @@ function clearInput() {
 function reset(keepWeather = false) {
   const seed = keepWeather === true ? race?.weather.seed : undefined;
   clearInput(); paused = false; resultShown = false; $("pause-panel").hidden = true; if (dialog.open) dialog.close();
-  race = new SkiJumpRace(loadout).setWeather(seed); race.previousBest = best; lastTime = performance.now();
+  race = new SkiJumpRace(loadout).setWeather(seed); prepareMeet(race); race.previousBest = best; lastTime = performance.now();
   const stats = getStats(loadout, SKI_COURSE);
   $("stat-band").textContent = stats.timingTolerance.toFixed(2) + "x edge tolerance";
   $("stat-blocks").textContent = stats.acceleration.toFixed(2) + " m/s2";
@@ -170,5 +172,6 @@ function render() {
   if (scene) { $("race-call").style.left = clamp(scene.callout.x, 78, scene.width - 78) + "px"; $("race-call").style.top = Math.max(34, scene.callout.y) + "px"; }
 }
 function fit() { const r = canvas.getBoundingClientRect(); scene?.resize(r.width, r.height); }
+const tutorial = installTutorial({ getRace: () => race, isPaused: () => paused, sync, render, makeRace: () => new SkiJumpRace(), makeScene: canvas => new SkiJumpScene(canvas) });
 new ResizeObserver(() => { fit(); render(); }).observe(canvas); fit(); reset();
-function frame(now) { sync(now); render(); requestAnimationFrame(frame); } requestAnimationFrame(frame);
+function frame(now) { sync(now); if (!tutorial.dialog.open) render(); tutorial.update(); requestAnimationFrame(frame); } requestAnimationFrame(frame);

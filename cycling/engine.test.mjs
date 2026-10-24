@@ -20,7 +20,7 @@ function play(race, i, entry = 0, exit = 0, frame = 1 / 120) {
 }
 function completed(gear = {}, frame = 1 / 120) {
   const race = started(gear); for (let i = 0; i < 2; i++) play(race, i, 0, 0, frame);
-  to(race, 200, frame); return race;
+  race.activateFlame(); to(race, 200, frame); return race;
 }
 
 test("cycling starts rolling and automatically completes 200m at a 15m/s baseline", () => {

@@ -1,7 +1,7 @@
-import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=rivals-1";
+import { RhythmRace, scoreZone, clamp } from "../sprint/engine.mjs?v=meets-1";
 import { World, Body, Vec3, Sphere, Box } from "../javelin/cannon-es.mjs";
-import { HIGH_JUMP_COURSE, TAKEOFF_ZONE, HIGH_JUMP, approachPoint, normalizeBar } from "./course.mjs?v=rivals-1";
-import { clearancePoints, getHighJumperPose } from "./jumper.mjs?v=rivals-1";
+import { HIGH_JUMP_COURSE, TAKEOFF_ZONE, HIGH_JUMP, approachPoint, normalizeBar } from "./course.mjs?v=meets-1";
+import { clearancePoints, getHighJumperPose } from "./jumper.mjs?v=meets-1";
 export { HIGH_JUMP_COURSE, TAKEOFF_ZONE, HIGH_JUMP, approachPoint, normalizeBar };
 
 export class HighJumpRace extends RhythmRace {

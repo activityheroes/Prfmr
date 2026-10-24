@@ -40,7 +40,7 @@ function complete(Race, kind = "random", dt = 1 / 120, seed = 973129) {
     to(r, z.start, dt); r.press(); to(r, z.end, dt);
     const frozen = { ...r.timingWindow(z) }, bands = releaseBands({ ...z, ...frozen }, z.attempt.distance);
     assert.ok(r.distance >= bands.perfect.start && r.distance <= bands.perfect.end);
-    r.release(); assert.equal(z.result.grade, "Perfect");
+    r.release(); assert.equal(z.result.grade, "Perfect"); if (r.canActivateFlame) r.activateFlame();
   }
   if (r.finishZone) { to(r, r.finishZone.start, dt); r.press(); to(r, r.finishZone.end, dt); r.release(); }
   until(r, () => r.terminal, dt); return r;
